@@ -5,3 +5,6 @@ workspace/src/moveit_visual_tools
 workspace/src/moveit2
 workspace/src/rosparam_shortcuts
 workspace/src/srdfdom
+workspace/build
+workspace/install
+workspace/log

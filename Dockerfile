@@ -50,7 +50,7 @@ RUN sudo update-locale LC_ALL=en_AU.UTF-8 LANG=en_AU.UTF-8
 RUN sudo apt-get update && sudo apt-get install -y nano curl software-properties-common git python3-pip
 
 # Install ROS 2 packages
-RUN sudo apt-get install -y ros-$ROS_DISTRO-desktop ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-urdfdom-py ros-$ROS_DISTRO-ros-testing ros-$ROS_DISTRO-moveit-msgs ros-$ROS_DISTRO-graph-msgs ros-$ROS_DISTRO-rviz-visual-tools ros-$ROS_DISTRO-object-recognition-msgs ros-$ROS_DISTRO-geometric-shapes ros-$ROS_DISTRO-joint-state-publisher ros-$ROS_DISTRO-control-msgs ros-$ROS_DISTRO-ompl ros-$ROS_DISTRO-ament-clang-format ros-$ROS_DISTRO-warehouse-ros ros-$ROS_DISTRO-generate-parameter-library ros-$ROS_DISTRO-backward-ros ros-$ROS_DISTRO-controller-manager-msgs ros-$ROS_DISTRO-controller-manager ros-$ROS_DISTRO-gripper-controllers ros-$ROS_DISTRO-joint-state-broadcaster ros-$ROS_DISTRO-joint-trajectory-controller ros-$ROS_DISTRO-ros2-control ros-$ROS_DISTRO-control-toolbox ros-$ROS_DISTRO-position-controllers ros-$ROS_DISTRO-eigen-stl-containers ros-$ROS_DISTRO-octomap-msgs ros-$ROS_DISTRO-random-numbers ros-$ROS_DISTRO-ruckig ros-$ROS_DISTRO-joint-state-publisher-gui
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-desktop ros-$ROS_DISTRO-xacro ros-$ROS_DISTRO-urdfdom-py ros-$ROS_DISTRO-ros-testing ros-$ROS_DISTRO-moveit-msgs ros-$ROS_DISTRO-graph-msgs ros-$ROS_DISTRO-rviz-visual-tools ros-$ROS_DISTRO-object-recognition-msgs ros-$ROS_DISTRO-geometric-shapes ros-$ROS_DISTRO-joint-state-publisher ros-$ROS_DISTRO-control-msgs ros-$ROS_DISTRO-ompl ros-$ROS_DISTRO-ament-clang-format ros-$ROS_DISTRO-warehouse-ros ros-$ROS_DISTRO-generate-parameter-library ros-$ROS_DISTRO-backward-ros ros-$ROS_DISTRO-controller-manager-msgs ros-$ROS_DISTRO-controller-manager ros-$ROS_DISTRO-gripper-controllers ros-$ROS_DISTRO-joint-state-broadcaster ros-$ROS_DISTRO-joint-trajectory-controller ros-$ROS_DISTRO-ros2-control ros-$ROS_DISTRO-control-toolbox ros-$ROS_DISTRO-position-controllers ros-$ROS_DISTRO-eigen-stl-containers ros-$ROS_DISTRO-octomap-msgs ros-$ROS_DISTRO-random-numbers ros-$ROS_DISTRO-ruckig ros-$ROS_DISTRO-joint-state-publisher-gui
 
 # Install Python dependencies
 RUN sudo apt-get update && sudo apt-get install -y python3-rosdep python3-colcon-common-extensions python3-colcon-mixin python3-vcstool
@@ -59,17 +59,14 @@ RUN sudo apt-get update && sudo apt-get install -y python3-rosdep python3-colcon
 RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libfcl-dev
 RUN sudo apt-get update && sudo apt-get install -y python3-colcon-mixin
 
+# Install move it and UR
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit ros-$ROS_DISTRO-ur
+
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 
 
-# Add this to our bashrc so we don't need to source it every time we connect to the container
-RUN mkdir -p ~/.config
-ADD ./docker_scripts/post_build_setup.sh /home/${USERNAME}/.config/
-RUN sudo chown -R $(whoami) /home/${USERNAME}
-
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
-RUN echo "source ~/.config/post_build_setup.sh" >> /home/${USERNAME}/.bashrc
 
 
 
