@@ -61,23 +61,11 @@ RUN sudo apt-get update && sudo apt-get install -y python3-colcon-mixin
 RUN sudo apt-get update
 
 
-
-
-
-
 RUN sudo colcon mixin remove default
 RUN sudo apt-get update && sudo colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
 RUN sudo colcon mixin update default
 
-RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash"
 
-RUN mkdir -p ${UNDERLAY_WS}/src && \
-    cd ${UNDERLAY_WS}/src && \
-    git clone --branch $ROS_DISTRO https://github.com/ros-planning/moveit2_tutorials && \
-    vcs import < moveit2_tutorials/moveit2_tutorials.repos && \
-    colcon build --mixin release
-
-RUN /bin/bash -c "source ${UNDERLAY_WS}/install/setup.bash"
 
 # Add this to our bashrc so we don't need to source it every time we connect to the container
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
