@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ros2:
+    build:
+      context: .
+      args:
+        USERNAME: $USERNAME
+        USER_UID: $USER_UID
+        USER_GID: $USER_GID
+    image: ros:humble
+    user: $USERNAME
+    container_name: ros2
+    tty : true
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
+      - /dev/dri:/dev/dri
+      - ./workspaces:/home/$USERNAME/workspaces
+    environment:
+      - DISPLAY=$DISPLAY
+      - XAUTHORITY=/tmp/.docker.xauth
+    network_mode: "host"
