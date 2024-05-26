@@ -4,7 +4,7 @@
 # Last Updated:     2024-05-26
 
 # Get the base image
-FROM ros:$ROS_DISTRO
+FROM ros:humble
 
 # Make sure the UID matches your local user. Running
 # it this through docker-compose should handle that.
