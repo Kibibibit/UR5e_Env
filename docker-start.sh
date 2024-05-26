@@ -2,5 +2,5 @@
 
 USER_UID="$(id -u)" \
     USER_GID="$(id -g)" \
-    USERNAME="$(whoami)" \
+    USERNAME=rosuser \
     docker-compose up -d
