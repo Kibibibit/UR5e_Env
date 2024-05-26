@@ -65,6 +65,9 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit ros-$R
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 
+# Install python requirements
+RUN pip install pymodbus==2.5.3
+
 
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
 

@@ -3,11 +3,12 @@
 <package format="3">
   <name>par_pkg</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="kibi@todo.todo">kibi</maintainer>
+  <description>Python package for controlling a ur5e arm with moveit</description>
+  <maintainer email="s3843035@student.rmit.edu.au">Daniel Mills</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>
+  <depend>par_utils</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
