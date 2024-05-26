@@ -1,0 +1,7 @@
+workspace/src/launch_param_builder
+workspace/src/moveit_resources
+workspace/src/moveit_task_constructor
+workspace/src/moveit_visual_tools
+workspace/src/moveit2
+workspace/src/rosparam_shortcuts
+workspace/src/srdfdom

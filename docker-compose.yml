@@ -16,7 +16,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev/dri:/dev/dri
-      - ./workspaces:/home/$USERNAME/workspaces
+      - ./workspace:/home/$USERNAME/workspace
     environment:
       - DISPLAY=$DISPLAY
       - XAUTHORITY=/tmp/.docker.xauth

@@ -58,27 +58,19 @@ RUN sudo apt-get update && sudo apt-get install -y python3-rosdep python3-colcon
 # Install additional dependencies
 RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libfcl-dev
 RUN sudo apt-get update && sudo apt-get install -y python3-colcon-mixin
-RUN sudo apt-get update
 
-
-RUN sudo colcon mixin remove default
-RUN sudo apt-get update && sudo colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-RUN sudo colcon mixin update default
-
+# Install RVIZ
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 
 
 # Add this to our bashrc so we don't need to source it every time we connect to the container
+RUN mkdir -p ~/.config
+ADD ./docker_scripts/post_build_setup.sh /home/${USERNAME}/.config/
+RUN sudo chown -R $(whoami) /home/${USERNAME}
+
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
-RUN echo "cd ~/ws/src && vcs import < moveit2_tutorials/moveit2_tutorials.repos" >> /home/${USERNAME}/.bashrc
+RUN echo "source ~/.config/post_build_setup.sh" >> /home/${USERNAME}/.bashrc
 
-
-ENV UNDERLAY_WS /home/$USERNAME/workspaces/underlay_workspace
-ENV OVERLAY_WS /home/$USERNAME/workspaces/overlay_workspace
-
-RUN echo "source ${UNDERLAY_WS}/install/setup.bash" >> /home/${USERNAME}/.bashrc
-RUN echo "source ${OVERLAY_WS}/install/setup.bash" >> /home/${USERNAME}/.bashrc
-# Install RVIZ.
-RUN sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 
 
 CMD ["/bin/bash"]
