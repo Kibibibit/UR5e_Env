@@ -15,7 +15,7 @@ done
 if [[ "$SKIP_USER_CONFIRM" == "1" ]]; then
     CONFIRMED=1
 else
-    read -p "Are you sure? This will delete your existing image and take a long time to rebuild! [y/n]: " -n 1 -r
+    read -p "Are you sure? This will delete your existing image and take a long time (About 5-10 minutes) to rebuild! [y/n]: " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         CONFIRMED=1
@@ -27,7 +27,13 @@ fi
 if [[ "$CONFIRMED" == "1" ]]; then
 
     ./docker-kill.sh -y
+
+    CONTAINER=`docker container ls --format '{{.Names}}' | grep ros2`
     IMAGE=`docker image ls --format '{{.Repository}}:{{.Tag}}' | grep ros:humble`
+
+    if [ ! -z "$CONTAINER" ]; then
+        docker container rm ros2
+    fi
 
     if [ ! -z "$IMAGE" ]; then
         docker image rm ros:humble

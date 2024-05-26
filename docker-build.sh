@@ -16,7 +16,7 @@ done
 if [[ "$SKIP_USER_CONFIRM" == "1" ]]; then
     CONFIRMED=1
 else
-    read -p "Are you sure? This will delete your exising container and image, and take potentially a long time (500+ seconds!) to rebuild! [y/n]: " -n 1 -r
+    read -p "Are you sure? This will delete your exising container and image, and take potentially a long time  (About 5-10 minutes) to rebuild! [y/n]: " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         CONFIRMED=1
@@ -29,8 +29,9 @@ if [[ "$CONFIRMED" == "1" ]]; then
     ./docker-delete.sh -y
     USER_UID="$(id -u)" \
         USER_GID="$(id -g)" \
-        USERNAME=rosuser \
+        USERNAME="rosuser" \
         docker-compose build
+        
     
 fi
 

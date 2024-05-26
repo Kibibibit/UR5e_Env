@@ -40,4 +40,11 @@ def generate_launch_description():
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")}
             ]
         ),
+        Node(
+            package='par_pkg',
+            executable='move_to_pose_node',
+            name="move_to_pose_node",
+            output="screen",
+            parameters=[]
+        )
     ])

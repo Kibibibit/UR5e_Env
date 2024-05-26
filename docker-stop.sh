@@ -2,5 +2,5 @@
 
 USER_UID="$(id -u)" \
     USER_GID="$(id -g)" \
-    USERNAME=rosuser \
+    USERNAME="rosuser" \
     docker-compose down

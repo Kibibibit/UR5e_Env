@@ -59,18 +59,34 @@ RUN sudo apt-get update && sudo apt-get install -y python3-rosdep python3-colcon
 RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libfcl-dev
 RUN sudo apt-get update && sudo apt-get install -y python3-colcon-mixin
 
-# Install move it and UR
-RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit ros-$ROS_DISTRO-ur
+# Install UR
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
+
+# Install moveit, from https://moveit.ros.org/moveit%202/ros/2023/05/31/balancing-stability-and-development.html
+RUN echo "deb [trusted=yes] https://raw.githubusercontent.com/moveit/moveit2_packages/jammy-$ROS_DISTRO/ ./" | sudo tee /etc/apt/sources.list.d/moveit_moveit2_packages.list
+RUN echo "yaml https://raw.githubusercontent.com/moveit/moveit2_packages/jammy-$ROS_DISTRO/local.yaml $ROS_DISTRO" | sudo tee /etc/ros/rosdep/sources.list.d/1-moveit_moveit2_packages.list
+
+RUN sudo apt-get update
+RUN sudo apt-get install -y ros-$ROS_DISTRO-moveit-py ros-$ROS_DISTRO-moveit
+RUN sudo apt-get upgrade -y
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
+
+# Install CycloneDDS middleware
+RUN sudo apt-get update && sudo apt install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp
+RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+
 
 # Install python requirements
 RUN pip install pymodbus==2.5.3
 
 
+RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
 
+RUN echo "source /home/${USERNAME}/workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 
 
 CMD ["/bin/bash"]

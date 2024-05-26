@@ -23,7 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'gripper_control_node = par_pkg.gripper_control_node:main'
+            'gripper_control_node = par_pkg.gripper_control_node:main',
+            'move_to_pose_node = par_pkg.move_to_pose_node:main'
         ],
     },
 )
