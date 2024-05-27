@@ -20,6 +20,5 @@ services:
     environment:
       - DISPLAY=$DISPLAY
       - XAUTHORITY=/tmp/.docker.xauth
-    network_mode: "host"
     ports:
-      - 50002:50002
+      - 50003:50002

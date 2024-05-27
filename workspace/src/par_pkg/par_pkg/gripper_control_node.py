@@ -45,12 +45,12 @@ class GripperControlNode(Node):
             parameters=[
                 ('gripperType', "rg2"),
                 ('gripperIp', "192.168.1.1"),
-                ('gripperPort', 502),
+                ('gripperPort', :502:),
                 ("gripperCheckRate", 10),
                 ("gripperPrecisionEpsilon", 0.1),
                 ("gripperInfoPublishRate", 5),
                 ("gripperInfoTopic", "/par/gripper/info"),
-                ('gripperJointPublishRate', 100)
+                #('gripperJointPublishRate', 100),
             ]
         )
         
@@ -69,8 +69,8 @@ class GripperControlNode(Node):
         """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
         self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
         """The topic that the gripper info will be published to."""
-        self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
-        """The frequency in Hz that this node will update the joint state for RViz/Moveit"""
+        #self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
+        #"""The frequency in Hz that this node will update the joint state for RViz/Moveit"""
         
         self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
@@ -101,8 +101,8 @@ class GripperControlNode(Node):
         self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
         """This timer will publish info about the gripper now and then for other nodes if needed"""
         
-        self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
-        """This timer will publish the joint state to update rviz/moveit"""
+        #self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
+        #"""This timer will publish the joint state to update rviz/moveit"""
         
         
         self._info_publisher: Publisher = self.create_publisher(
@@ -128,7 +128,7 @@ class GripperControlNode(Node):
     def gripper_info_callback(self):
         msg = GripperInfo()
         msg.gripper_type = self._gripper_type
-        msg.port = self._gripper_port
+        msg.port = str(self._gripper_port)
         msg.ip = self._gripper_ip
         msg.max_force = self._max_force
         msg.max_width = self._max_width
@@ -152,7 +152,10 @@ class GripperControlNode(Node):
             target_force = h.clamp(0, self._max_force, target_force)
         
         
-        self._gripper.move_gripper(self.metres_to_milimetre_tenths(target_width), self.newtons_to_centinewtons(target_force))
+        self._gripper.move_gripper(
+            int(self.metres_to_milimetre_tenths(target_width)), 
+            int(self.newtons_to_centinewtons(target_force))
+        )
         
         while(not self.gripper_reached_target(self._current_gripper_width, target_width) or self._is_gripper_busy):
             feedback_msg = GripperSetWidth.Feedback()
