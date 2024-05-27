@@ -12,11 +12,10 @@ if [ ! -f "$MARKER_FILE" ]; then
     git clone --branch $ROS_DISTRO https://github.com/ros-planning/moveit2_tutorials
     vcs import < moveit2_tutorials/moveit2_tutorials.repos
     source /opt/ros/$ROS_DISTRO/setup.bash
-    cd $HOME/workspace
     rosdep update
     rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
     colcon build --parallel-workers 2 --cmake-args -DCMAKE_BUILD_TYPE=Release
-    cd $HOME/workspace
+    source $WORKSPACE/install/setup.bash
 
     touch $MARKER_FILE
 fi
