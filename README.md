@@ -45,6 +45,9 @@ You can also access the workspace inside the docker container with the vscode ex
 3. You can now move the blue sphere to move the arm around.
 4. Click `plan` to visualise the trajectory of the movement, and then `execute` to move the arm.
 
+### Creating new Packages
+*TODO* (Basically just put them in workspace/src but I'll write something proper soon)
+
 ### Shutting down
 #### Stopping the container
 `./docker-stop.sh` will shut down the container, but leave it for future use. It can be restarted with `./docker-start.sh`
