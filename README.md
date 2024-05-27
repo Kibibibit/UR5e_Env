@@ -12,7 +12,7 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 |[docker-stop.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-stop.sh)| Stops the docker container without destroying it, unlike `docker-kill.sh` |
 |[docker-attach.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-attach.sh)| Provides terminal access to the docker container. You can exit with `CTRL+D` without destroying the container. |
 |[docker-kill.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-kill.sh)| Kills and removes the container. Adding the `-y` flag will skip asking for confirmation.|
-|[docker-delete.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-delete.sh)| Deletes the ROS docker image from the system. This is needed to clear some errors that can occur when rebuilding the container, and is run automatically by `docker-delete.sh`. The `-y` flag can skip asking for confirmation.|
+|[docker-delete.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-delete.sh)| Deletes the ROS docker image from the system. This is needed to clear some errors that can occur when rebuilding the container, and is run automatically by `docker-build.sh`. The `-y` flag can skip asking for confirmation.|
 
 ## Installation
 ### Requirements
