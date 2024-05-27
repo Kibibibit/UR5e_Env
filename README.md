@@ -55,3 +55,7 @@ You can also access the workspace inside the docker container with the vscode ex
 If you need to rebuild the container, you should run `./docker-delete.sh`, which will wipe the container and require a rebuild to use again. You shouldn't have to do this very often.
 
 
+## Credits
+*TODO Format nicely*
+Sam/Jasper
+Some ros wiki pages, will find and add when I get a chance.
