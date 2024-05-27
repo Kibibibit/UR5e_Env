@@ -77,11 +77,10 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 RUN sudo apt-get update && sudo apt install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp
 RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-
-
 # Install python requirements
 RUN pip install pymodbus==2.5.3
 
+EXPOSE 50002
 
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
