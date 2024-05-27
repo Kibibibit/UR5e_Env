@@ -1,5 +1,5 @@
 workspace/build
 workspace/install
 workspace/log
-workspace/src/underlay_pkgs/moveit_resources
-workspace/src/underlay_pkgs/launch_param_builder
+workspace/src/moveit_pkgs
+.moveit_install_done

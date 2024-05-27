@@ -11,12 +11,12 @@ services:
     image: ros:humble
     user: $USERNAME
     container_name: ros2
-    tty : true
+    tty: true
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev/dri:/dev/dri
-      - ./workspace:/home/$USERNAME/workspace
+      - ./workspace:/home/rosuser/workspace
     environment:
       - DISPLAY=$DISPLAY
       - XAUTHORITY=/tmp/.docker.xauth

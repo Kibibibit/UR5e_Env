@@ -19,18 +19,19 @@ ENV LANGUAGE=en_AU:en
 ENV LC_ALL=en_AU.UTF-8
 
 
+# The user ubuntu will most likely clash with our rosuser, so we move it out of the way
+#RUN usermod ubuntu -u 1200
+
 # Adding the user, installing sudo and allowing said user  to use sudo
-RUN groupadd --gid $USER_GID $USERNAME && \
-    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+RUN groupadd --g $USER_GID -o $USERNAME && \
+    useradd  -m -u $USER_UID -g $USER_GID -o $USERNAME && \
     apt-get update && \
-    apt-get install -y sudo && \
+    apt-get install sudo -y && \
     echo "$USERNAME:$USERNAME" | chpasswd && \
     usermod --shell /bin/bash $USERNAME && \
     usermod -aG sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME && \
-    chmod 0440 /etc/sudoers.d/$USERNAME && \
-    usermod  --uid $USER_UID $USERNAME && \
-    groupmod --gid $USER_GID $USERNAME
+    chmod 0440 /etc/sudoers.d/$USERNAME
 
 # Setup the environment to attach to
 ENV SHELL /bin/bash
@@ -56,19 +57,13 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-desktop ros-$
 RUN sudo apt-get update && sudo apt-get install -y python3-rosdep python3-colcon-common-extensions python3-colcon-mixin python3-vcstool
 
 # Install additional dependencies
-RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libfcl-dev
-RUN sudo apt-get update && sudo apt-get install -y python3-colcon-mixin
+RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libfcl-dev python3-colcon-mixin libbenchmark-tools sqlite3-doc
 
 # Install UR
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 
-# Install moveit, from https://moveit.ros.org/moveit%202/ros/2023/05/31/balancing-stability-and-development.html
-RUN echo "deb [trusted=yes] https://raw.githubusercontent.com/moveit/moveit2_packages/jammy-$ROS_DISTRO/ ./" | sudo tee /etc/apt/sources.list.d/moveit_moveit2_packages.list
-RUN echo "yaml https://raw.githubusercontent.com/moveit/moveit2_packages/jammy-$ROS_DISTRO/local.yaml $ROS_DISTRO" | sudo tee /etc/ros/rosdep/sources.list.d/1-moveit_moveit2_packages.list
-
-RUN sudo apt-get update
-RUN sudo apt-get install -y ros-$ROS_DISTRO-moveit-py ros-$ROS_DISTRO-moveit
-RUN sudo apt-get upgrade -y
+# Install Moveit
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
@@ -80,11 +75,15 @@ RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Install python requirements
 RUN pip install pymodbus==2.5.3
 
+RUN mkdir -p /home/${USERNAME}/.post-build/
+COPY post_build_scripts/* /home/${USERNAME}/.post-build/
+RUN sudo chown -R ${USERNAME} $HOME/.post-build/
+
 EXPOSE 50002
 
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
-
+RUN echo "source /home/${USERNAME}/.post-build/moveit_install.sh" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 
 

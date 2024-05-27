@@ -45,7 +45,7 @@ class GripperControlNode(Node):
             parameters=[
                 ('gripperType', "rg2"),
                 ('gripperIp', "192.168.1.1"),
-                ('gripperPort', :502:),
+                ('gripperPort', "502"),
                 ("gripperCheckRate", 10),
                 ("gripperPrecisionEpsilon", 0.1),
                 ("gripperInfoPublishRate", 5),
