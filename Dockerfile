@@ -65,6 +65,14 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 # # Install Moveit
 # RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
 
+# Install Realsense Drivers for camera
+RUN sudo mkdir -p /etc/apt/keyrings
+RUN curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp > /dev/null
+RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | \
+RUN sudo tee /etc/apt/sources.list.d/librealsense.list
+RUN sudo apt-get update
+RUN sudo apt-get install -y librealsense2-dkms librealsense2-utils
+
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 
