@@ -90,6 +90,7 @@ class GripperControlNode(Node):
         self._is_gripper_busy = self.get_gripper_is_busy()
         """This is true if the gripper is currently preforming a move, and cannot take new instructions. Updated every [gripper_check_rate] seconds"""
         
+        self._min_width: int = (int(round(self._gripper_fingertip_offset)))
         self._max_width: int = int(round(self._gripper.max_width-self._gripper_fingertip_offset))
         """This is the maximum width in metres the gripper can open. Trying to open wider than this will result in the gripper being clamped to this size"""
         self._max_force:int = int(round(self._gripper.max_force))
@@ -145,7 +146,7 @@ class GripperControlNode(Node):
         
         target_width = goal_handle.request.target_width
         target_force = goal_handle.request.target_force
-        if (target_width > self._max_width or target_width < 0):
+        if (target_width > self._max_width or target_width < self._min_width):
             self.get_logger().warn(f"Tried to set gripper width to {target_width}m which is outside range [0,{self._max_width}]. Clamping!")
             target_width:int = int(h.clamp(0, self._max_width, target_width))
         if (target_force > self._max_force or target_force < 0):
@@ -158,7 +159,7 @@ class GripperControlNode(Node):
             int(target_force)
         )
         
-        while(not self.gripper_reached_target(self._current_gripper_width, target_width) or self._is_gripper_busy):
+        while(self._is_gripper_busy):
             feedback_msg = GripperSetWidth.Feedback()
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)
