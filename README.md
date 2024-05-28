@@ -19,6 +19,26 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 - docker
 - docker-compose
 
+### Installing moveit
+Moveit has to be built from source manually after starting the docker. Run the following steps:
+First run this to create the required files for RVIZ to connect to the docker.
+```bash
+./initial_setup.sh
+``` 
+Then, run the following to build, start and connect to the docker.
+```bash
+./docker-build.sh
+./docker-start.sh
+./docker-attach.sh
+```
+Finally, run the following to start the moveit install.
+```bash
+cd ~/rosuser/.post-build
+./moveit_install.sh
+```
+You'll need to disconnect `CTRL+D` and reconnect with `docker-attach.sh` to source the new moveit repo. 
+
+
 ## Usage
 
 ### Starting Up

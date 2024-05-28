@@ -1,0 +1,4 @@
+[submodule ".moveit_workspace/src/moveit2_tutorials"]
+	path = .moveit_workspace/src/moveit2_tutorials
+	url = https://github.com/ros-planning/moveit2_tutorials
+	branch = humble
