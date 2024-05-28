@@ -13,7 +13,7 @@ def generate_launch_description():
         
         #### GRIPPER SETUP
         DeclareLaunchArgument('gripperType', default_value="rg2"),
-        DeclareLaunchArgument('gripperIp', default_value='192.168.1.1'),
+        DeclareLaunchArgument('gripperIp', default_value='10.234.6.47'),
         DeclareLaunchArgument('gripperPort', default_value="502"),
         
         #### GRIPPER BEHAVIOUR CONFIG

@@ -72,7 +72,7 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsens
     sudo tee /etc/apt/sources.list.d/librealsense.list
 RUN sudo apt-get update
 RUN sudo apt-get install -y librealsense2-dkms librealsense2-utils
-RUN sudo apt-get install -y ros-$ROS_DISTRO-librealsense2* ros-$ROS_DISTRO-librealsense2-*
+RUN sudo apt-get install -y ros-$ROS_DISTRO-librealsense2-*
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
