@@ -164,6 +164,7 @@ class GripperControlNode(Node):
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)
             self._gripper_check_rate_object.sleep()
+            self.get_logger().info(f"{self._is_gripper_busy}, {self._current_gripper_width}")
         
         self.get_logger().info("Gripper move suceeded!")
         
