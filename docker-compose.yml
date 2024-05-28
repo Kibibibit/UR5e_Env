@@ -12,10 +12,13 @@ services:
     user: $USERNAME
     container_name: ros2
     tty: true
+    device_cgroup_rules:
+      - "c 81:* rmw"
+      - "c 189:* rmw"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
-      - /dev/dri:/dev/dri
+      - /dev:/dev
       - ./workspace:/home/$USERNAME/workspace
       - ./moveit_workspace:/home/$USERNAME/.moveit_workspace
     environment:
