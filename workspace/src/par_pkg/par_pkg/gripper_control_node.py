@@ -147,10 +147,10 @@ class GripperControlNode(Node):
         target_force = goal_handle.request.target_force
         if (target_width > self._max_width or target_width < 0):
             self.get_logger().warn(f"Tried to set gripper width to {target_width}m which is outside range [0,{self._max_width}]. Clamping!")
-            target_width = h.clamp(0, self._max_width, target_width)
+            target_width:int = int(h.clamp(0, self._max_width, target_width))
         if (target_force > self._max_force or target_force < 0):
             self.get_logger().warn(f"Tried to set gripper force to {target_force} which is outside range [0,{self._max_force}]. Clamping!")
-            target_force = h.clamp(0, self._max_force, target_force)
+            target_force:int = int(h.clamp(0, self._max_force, target_force))
         
         
         self._gripper.move_gripper(
@@ -174,8 +174,8 @@ class GripperControlNode(Node):
     def gripper_reached_target(self, current: float, target:float) -> bool:
         return h.is_approx_equal(current, target, self._gripper_precision_epsilon)
 
-    def get_gripper_width(self):
-        return self._gripper.get_width_with_offset()
+    def get_gripper_width(self)->int:
+        return int(round(self._gripper.get_width_with_offset()))
 
     def get_gripper_status(self):
         return self._gripper.get_status()
