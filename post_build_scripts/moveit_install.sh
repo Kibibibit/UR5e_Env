@@ -14,7 +14,5 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 cd $MOVEIT_WORKSPACE
 rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
 colcon build --parallel-workers 2 --cmake-args -DCMAKE_BUILD_TYPE=Release
-touch $MARKER_FILE
-
 
 source $MOVEIT_WORKSPACE/install/setup.bash
