@@ -84,12 +84,13 @@ class GripperControlNode(Node):
         
         self._gripper_check_rate_object = self.create_rate(self._gripper_check_rate)
         
+        self._gripper_fingertip_offset = self._gripper.get_fingertip_offset()
         self._current_gripper_width = self.get_gripper_width()
         """This is the current width of the gripper, updated every [gripper_check_rate] seconds. In metres"""
         self._is_gripper_busy = self.get_gripper_is_busy()
         """This is true if the gripper is currently preforming a move, and cannot take new instructions. Updated every [gripper_check_rate] seconds"""
         
-        self._max_width = self.milimetre_tenths_to_metres(self._gripper.max_width)
+        self._max_width = self.milimetre_tenths_to_metres(self._gripper.max_width-self._gripper_fingertip_offset)
         """This is the maximum width in metres the gripper can open. Trying to open wider than this will result in the gripper being clamped to this size"""
         self._max_force = self.centinewtons_to_newtons(self._gripper.max_force)
         """This is the maximum force that the gripper can exert, in newtons. Trying to go higher than this will result in the value being clamped to this amount."""
@@ -153,7 +154,7 @@ class GripperControlNode(Node):
         
         
         self._gripper.move_gripper(
-            int(self.metres_to_milimetre_tenths(target_width)), 
+            int(self.metres_to_milimetre_tenths(target_width-self._gripper_fingertip_offset)), 
             int(self.newtons_to_centinewtons(target_force))
         )
         
@@ -174,7 +175,7 @@ class GripperControlNode(Node):
         return h.is_approx_equal(current, target, self._gripper_precision_epsilon)
 
     def get_gripper_width(self):
-        return self.milimetre_tenths_to_metres(self._gripper.get_width())
+        return self.milimetre_tenths_to_metres(self._gripper.get_width_with_offset())
 
     def get_gripper_status(self):
         return self._gripper.get_status()

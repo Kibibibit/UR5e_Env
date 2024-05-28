@@ -62,8 +62,8 @@ RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libf
 # Install UR
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 
-# Install Moveit
-RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
+# # Install Moveit
+# RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
