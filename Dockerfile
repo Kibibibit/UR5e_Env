@@ -88,10 +88,7 @@ RUN mkdir -p /home/${USERNAME}/.post-build/
 COPY post_build_scripts/* /home/${USERNAME}/.post-build/
 RUN sudo chown -R ${USERNAME} $HOME/.post-build/
 
-EXPOSE 50002
-
-RUN sudo mkdir -p $HOME/.moveit_workspace/src
-RUN sudo sudo chown -R rosuser $HOME/.moveit_workspace 
+EXPOSE 50002 
 
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
