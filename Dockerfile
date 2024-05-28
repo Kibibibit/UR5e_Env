@@ -72,7 +72,7 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsens
     sudo tee /etc/apt/sources.list.d/librealsense.list
 RUN sudo apt-get update
 RUN sudo apt-get install -y librealsense2-dkms librealsense2-utils
-RUN sudo apt-get install -y ros-$ROS_DISTRO-librealsense2-camera-msgs ros-$ROS_DISTRO-librealsense2-camera ros-$ROS_DISTRO-librealsense2-description ros-$ROS_DISTRO-librealsense2-camera-msgs-dbgsym ros-$ROS_DISTRO-librealsense2-camera-dbgsym ros-$ROS_DISTRO-diagnostic-updater
+RUN sudo apt-get install -y ros-$ROS_DISTRO-realsense2-camera-msgs ros-$ROS_DISTRO-realsense2-camera ros-$ROS_DISTRO-realsense2-description ros-$ROS_DISTRO-realsense2-camera-msgs-dbgsym ros-$ROS_DISTRO-realsense2-camera-dbgsym ros-$ROS_DISTRO-diagnostic-updater
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
