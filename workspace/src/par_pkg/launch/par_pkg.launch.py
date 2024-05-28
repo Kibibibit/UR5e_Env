@@ -9,7 +9,7 @@ def generate_launch_description():
         ### GRIPPER CONTROL NODE ARGUMENTS
         
         #### GRIPPER JOINT PUBLISHING SETUP
-        DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
+        #DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
         
         #### GRIPPER SETUP
         DeclareLaunchArgument('gripperType', default_value="rg2"),
@@ -30,7 +30,7 @@ def generate_launch_description():
             name='gripper_control_node',
             output='screen',
             parameters=[
-                {'gripperJointPublishRate', LaunchConfiguration("gripperJointPublishRate")},
+                #{'gripperJointPublishRate', LaunchConfiguration("gripperJointPublishRate")},
                 {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
