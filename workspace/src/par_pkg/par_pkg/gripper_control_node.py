@@ -47,7 +47,7 @@ class GripperControlNode(Node):
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperCheckRate", 10),
-                ("gripperPrecisionEpsilon", 0.1),
+                ("gripperPrecisionEpsilon", 10.0),
                 ("gripperInfoPublishRate", 5),
                 ("gripperInfoTopic", "/par/gripper/info"),
                 #('gripperJointPublishRate', 100),
@@ -159,7 +159,7 @@ class GripperControlNode(Node):
             int(target_force)
         )
         
-        while(self._is_gripper_busy):
+        while(self.gripper_reached_target(self._current_gripper_width, target_width) or self._is_gripper_busy):
             feedback_msg = GripperSetWidth.Feedback()
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)

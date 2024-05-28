@@ -17,7 +17,7 @@ def generate_launch_description():
         DeclareLaunchArgument('gripperPort', default_value="502"),
         
         #### GRIPPER BEHAVIOUR CONFIG
-        DeclareLaunchArgument('gripperPrecisionEpsilon', default_value='0.1'),
+        DeclareLaunchArgument('gripperPrecisionEpsilon', default_value='10.0'),
         DeclareLaunchArgument('gripperCheckRate', default_value='10'),
         DeclareLaunchArgument('gripperInfoPublishRate', default_value="5"),
         
