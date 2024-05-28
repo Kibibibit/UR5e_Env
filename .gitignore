@@ -3,3 +3,4 @@ workspace/install
 workspace/log
 workspace/src/moveit_pkgs
 .moveit_install_done
+.moveit_workspace

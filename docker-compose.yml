@@ -16,7 +16,8 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev/dri:/dev/dri
-      - ./workspace:/home/rosuser/workspace
+      - ./workspace:/home/$USERNAME/workspace
+      - ./moveit_workspace:/home/$USERNAME/.moveit_workspace
     environment:
       - DISPLAY=$DISPLAY
       - XAUTHORITY=/tmp/.docker.xauth

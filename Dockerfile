@@ -69,9 +69,10 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 RUN sudo mkdir -p /etc/apt/keyrings
 RUN curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp > /dev/null
 RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | \
-RUN sudo tee /etc/apt/sources.list.d/librealsense.list
+    sudo tee /etc/apt/sources.list.d/librealsense.list
 RUN sudo apt-get update
 RUN sudo apt-get install -y librealsense2-dkms librealsense2-utils
+RUN sudo apt-get install ros-$ROS_DISTRO-librealsense2* ros-$ROS_DISTRO-librealsense2-*
 
 # Install RVIZ
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
@@ -93,6 +94,6 @@ RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.ba
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/.post-build/moveit_install.sh" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
-
+RUN echo "source /home/${USERNAME}/.moveit_workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 
 CMD ["/bin/bash"]
