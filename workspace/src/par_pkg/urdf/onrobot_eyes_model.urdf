@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot name="onrobot_eyes_model">
+    <link name="onrobot_eyes_base_link">
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
+            <mass value="0.7" />
+            <inertia ixx="1.0E-03" ixy="1.0E-06" ixz="1.0E-06" iyy="1.0E-03" iyz="1.0E-06"
+                izz="1.0E-03" />
+        </inertial>
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0" />
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/visual/camerav3.stl" />
+            </geometry>
+            <material name="">
+                <color rgba="0.8 0.8 0.8 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0" />
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/camerav3.stl" />
+            </geometry>
+        </collision>
+    </link>
+</robot>
