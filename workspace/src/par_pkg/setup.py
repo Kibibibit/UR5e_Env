@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*.launch.py'))),
         (os.path.join('share', package_name, "urdf"), glob('urdf/*')),
+        (os.path.join('share', package_name, "srdf"), glob('srdf/*')),
         (os.path.join('share', package_name, "meshes/visual"), glob('meshes/visual/*')),
         (os.path.join('share', package_name, "meshes/collision"), glob('meshes/collision/*')),
     ],

@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<robot name="onrobot_eyes_model">
-    <link name="onrobot_eyes_base_link">
+<robot name="onrobot_quick_changer_model">
+    <link name="onrobot_quick_changer_base_link">
         <inertial>
             <origin rpy="0 0 0" xyz="0.0 0.0 0.0" />
-            <mass value="0.26"/>
+            <mass value="0.06"/>
             <inertia ixx="1.0E-03" ixy="1.0E-06" ixz="1.0E-06" iyy="1.0E-03" iyz="1.0E-06"
                 izz="1.0E-03" />
         </inertial>
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0" />
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/camerav3.stl" />
+                <mesh filename="package://par_pkg/meshes/visual/quick_changer.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.8 0.8 0.8 1" />
@@ -19,15 +19,15 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0" />
             <geometry>
-                <mesh filename="package://par_pkg/meshes/collision/camerav3.stl" />
+                <mesh filename="package://par_pkg/meshes/collision/quick_changer.stl" />
             </geometry>
         </collision>
     </link>
-    <link name="onrobot_eyes_tool_link"/>
-    <joint name="onrobot_eyes_joint" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0.012"/>
-        <parent link="onrobot_eyes_base_link"/>
-        <child link="onrobot_eyes_tool_link"/>
+    <link name="onrobot_quick_changer_tool_link"/>
+    <joint name="onrobot_quick_changer_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0.0021"/>
+        <parent link="onrobot_quick_changer_base_link"/>
+        <child link="onrobot_quick_changer_tool_link"/>
         <axis xyz="0 0 0"/>
     </joint>
 </robot>
