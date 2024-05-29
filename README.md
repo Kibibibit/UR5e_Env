@@ -16,8 +16,9 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 
 ## Installation
 ### Requirements
-- docker
-- docker-compose
+- [Docker](https://docs.docker.com/engine/install/ubuntu/) - Don't use apt without following this guide!
+- [Docker Post-install](https://docs.docker.com/engine/install/linux-postinstall/) - If you don't follow this, it won't work!
+- `docker-compose` - sudo apt install docker-compose
 
 ### Installing moveit
 Moveit has to be built from source manually after starting the docker. Run the following steps:
@@ -31,7 +32,7 @@ Then, run the following to build, start and connect to the docker.
 ./docker-start.sh
 ./docker-attach.sh
 ```
-Finally, run the following to start the moveit install.
+Finally, run the following to start the moveit install. This takes about 30 minutes, but should only need to be run once.
 ```bash
 cd ~/rosuser/.post-build
 ./moveit_install.sh
@@ -54,19 +55,40 @@ You can also access the workspace inside the docker container with the vscode ex
 
 ### Running UR5e Drivers
 #### UR Controller
-1. First, on the UR5e teach pendant, select: `Open>>Installation>>RemoteRos`. If asked to update the program, select `Update Program`.
-2. Then, go to the `Program` tab, and under `URCaps`, add `External Control`. Make sure the IP matches the PC IP, and that the port is 50002.
-3. Turn ON the arm, ensuring that the E-Stop is released.
-4. Attach to the container (`./docker-attach.sh`) and run `ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur5e robot_ip:=10.234.6.49 launch_rviz:=true`. You can omit Rviz if you'd like. *TODO: Using a different description (xacro) file.*
-5. An RViz display showing the current state of the robot should appear.
+First, on the UR5e teach pendant, select: `Open>>Installation>>RemoteRos`. If asked to update the program, select `Update Program`.<br/>
+Then, go to the `Program` tab, and under `URCaps`, add `External Control`. Make sure the IP matches the PC IP, and that the port is 50002.<br/>
+Turn ON the arm, ensuring that the E-Stop is released.<br/>
+Attach to the container (`./docker-attach.sh`) and run:
+```sh
+cd ~/workspace/driver_scripts 
+./driver-ur-start.sh 
+```
+An RViz display showing the current state of the robot should appear.<br/>
+If you wan't to disable RVIZ, you can add `false` to the end of the command.<br/> 
+*TODO: Using a different description (xacro) file.*
 #### MoveIt
-1. in a new terminal tab, attach to the container (`./docker-attach.sh`)
-2. Run `ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur5e launch_rviz:=true` *TODO: Using a different description (xacro) file.*
-3. You can now move the blue sphere to move the arm around.
-4. Click `plan` to visualise the trajectory of the movement, and then `execute` to move the arm.
+In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
+Run:
+```sh
+cd ~/workspace/driver_scripts 
+./driver-moveit-start.sh 
+```
+You can now move the blue sphere to move the arm around, and use `plan` to visualise the trajectory of the movement, and then `execute` to move the arm. <br/>
+This is needed for moveit commands to work from other packages, so if you don't need RVIZ, you can add `false` to this command like before. <br/>
+*TODO: Using a different description (xacro) file.*
+
+#### Realsense
+The realsense ROS node is needed for the camera topics to be accessed.
+In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
+Run:
+```sh
+cd ~/workspace/driver_scripts 
+./driver-realsense-start.sh 
+```
+To test the camera display, open a new tab and open RVIZ. Then, add an Image display and set the topic to `/camera/color/raw`. You should see a camera output.
 
 ### Creating new Packages
-*TODO* (Basically just put them in workspace/src but I'll write something proper soon)
+To create a new package, attach to the docker, and go into `~/workspace/src` and run the package create command. Make sure to run your build commands in `~/workspace` and not `src`
 
 ### Shutting down
 #### Stopping the container
