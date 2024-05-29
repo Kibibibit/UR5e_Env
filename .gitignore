@@ -6,3 +6,5 @@ workspace/src/moveit_pkgs
 .moveit_workspace/build
 .moveit_workspace/log
 .moveit_workspace/install
+.moveit_workspace/src/*
+*.moveit_workspace/src/moveit2_tutorials
