@@ -65,7 +65,6 @@ cd ~/workspace/driver_scripts
 ```
 An RViz display showing the current state of the robot should appear.<br/>
 If you wan't to disable RVIZ, you can add `false` to the end of the command.<br/> 
-*TODO: Using a different description (xacro) file.*
 #### MoveIt
 In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
 Run:
@@ -75,7 +74,6 @@ cd ~/workspace/driver_scripts
 ```
 You can now move the blue sphere to move the arm around, and use `plan` to visualise the trajectory of the movement, and then `execute` to move the arm. <br/>
 This is needed for moveit commands to work from other packages, so if you don't need RVIZ, you can add `false` to this command like before. <br/>
-*TODO: Using a different description (xacro) file.*
 
 #### Realsense
 The realsense ROS node is needed for the camera topics to be accessed.

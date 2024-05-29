@@ -62,9 +62,6 @@ RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libf
 # Install UR
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 
-# # Install Moveit
-# RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
-
 # Install Realsense Drivers for camera
 RUN sudo mkdir -p /etc/apt/keyrings
 RUN curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp > /dev/null
