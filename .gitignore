@@ -1,7 +1,6 @@
 workspace/build
 workspace/install
 workspace/log
-workspace/src/moveit_pkgs
 .moveit_workspace/build
 .moveit_workspace/log
 .moveit_workspace/install
