@@ -60,28 +60,25 @@ Then, go to the `Program` tab, and under `URCaps`, add `External Control`. Make 
 Turn ON the arm, ensuring that the E-Stop is released.<br/>
 Attach to the container (`./docker-attach.sh`) and run:
 ```sh
-cd ~/workspace/driver_scripts 
-./driver-ur-start.sh 
+ur_driver
 ```
 An RViz display showing the current state of the robot should appear.<br/>
-If you wan't to disable RVIZ, you can add `false` to the end of the command.<br/> 
+If you want to disable RVIZ, you can add `--no-rviz` to the end of the command. If you're working without the gripper, you can add `--no-gripper` to disable it.<br/> 
 #### MoveIt
 In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
 Run:
 ```sh
-cd ~/workspace/driver_scripts 
-./driver-moveit-start.sh 
+moveit_config_driver
 ```
 You can now move the blue sphere to move the arm around, and use `plan` to visualise the trajectory of the movement, and then `execute` to move the arm. <br/>
-This is needed for moveit commands to work from other packages, so if you don't need RVIZ, you can add `false` to this command like before. <br/>
+This is needed for moveit commands to work from other packages, so if you want to disable RVIZ, you can add `--no-rviz` to the end of the command. If you're working without the gripper, you can add `--no-gripper` to disable it <br/>
 
 #### Realsense
 The realsense ROS node is needed for the camera topics to be accessed.
 In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
 Run:
 ```sh
-cd ~/workspace/driver_scripts 
-./driver-realsense-start.sh 
+realsense_driver
 ```
 To test the camera display, open a new tab and open RVIZ. Then, add an Image display and set the topic to `/camera/color/raw`. You should see a camera output.
 
