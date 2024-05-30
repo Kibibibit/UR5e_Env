@@ -10,8 +10,8 @@ from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
 from tf2_ros import TransformBroadcaster, TransformStamped
 
-UPPER_FINGER_JOINT = "0.785398"
-LOWER_FINGER_JOINT = "-0.558505"
+UPPER_FINGER_JOINT = 0.785398
+LOWER_FINGER_JOINT = -0.558505
 
 class GripperStatePublisherNode(Node):
 
