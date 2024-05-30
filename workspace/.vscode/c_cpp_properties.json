@@ -7,13 +7,13 @@
       },
       "includePath": [
         "/opt/ros/humble/include/**",
-        "${workspaceFolder}/src/par_interfaces/include/**",
+        "${workspaceFolder}/**",
         "/usr/include/**"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",
       "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
+      "cStandard": "g11",
       "cppStandard": "c++14"
     }
   ],
