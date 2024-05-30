@@ -53,7 +53,7 @@ class GripperStatePublisherNode(Node):
             self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
             exit() 
         
-        self._gripper_max_width = self._gripper.max_width
+        self._gripper_max_width:float = self._gripper.max_width/10.0
 
         self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
         """This timer will publish the joint state to update rviz/moveit"""
@@ -73,8 +73,6 @@ class GripperStatePublisherNode(Node):
         
 
         rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
-        self.get_logger().info(f"Gripper is at width: {gripper_width}/{self._gripper_max_width}, delta:{delta}")
-        self.get_logger().info(f"Rotation output: {rotation}")
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
