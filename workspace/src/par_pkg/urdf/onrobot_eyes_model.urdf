@@ -24,10 +24,17 @@
         </collision>
     </link>
     <link name="onrobot_eyes_tool_link"/>
+    <link name="camera_link"/>
     <joint name="onrobot_eyes_joint" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 0.0105"/>
         <parent link="onrobot_eyes_base_link"/>
         <child link="onrobot_eyes_tool_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    <joint name="camera_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0.105 0"/>
+        <parent link="onrobot_eyes_base_link"/>
+        <child link="camera_link"/>
         <axis xyz="0 0 0"/>
     </joint>
 </robot>
