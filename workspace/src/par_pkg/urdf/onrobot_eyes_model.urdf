@@ -25,7 +25,7 @@
     </link>
     <link name="onrobot_eyes_tool_link"/>
     <joint name="onrobot_eyes_joint" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0.012"/>
+        <origin rpy="0 0 0" xyz="0 0 0.0105"/>
         <parent link="onrobot_eyes_base_link"/>
         <child link="onrobot_eyes_tool_link"/>
         <axis xyz="0 0 0"/>
