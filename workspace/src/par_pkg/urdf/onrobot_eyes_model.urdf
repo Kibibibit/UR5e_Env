@@ -32,7 +32,7 @@
         <axis xyz="0 0 0"/>
     </joint>
     <joint name="camera_joint" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0.105"/>
+        <origin rpy="0 0 0" xyz="0 0.105 0"/>
         <parent link="onrobot_eyes_base_link"/>
         <child link="camera_link"/>
         <axis xyz="0 0 0"/>
