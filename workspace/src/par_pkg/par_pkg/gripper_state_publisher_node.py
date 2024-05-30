@@ -71,10 +71,8 @@ class GripperStatePublisherNode(Node):
         delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width))
 
         
-
+        #TODO: Check this relationship is linear
         rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
-
-        self.get_logger().info(f"{gripper_width}-{delta}")
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
