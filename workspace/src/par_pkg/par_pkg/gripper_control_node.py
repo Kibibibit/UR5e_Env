@@ -46,11 +46,10 @@ class GripperControlNode(Node):
                 ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
-                ("gripperCheckRate", 10),
+                ("gripperCheckRate", 50),
                 ("gripperPrecisionEpsilon", 10.0),
                 ("gripperInfoPublishRate", 5),
                 ("gripperInfoTopic", "/par/gripper/info"),
-                #('gripperJointPublishRate', 100),
             ]
         )
         
@@ -69,8 +68,6 @@ class GripperControlNode(Node):
         """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
         self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
         """The topic that the gripper info will be published to."""
-        #self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
-        #"""The frequency in Hz that this node will update the joint state for RViz/Moveit"""
         
         self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
@@ -103,8 +100,7 @@ class GripperControlNode(Node):
         self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
         """This timer will publish info about the gripper now and then for other nodes if needed"""
         
-        #self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
-        #"""This timer will publish the joint state to update rviz/moveit"""
+       
         
         
         self._info_publisher: Publisher = self.create_publisher(
@@ -189,22 +185,19 @@ class GripperControlNode(Node):
     def close_connection(self):
         self._gripper.close_connection()
 
-    
-    def gripper_joint_publish_callback(self):
-        # TODO: Hook this up
-        pass
-
 
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    # TODO: Make sure this is correct
+    gripper_control_node = None
+    try:
+        gripper_control_node = GripperControlNode()
 
-    gripper_control_node = GripperControlNode()
-
-    rclpy.spin(gripper_control_node)
+        rclpy.spin(gripper_control_node)
+    except KeyboardInterrupt:
+        pass
     gripper_control_node.close_connection()
 
 

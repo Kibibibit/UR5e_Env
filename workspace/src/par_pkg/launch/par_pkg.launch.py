@@ -9,7 +9,7 @@ def generate_launch_description():
         ### GRIPPER CONTROL NODE ARGUMENTS
         
         #### GRIPPER JOINT PUBLISHING SETUP
-        #DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
+        DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
         
         #### GRIPPER SETUP
         DeclareLaunchArgument('gripperType', default_value="rg2"),
@@ -18,7 +18,7 @@ def generate_launch_description():
         
         #### GRIPPER BEHAVIOUR CONFIG
         DeclareLaunchArgument('gripperPrecisionEpsilon', default_value='10.0'),
-        DeclareLaunchArgument('gripperCheckRate', default_value='10'),
+        DeclareLaunchArgument('gripperCheckRate', default_value='50'),
         DeclareLaunchArgument('gripperInfoPublishRate', default_value="5"),
         
         #### GRIPPER TOPICS
@@ -30,7 +30,6 @@ def generate_launch_description():
             name='gripper_control_node',
             output='screen',
             parameters=[
-                #{'gripperJointPublishRate', LaunchConfiguration("gripperJointPublishRate")},
                 {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
@@ -38,6 +37,18 @@ def generate_launch_description():
                 {'gripperPrecisionEpsilon': LaunchConfiguration('gripperPrecisionEpsilon')},
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")}
+            ]
+        ),
+        Node(
+            package='par_pkg',
+            executable='gripper_state_publisher_node',
+            name='gripper_state_publisher_node',
+            output='screen',
+            parameters=[
+                {'gripperJointPublishRate': LaunchConfiguration("gripperJointPublishRate")},
+                {'gripperType': LaunchConfiguration('gripperType')},
+                {'gripperIp': LaunchConfiguration('gripperIp')},
+                {'gripperPort': LaunchConfiguration('gripperPort')},
             ]
         ),
         #Node(
