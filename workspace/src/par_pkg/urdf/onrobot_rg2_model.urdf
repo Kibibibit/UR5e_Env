@@ -13,7 +13,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://par_pkg/meshes/visual/base_link.stl"/>
+        <mesh filename="package://par_pkg/meshes/visual/base_link_v2.stl"/>
       </geometry>
       <material name="">
         <color rgba="0.8 0.8 0.8 1"/>

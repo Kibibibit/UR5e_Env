@@ -19,15 +19,17 @@
 
     <disable_collisions link1="right_inner_finger" link2="right_inner_knuckle" reason="Adjacent" />
     <disable_collisions link1="right_inner_finger" link2="right_outer_knuckle" reason="Adjacent" />
-    <disable_collisions link1="right_outer_finger" link2="right_inner_knuckle" reason="Adjacent" />
+    <disable_collisions link1="right_inner_knuckle" link2="right_outer_knuckle" reason="Never" />
     
     <disable_collisions link1="left_inner_finger" link2="left_inner_knuckle" reason="Adjacent" />
     <disable_collisions link1="left_inner_finger" link2="left_outer_knuckle" reason="Adjacent" />
-    <disable_collisions link1="left_outer_finger" link2="left_inner_knuckle" reason="Adjacent" />
+    <disable_collisions link1="left_inner_knuckle" link2="left_outer_knuckle" reason="Never" />
 
-    <disable_collisions link1="onrobot_rg2_base_link" link2="right_outer_knuckle" reason="Never" />
-    <disable_collisions link1="onrobot_rg2_base_link" link2="right_inner_knuckle" reason="Never" />
-    <disable_collisions link1="onrobot_rg2_base_link" link2="left_outer_knuckle" reason="Never" />
-    <disable_collisions link1="onrobot_rg2_base_link" link2="left_inner_knuckle" reason="Never" />
+    <disable_collisions link1="left_inner_finger" link2="right_inner_finger" reason="Never" />
+
+    <disable_collisions link1="onrobot_rg2_base_link" link2="right_outer_knuckle" reason="Adjacent" />
+    <disable_collisions link1="onrobot_rg2_base_link" link2="right_inner_knuckle" reason="Adjacent" />
+    <disable_collisions link1="onrobot_rg2_base_link" link2="left_outer_knuckle" reason="Adjacent" />
+    <disable_collisions link1="onrobot_rg2_base_link" link2="left_inner_knuckle" reason="Adjacent" />
     
 </robot>
