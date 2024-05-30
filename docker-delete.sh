@@ -31,11 +31,8 @@ if [[ "$CONFIRMED" == "1" ]]; then
     CONTAINER=`docker container ls --format '{{.Names}}' | grep ros2`
     IMAGE=`docker image ls --format '{{.Repository}}:{{.Tag}}' | grep ros:humble`
 
-    if [ ! -z "$CONTAINER" ]; then
+    if [ ! -z "$IMAGE" ] || [ ! -z "$CONTAINER" ]; then
         docker container rm ros2
-    fi
-
-    if [ ! -z "$IMAGE" ]; then
         docker image rm ros:humble
     fi
 fi

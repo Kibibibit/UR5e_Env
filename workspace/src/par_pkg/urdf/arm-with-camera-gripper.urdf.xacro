@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="$(arg name)">
+
+    <xacro:arg name="name" default="ur"/>
+    <xacro:arg name="ur_type" default="ur5x"/>
+    <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
+    <xacro:include filename="onrobot_rg2_model.urdf"/>
+    <xacro:include filename="onrobot_quick_changer_model.urdf"/>
+    <xacro:include filename="onrobot_eyes_model.urdf"/>
+
+    <xacro:macro name="ur" params="name ur_type"/>
+
+    <joint name="eyes_joint" type="fixed">
+        <origin rpy="0 0 ${pi}" xyz="0 0 0"/>
+        <parent link="tool0"/>
+        <child link="onrobot_eyes_base_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    <joint name="quick_changer_joint" type="fixed">
+        <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+        <parent link="onrobot_eyes_tool_link"/>
+        <child link="onrobot_quick_changer_base_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    <joint name="gripper_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="onrobot_quick_changer_tool_link"/>
+        <child link="onrobot_rg2_base_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+</robot>
