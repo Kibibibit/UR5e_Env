@@ -1,0 +1,87 @@
+[5.340s] Invoking command in '/home/rosuser/workspace/src/par_pkg': PYTHONPATH=/home/rosuser/workspace/src/build/par_pkg/prefix_override:/home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/par_pkg build --build-base /home/rosuser/workspace/src/build/par_pkg/build install --record /home/rosuser/workspace/src/build/par_pkg/install.log --single-version-externally-managed install_data
+[7.201s] running egg_info
+[7.216s] creating ../build/par_pkg/par_pkg.egg-info
+[7.223s] writing ../build/par_pkg/par_pkg.egg-info/PKG-INFO
+[7.224s] writing dependency_links to ../build/par_pkg/par_pkg.egg-info/dependency_links.txt
+[7.224s] writing entry points to ../build/par_pkg/par_pkg.egg-info/entry_points.txt
+[7.227s] writing requirements to ../build/par_pkg/par_pkg.egg-info/requires.txt
+[7.242s] writing top-level names to ../build/par_pkg/par_pkg.egg-info/top_level.txt
+[7.243s] writing manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+[7.245s] reading manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+[7.246s] writing manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+[7.255s] running build
+[7.263s] running build_py
+[7.264s] creating /home/rosuser/workspace/src/build/par_pkg/build
+[7.265s] creating /home/rosuser/workspace/src/build/par_pkg/build/lib
+[7.265s] creating /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.266s] copying par_pkg/gripper_state_publisher_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.267s] copying par_pkg/move_to_pose_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.268s] copying par_pkg/vision_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.274s] copying par_pkg/__init__.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.274s] copying par_pkg/gripper_control_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.275s] copying par_pkg/helpers.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+[7.275s] creating /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+[7.277s] copying par_pkg/onrobot/__init__.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+[7.278s] copying par_pkg/onrobot/onrobot.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+[7.281s] running install
+[7.284s] running install_lib
+[7.292s] creating /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.293s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/gripper_state_publisher_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.293s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/move_to_pose_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.294s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/vision_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.294s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/__init__.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.296s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/gripper_control_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.296s] creating /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+[7.296s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot/__init__.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+[7.297s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot/onrobot.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+[7.298s] copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/helpers.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+[7.305s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/gripper_state_publisher_node.py to gripper_state_publisher_node.cpython-310.pyc
+[7.306s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/move_to_pose_node.py to move_to_pose_node.cpython-310.pyc
+[7.319s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/vision_node.py to vision_node.cpython-310.pyc
+[7.329s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/__init__.py to __init__.cpython-310.pyc
+[7.332s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/gripper_control_node.py to gripper_control_node.cpython-310.pyc
+[7.337s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot/__init__.py to __init__.cpython-310.pyc
+[7.338s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot/onrobot.py to onrobot.cpython-310.pyc
+[7.352s] byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/helpers.py to helpers.cpython-310.pyc
+[7.357s] running install_data
+[7.358s] creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index
+[7.359s] creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index
+[7.360s] creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index/packages
+[7.361s] copying resource/par_pkg -> /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index/packages
+[7.366s] copying package.xml -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg
+[7.368s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/launch
+[7.369s] copying launch/par_pkg.launch.py -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/launch
+[7.369s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.373s] copying urdf/arm-with-camera-gripper.urdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.382s] copying urdf/onrobot_quick_changer_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.383s] copying urdf/onrobot_eyes_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.384s] copying urdf/onrobot_rg2_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.384s] copying urdf/arm-with-camera.urdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+[7.387s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+[7.387s] copying srdf/arm-with-camera-gripper.srdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+[7.388s] copying srdf/arm-with-camera.srdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+[7.390s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes
+[7.391s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.391s] copying meshes/visual/quick_changer.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.399s] copying meshes/visual/outer_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.408s] copying meshes/visual/base_link.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.412s] copying meshes/visual/inner_finger.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.419s] copying meshes/visual/inner_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.426s] copying meshes/visual/base_link_v2.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.432s] copying meshes/visual/camerav3.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+[7.448s] creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.449s] copying meshes/collision/quick_changer.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.478s] copying meshes/collision/outer_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.481s] copying meshes/collision/base_link.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.483s] copying meshes/collision/inner_finger.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.488s] copying meshes/collision/inner_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.491s] copying meshes/collision/camerav3.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+[7.494s] running install_egg_info
+[7.515s] Copying ../build/par_pkg/par_pkg.egg-info to /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg-0.0.0-py3.10.egg-info
+[7.516s] running install_scripts
+[7.721s] Installing gripper_control_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+[7.722s] Installing gripper_state_publisher_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+[7.724s] Installing move_to_pose_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+[7.725s] Installing vision_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+[7.749s] writing list of installed files to '/home/rosuser/workspace/src/build/par_pkg/install.log'
+[8.005s] Invoked command in '/home/rosuser/workspace/src/par_pkg' returned '0': PYTHONPATH=/home/rosuser/workspace/src/build/par_pkg/prefix_override:/home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/par_pkg build --build-base /home/rosuser/workspace/src/build/par_pkg/build install --record /home/rosuser/workspace/src/build/par_pkg/install.log --single-version-externally-managed install_data

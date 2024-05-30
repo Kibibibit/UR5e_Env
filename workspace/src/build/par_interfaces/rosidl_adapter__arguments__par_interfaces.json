@@ -1,0 +1,7 @@
+{
+  "package_name": "par_interfaces",
+  "non_idl_tuples": [
+    "/home/rosuser/workspace/src/par_interfaces:action/GripperSetWidth.action",
+    "/home/rosuser/workspace/src/par_interfaces:msg/GripperInfo.msg"
+  ]
+}
