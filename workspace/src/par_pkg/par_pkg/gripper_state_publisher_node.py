@@ -70,7 +70,7 @@ class GripperStatePublisherNode(Node):
         
         delta: float = float(gripper_width)/float(self._gripper_max_width)
 
-        rotation = (1.0 - delta)*LOWER_FINGER_JOINT + delta*UPPER_FINGER_JOINT
+        rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
 
 
         joint_state: JointState = JointState()
