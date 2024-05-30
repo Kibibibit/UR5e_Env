@@ -68,10 +68,13 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        delta: float = float(gripper_width)/float(self._gripper_max_width)
+        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width))
+
+        
 
         rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
-
+        self.get_logger().info(f"Gripper is at width: {gripper_width/10}, delta:{delta}")
+        self.get_logger().info(f"Rotation output: {rotation}")
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
