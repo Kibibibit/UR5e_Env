@@ -31,8 +31,8 @@ class OnRobotEyesCameraNode(Node):
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
-    def detect_shapes(self, image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    def detect_shapes(self, color_image, depth_image):
+        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -40,6 +40,9 @@ class OnRobotEyesCameraNode(Node):
         for contour in contours:
             epsilon = 0.04 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
+            (x, y, w, h) = cv2.boundingRect(approx)
+            depth = np.mean(depth_image[y:y+h, x:x+w])
+            
             if len(approx) == 3:
                 shape = "Triangle"
                 color = (0, 255, 0)
@@ -54,10 +57,10 @@ class OnRobotEyesCameraNode(Node):
             else:
                 shape = "Unknown"
                 color = (255, 255, 255)
-            cv2.drawContours(image, [approx], -1, color, 2)
+            cv2.drawContours(color_image, [approx], -1, color, 2)
             x, y = approx[0][0]
-            cv2.putText(image, shape, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-        return image
+            cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        return color_image
 
 def main(args=None):
     rclpy.init(args=args)
