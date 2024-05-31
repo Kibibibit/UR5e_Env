@@ -23,8 +23,8 @@ class RG():
             return
         self.gripper = gripper  # RG2/6
         if self.gripper == 'rg2':
-            self.max_width = 1100
-            self.max_force = 400
+            self.max_width = 110.0
+            self.max_force = 40.0
         elif self.gripper == 'rg6':
             self.max_width = 1600
             self.max_force = 1200
@@ -39,7 +39,7 @@ class RG():
         self.client.close()
 
     def get_fingertip_offset(self):
-        """Reads the current fingertip offset in 1/10 millimeters.
+        """Reads the current fingertip offset in millimeters.
         Please note that the value is a signed two's complement number.
         """
         result = self.client.read_holding_registers(
@@ -91,31 +91,31 @@ class RG():
         status = format(result.registers[0], '016b')
         status_list = [0] * 7
         if int(status[-1]):
-            print("A motion is ongoing so new commands are not accepted.")
+            #print("A motion is ongoing so new commands are not accepted.")
             status_list[0] = 1
         if int(status[-2]):
-            print("An internal- or external grip is detected.")
+            #print("An internal- or external grip is detected.")
             status_list[1] = 1
         if int(status[-3]):
-            print("Safety switch 1 is pushed.")
+            #print("Safety switch 1 is pushed.")
             status_list[2] = 1
         if int(status[-4]):
-            print("Safety circuit 1 is activated so it will not move.")
+            #print("Safety circuit 1 is activated so it will not move.")
             status_list[3] = 1
         if int(status[-5]):
-            print("Safety switch 2 is pushed.")
+            #print("Safety switch 2 is pushed.")
             status_list[4] = 1
         if int(status[-6]):
-            print("Safety circuit 2 is activated so it will not move.")
+            #print("Safety circuit 2 is activated so it will not move.")
             status_list[5] = 1
         if int(status[-7]):
-            print("Any of the safety switch is pushed.")
+            #print("Any of the safety switch is pushed.")
             status_list[6] = 1
 
         return status_list
 
     def get_width_with_offset(self):
-        """Reads current width between gripper fingers in 1/10 millimeters.
+        """Reads current width between gripper fingers in millimeters.
         The set fingertip offset is considered.
         """
         result = self.client.read_holding_registers(

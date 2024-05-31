@@ -6,13 +6,27 @@
     <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
     <xacro:include filename="onrobot_quick_changer_model.urdf"/>
     <xacro:include filename="onrobot_eyes_model.urdf"/>
-    <!-- <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/> -->
+    <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
 
     <xacro:macro name="ur" params="name ur_type"/>
-    <!-- <xacro:sensor_d415 parent="on_robot_eyes_base_link" use_nominal_extrinsics="true" add_plug="false" use_mesh="true">
-        <origin xyz="0 0.105 0" rpy="0 0 0"/>
-    </xacro:sensor_d415> -->
+    <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true" add_plug="false" use_mesh="false">
+        <!-- 
+            These measurements are not 100% accurate, they're the best
+            I could get based on manually aligning it in blender.
+            We need to preform camera extrinsics calibration manually to get these values.
+            industrial_calibration seems like a good package for doing this.
+        -->
+        <origin xyz="-0.000473 0.093319 0.021695" rpy="-${pi/2} -${pi/2} 0"/>
+    </xacro:sensor_d415>
 
+    <!-- This is the camera link provided by Sam, not sure how it was obtained -->
+    <link name="camera_sam_link"/>
+    <joint name="camera_sam_link_joint" type="fixed">
+        <origin rpy="0 -${pi/2} ${pi/2}" xyz="-0.018 -0.11 0.031"/>
+        <parent link="wrist_3_link"/>
+        <child link="camera_sam_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
     <joint name="eyes_joint" type="fixed">
         <origin rpy="0 0 ${pi}" xyz="0 0 0"/>
         <parent link="tool0"/>

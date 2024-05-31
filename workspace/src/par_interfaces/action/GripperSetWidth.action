@@ -4,16 +4,16 @@
 
 ### Request Params:
 
-#### The target width of the gripper in metres.
+#### The target width of the gripper in milimetres.
 #### If the request is outside the valid range, this will get clamped
-int32 target_width
+float32 target_width
 #### The target force to exert in newtons. If outside the valid range, this will get clamped
-int32 target_force
+float32 target_force
 ---
 ### Result Params:
-#### The final width the gripper ended the request at
-int32 final_width
+#### The final width the gripper ended the request at, in milimetres
+float32 final_width
 ---
 ### Feedback Params:
-#### The current width of the gripper at this timestep
-int32 current_width
+#### The current width of the gripper at this step, in milimetres
+float32 current_width

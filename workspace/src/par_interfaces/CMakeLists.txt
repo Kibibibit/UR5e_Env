@@ -15,6 +15,8 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GripperSetWidth.action"
+  "action/GripperFullClose.action"
+  "action/GripperFullOpen.action"
   "msg/GripperInfo.msg"
 )
 

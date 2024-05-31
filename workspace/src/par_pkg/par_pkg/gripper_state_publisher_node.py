@@ -5,10 +5,21 @@ from rclpy.qos import QoSProfile
 from rclpy.node import Node, Publisher
 from .onrobot.onrobot import RG
 from pymodbus.exceptions import ConnectionException 
-
-from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
-from tf2_ros import TransformBroadcaster, TransformStamped
+from . import helpers as h
+from par_interfaces.msg import GripperInfo
+
+### gripper_state_publisher_node.py ###
+# Author: Daniel Mills (s3843035@student.rmit.edu.au)
+# Created: 2024-05-30
+# Updated: 2024-05-31
+
+
+
+GRIPPER_BUSY_BIT = 0
+"""In the gripper status array, this is the index for the busy state of the gripper"""
+
+
 
 UPPER_FINGER_JOINT = 0.785398
 LOWER_FINGER_JOINT = -0.558505
@@ -25,6 +36,8 @@ class GripperStatePublisherNode(Node):
                 ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
+                ("gripperInfoPublishRate", 5),
+                ("gripperInfoTopic", "/par/gripper/info"),
                 ('gripperJointPublishRate', 100),
             ]
         )
@@ -38,10 +51,20 @@ class GripperStatePublisherNode(Node):
         """This is the port that the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
         """The frequency in Hz that this node will update the joint state for RViz/Moveit"""
+        self._gripper_info_publish_rate = self.get_parameter("gripperInfoPublishRate").value
+        """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
+        self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
+        """The topic that the gripper info will be published to."""
 
+    
         self._qos_profile = QoSProfile(depth=10)
         self._joint_publisher: Publisher = self.create_publisher(JointState, 'joint_states', self._qos_profile)
-        #self._joint_broadcaster: TransformBroadcaster = TransformBroadcaster(self, qos=self._qos_profile)
+
+        self._info_publisher: Publisher = self.create_publisher(
+            GripperInfo,
+            self._gripper_info_topic,
+            10 # TODO: Replace this with a launch parameter maybe?
+        )
 
         self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
@@ -53,10 +76,20 @@ class GripperStatePublisherNode(Node):
             self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
             exit() 
         
-        self._gripper_max_width:float = (self._gripper.max_width-self._gripper.get_fingertip_offset())/10.0
+        self._gripper_max_width:float = self._gripper.max_width
+        self._gripper_fingertip_offset = self._gripper.get_fingertip_offset()
+        self._gripper_max_force: float = self._gripper.max_force
+        """This is the maximum force that the gripper can exert, in newtons. Trying to go higher than this will result in the value being clamped to this amount."""
+        
+        
 
         self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
         """This timer will publish the joint state to update rviz/moveit"""
+
+        self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
+        """This timer will publish info about the gripper now and then for other nodes if needed"""
+
+        
     
 
     def close_connection(self):
@@ -68,11 +101,11 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width))
+        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
 
         
         #TODO: Check this relationship is linear
-        rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
+        rotation: float = h.lerp(LOWER_FINGER_JOINT, UPPER_FINGER_JOINT, delta)
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
@@ -81,6 +114,15 @@ class GripperStatePublisherNode(Node):
 
         self._joint_publisher.publish(joint_state)
 
+    def gripper_info_callback(self):
+        msg = GripperInfo()
+        msg.gripper_type = self._gripper_type
+        msg.port = str(self._gripper_port)
+        msg.ip = self._gripper_ip
+        msg.max_force = self._gripper_max_force
+        msg.max_width = self._gripper_max_width
+        msg.fingertip_offset = self._gripper_fingertip_offset
+        self._info_publisher.publish(msg)
 
         
 
