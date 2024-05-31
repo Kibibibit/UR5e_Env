@@ -92,8 +92,6 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/.moveit_workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 
-RUN echo "alias moveit_config_driver=\"/home/${USERNAME}/workspace/driver_scripts/driver-moveit-start.sh\"" >> /home/${USERNAME}/.bashrc
-RUN echo "alias ur_driver=\"/home/${USERNAME}/workspace/driver_scripts/driver-ur-start.sh\"" >> /home/${USERNAME}/.bashrc
-RUN echo "alias realsense_driver=\"/home/${USERNAME}/workspace/driver_scripts/driver-realsense-start.sh\"" >> /home/${USERNAME}/.bashrc
+RUN echo "source /home/${USERNAME}/workspace/.helper_scripts/helper-aliases.sh" >> /home/${USERNAME}/.bashrc
 
 CMD ["/bin/bash"]

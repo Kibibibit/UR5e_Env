@@ -26,7 +26,7 @@ then
             docker-compose build
     else
         # Otherwise print an error.
-        printf "\033[0;31mERROR: Failed to set up XAUTH files. This probably means the container was shut down unexpectedly. To resolve, run:\033[0m\n\
+        echo -e "\033[0;31mERROR: Failed to set up XAUTH files. This probably means the container was shut down unexpectedly. To resolve, run:\033[0m\n\
 sudo rm -rf $XAUTH\n\
 \033[0;31mand try again.\033[0m"
     fi
