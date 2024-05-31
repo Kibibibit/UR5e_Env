@@ -1,0 +1,85 @@
+running egg_info
+creating ../build/par_pkg/par_pkg.egg-info
+writing ../build/par_pkg/par_pkg.egg-info/PKG-INFO
+writing dependency_links to ../build/par_pkg/par_pkg.egg-info/dependency_links.txt
+writing entry points to ../build/par_pkg/par_pkg.egg-info/entry_points.txt
+writing requirements to ../build/par_pkg/par_pkg.egg-info/requires.txt
+writing top-level names to ../build/par_pkg/par_pkg.egg-info/top_level.txt
+writing manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+reading manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+writing manifest file '../build/par_pkg/par_pkg.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/rosuser/workspace/src/build/par_pkg/build
+creating /home/rosuser/workspace/src/build/par_pkg/build/lib
+creating /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/gripper_state_publisher_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/move_to_pose_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/vision_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/__init__.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/gripper_control_node.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+copying par_pkg/helpers.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg
+creating /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+copying par_pkg/onrobot/__init__.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+copying par_pkg/onrobot/onrobot.py -> /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot
+running install
+running install_lib
+creating /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/gripper_state_publisher_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/move_to_pose_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/vision_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/__init__.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/gripper_control_node.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+creating /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot/__init__.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/onrobot/onrobot.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot
+copying /home/rosuser/workspace/src/build/par_pkg/build/lib/par_pkg/helpers.py -> /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/gripper_state_publisher_node.py to gripper_state_publisher_node.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/move_to_pose_node.py to move_to_pose_node.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/vision_node.py to vision_node.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/gripper_control_node.py to gripper_control_node.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/onrobot/onrobot.py to onrobot.cpython-310.pyc
+byte-compiling /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg/helpers.py to helpers.cpython-310.pyc
+running install_data
+creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index
+creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index
+creating /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index/packages
+copying resource/par_pkg -> /home/rosuser/workspace/src/install/par_pkg/share/ament_index/resource_index/packages
+copying package.xml -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/launch
+copying launch/par_pkg.launch.py -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/launch
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+copying urdf/arm-with-camera-gripper.urdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+copying urdf/onrobot_quick_changer_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+copying urdf/onrobot_eyes_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+copying urdf/onrobot_rg2_model.urdf -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+copying urdf/arm-with-camera.urdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/urdf
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+copying srdf/arm-with-camera-gripper.srdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+copying srdf/arm-with-camera.srdf.xacro -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/srdf
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/quick_changer.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/outer_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/base_link.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/inner_finger.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/inner_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/base_link_v2.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+copying meshes/visual/camerav3.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/visual
+creating /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/quick_changer.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/outer_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/base_link.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/inner_finger.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/inner_knuckle.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+copying meshes/collision/camerav3.stl -> /home/rosuser/workspace/src/install/par_pkg/share/par_pkg/meshes/collision
+running install_egg_info
+Copying ../build/par_pkg/par_pkg.egg-info to /home/rosuser/workspace/src/install/par_pkg/lib/python3.10/site-packages/par_pkg-0.0.0-py3.10.egg-info
+running install_scripts
+Installing gripper_control_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+Installing gripper_state_publisher_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+Installing move_to_pose_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+Installing vision_node script to /home/rosuser/workspace/src/install/par_pkg/lib/par_pkg
+writing list of installed files to '/home/rosuser/workspace/src/build/par_pkg/install.log'

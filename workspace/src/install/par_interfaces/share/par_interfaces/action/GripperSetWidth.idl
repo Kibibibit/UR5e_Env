@@ -1,0 +1,36 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from par_interfaces/action/GripperSetWidth.action
+// generated code does not contain a copyright notice
+
+
+module par_interfaces {
+  module action {
+    @verbatim (language="comment", text=
+      "GripperSetWidth.action" "\n"
+      "This action sets the gripper to a target width in milimetres, exerting" "\n"
+      "a target force in centinewtons")
+    struct GripperSetWidth_Goal {
+      @verbatim (language="comment", text=
+        "Request Params:" "\n"
+        "The target width of the gripper in metres." "\n"
+        "If the request is outside the valid range, this will get clamped")
+      int32 target_width;
+
+      @verbatim (language="comment", text=
+        "The target force to exert in newtons. If outside the valid range, this will get clamped")
+      int32 target_force;
+    };
+    @verbatim (language="comment", text=
+      "Result Params:" "\n"
+      "The final width the gripper ended the request at")
+    struct GripperSetWidth_Result {
+      int32 final_width;
+    };
+    @verbatim (language="comment", text=
+      "Feedback Params:" "\n"
+      "The current width of the gripper at this timestep")
+    struct GripperSetWidth_Feedback {
+      int32 current_width;
+    };
+  };
+};
