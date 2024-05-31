@@ -18,7 +18,7 @@ then
     xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
 
     # Assuming that passed, we build the docker
-    if [ $? -eq 1 ]
+    if [ $? -eq 0 ]
     then
         USER_UID="$(id -u)" \
             USER_GID="$(id -g)" \
