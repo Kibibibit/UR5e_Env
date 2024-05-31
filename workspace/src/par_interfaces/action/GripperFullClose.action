@@ -1,7 +1,9 @@
 # GripperFullClose.action
 ## This action closes the gripper to its minimum width
 
-### Request Params:None
+### Request Params:
+#### The force in newtons that the gripper will exert
+float32 target_force
 ---
 ### Result Params:
 #### The final width the gripper ended the request at

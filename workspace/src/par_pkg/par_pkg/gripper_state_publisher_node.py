@@ -9,6 +9,18 @@ from sensor_msgs.msg import JointState
 from . import helpers as h
 from par_interfaces.msg import GripperInfo
 
+### gripper_state_publisher_node.py ###
+# Author: Daniel Mills (s3843035@student.rmit.edu.au)
+# Created: 2024-05-30
+# Updated: 2024-05-31
+
+
+
+GRIPPER_BUSY_BIT = 0
+"""In the gripper status array, this is the index for the busy state of the gripper"""
+
+
+
 UPPER_FINGER_JOINT = 0.785398
 LOWER_FINGER_JOINT = -0.558505
 

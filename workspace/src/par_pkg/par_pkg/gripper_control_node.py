@@ -2,7 +2,7 @@ import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
 from .onrobot.onrobot import RG
-from par_interfaces.action import GripperSetWidth
+from par_interfaces.action import GripperSetWidth, GripperFullClose, GripperFullOpen
 from rclpy.action.server import ServerGoalHandle
 from . import helpers as h
 from pymodbus.exceptions import ConnectionException 
@@ -11,7 +11,7 @@ import time
 ### gripper_control_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
 # Created: 2024-05-23
-# Updated: 2024-05-23
+# Updated: 2024-05-31
 
 
 
@@ -21,7 +21,8 @@ GRIPPER_BUSY_BIT = 0
 
 ### This is the node that will handle opening and closing, and other tasks for it.
 ### Contains:
-###  - An action server for opening and closing the gripper
+###  - An action server for opening and closing the gripper to a set width
+###  - Action servers for open and closing the gripper to its max and min width
 
 class GripperControlNode(Node):
 
@@ -81,11 +82,25 @@ class GripperControlNode(Node):
         """This timer will update this node's values for the gripper's width and busy status"""
         
         
-        self._action_server = ActionServer(
+        self._set_width_action_server = ActionServer(
             self,
             GripperSetWidth,
-            'set_gripper_width',
-            self.execute_callback
+            'gripper_set_width',
+            self.execute_set_width_callback
+        )
+
+        self._close_action_server = ActionServer(
+            self,
+            GripperFullClose,
+            'gripper_full_close',
+            self.execute_close_callback
+        )
+
+        self._open_action_server = ActionServer(
+            self,
+            GripperFullOpen,
+            'gripper_full_open',
+            self.execute_close_callback
         )
         
         self.get_logger().info(f"Gripper Action Node starting on host: {self._gripper_ip}:{self._gripper_port}. TYPE = {self._gripper_type}")
@@ -97,15 +112,25 @@ class GripperControlNode(Node):
 
         
 
-    def execute_callback(self, goal_handle: ServerGoalHandle):
-        self.get_logger().info('Executing gripper action!')
+    def execute_set_width_callback(self, goal_handle: ServerGoalHandle):
+        target_width = goal_handle.request.target_width
+       
+        return self.execute_gripper_move(target_width, goal_handle)
+    
+    def execute_open_callback(self, goal_handle: ServerGoalHandle):
+        return self.execute_gripper_move(self._max_width, goal_handle)
+
+    def execute_close_callback(self, goal_handle: ServerGoalHandle):
+        return self.execute_gripper_move(0.0, goal_handle)
+
+    def execute_gripper_move(self, target_width, goal_handle: ServerGoalHandle):
+        target_force = goal_handle.request.target_force
+        self.get_logger().info(f'Executing gripper action! width={target_width}, force={target_force}')
         if (self._is_gripper_busy):
             goal_handle.abort()
             self.get_logger().error("Tried to move gripper while it was busy! Aborting action!")
             return
         
-        target_width = goal_handle.request.target_width
-        target_force = goal_handle.request.target_force
         if (target_width > self._max_width or target_width < 0):
             self.get_logger().warn(f"Tried to set gripper width to {target_width}m which is outside range [0,{self._max_width}]. Clamping!")
             target_width:float = h.clamp(0, self._max_width, target_width)
@@ -133,6 +158,7 @@ class GripperControlNode(Node):
         result = GripperSetWidth.Result()
         result.final_width = self._current_gripper_width
         return result
+
 
     def get_gripper_width(self)->int:
         return self._gripper.get_width_with_offset()
