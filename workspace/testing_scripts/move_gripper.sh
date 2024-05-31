@@ -7,11 +7,11 @@ ACTION="gripper_set_width par_interfaces/action/GripperSetWidth"
 
 WIDTH_FIELD="\"target_width\":$WIDTH,"
 
-if [ "$WIDTH" -eq "open" ]
+if [ "$WIDTH" == "open" ]
 then
     ACTION="gripper_full_open par_interfaces/action/GripperFullOpen"
     WIDTH_FIELD=
-elif [ "$WIDTH" -eq "close" ]
+elif [ "$WIDTH" == "close" ]
 then
     ACTION="gripper_full_close par_interfaces/action/GripperFullClose"
     WIDTH_FIELD=
