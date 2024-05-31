@@ -88,7 +88,7 @@ class GripperControlNode(Node):
         """This is true if the gripper is currently preforming a move, and cannot take new instructions. Updated every [gripper_check_rate] seconds"""
         
         self._min_width: int = (int(round(self._gripper_fingertip_offset)))
-        self._max_width: int = int(round(self._gripper.max_width-self._gripper_fingertip_offset))
+        self._max_width: int = int(round(self._gripper.max_width/10.0))
         """This is the maximum width in metres the gripper can open. Trying to open wider than this will result in the gripper being clamped to this size"""
         self._max_force:int = int(round(self._gripper.max_force))
         """This is the maximum force that the gripper can exert, in newtons. Trying to go higher than this will result in the value being clamped to this amount."""
@@ -102,7 +102,7 @@ class GripperControlNode(Node):
         
        
 
-        self.get_logger().info(f"{self._gripper.max_width}/{self._gripper.get_width_with_offset()}")
+        self.get_logger().info(f"{self._gripper.max_width}/{self._gripper.get_width_with_offset()}/{self._gripper.get_fingertip_offset()}")
         
         
         self._info_publisher: Publisher = self.create_publisher(

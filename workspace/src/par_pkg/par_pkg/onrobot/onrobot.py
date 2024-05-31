@@ -115,7 +115,7 @@ class RG():
         return status_list
 
     def get_width_with_offset(self):
-        """Reads current width between gripper fingers in 1/10 millimeters.
+        """Reads current width between gripper fingers in millimeters.
         The set fingertip offset is considered.
         """
         result = self.client.read_holding_registers(
