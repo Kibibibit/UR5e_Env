@@ -56,6 +56,7 @@ class GripperStatePublisherNode(Node):
         self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
         """The topic that the gripper info will be published to."""
 
+    
         self._qos_profile = QoSProfile(depth=10)
         self._joint_publisher: Publisher = self.create_publisher(JointState, 'joint_states', self._qos_profile)
 
@@ -75,7 +76,12 @@ class GripperStatePublisherNode(Node):
             self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
             exit() 
         
-        self._gripper_max_width:float = self._gripper.max_width-self._gripper.get_fingertip_offset()
+        self._gripper_max_width:float = self._gripper.max_width
+        self._gripper_fingertip_offset = self._gripper.get_fingertip_offset()
+        self._gripper_max_force: float = self._gripper.max_force
+        """This is the maximum force that the gripper can exert, in newtons. Trying to go higher than this will result in the value being clamped to this amount."""
+        
+        
 
         self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
         """This timer will publish the joint state to update rviz/moveit"""
@@ -95,7 +101,7 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width))
+        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
 
         
         #TODO: Check this relationship is linear
@@ -113,8 +119,8 @@ class GripperStatePublisherNode(Node):
         msg.gripper_type = self._gripper_type
         msg.port = str(self._gripper_port)
         msg.ip = self._gripper_ip
-        msg.max_force = self._max_force
-        msg.max_width = self._max_width
+        msg.max_force = self._gripper_max_force
+        msg.max_width = self._gripper_max_width
         msg.fingertip_offset = self._gripper_fingertip_offset
         self._info_publisher.publish(msg)
 

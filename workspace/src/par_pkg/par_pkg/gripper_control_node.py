@@ -62,7 +62,6 @@ class GripperControlNode(Node):
             self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
             exit() 
         
-        self._gripper_fingertip_offset = self._gripper.get_fingertip_offset()
         self._current_gripper_width = self.get_gripper_width()
         """This is the current width of the gripper, updated every [gripper_check_rate] seconds. In milimetres"""
         self._is_gripper_busy = self.get_gripper_is_busy()
