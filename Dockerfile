@@ -62,6 +62,9 @@ RUN sudo apt-get update && sudo apt-get install -y freeglut3-dev libomp-dev libf
 # Install UR
 RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-ur
 
+# Install Moveit
+RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-moveit
+
 # Install Realsense Drivers for camera
 RUN sudo mkdir -p /etc/apt/keyrings
 RUN curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | sudo tee /etc/apt/keyrings/librealsense.pgp > /dev/null
@@ -81,16 +84,11 @@ RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Install python requirements - We shouldn't need pyrealsense2 once the realsense ros node is setup
 RUN pip install pymodbus==2.5.3 pyrealsense2
 
-RUN mkdir -p /home/${USERNAME}/.post-build/
-COPY post_build_scripts/* /home/${USERNAME}/.post-build/
-RUN sudo chown -R ${USERNAME} $HOME/.post-build/
-
 EXPOSE 50002 
 
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/${USERNAME}/.bashrc
 RUN echo "source /home/${USERNAME}/workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
-RUN echo "source /home/${USERNAME}/.moveit_workspace/install/setup.bash" >> /home/${USERNAME}/.bashrc
 
 RUN echo "source /home/${USERNAME}/workspace/.helper_scripts/helper-aliases.sh" >> /home/${USERNAME}/.bashrc
 
