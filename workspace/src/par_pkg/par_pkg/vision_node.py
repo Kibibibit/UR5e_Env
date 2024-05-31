@@ -10,17 +10,26 @@ class OnRobotEyesCameraNode(Node):
     def __init__(self):
         super().__init__('vision_node')
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
-        self.subscription = self.create_subscription(Image,'/camera/color/image_raw',self.image_callback,10)
+        self.subscription = self.create_subscription(Image,'/camera/color/image_raw',self.colour_image_callback,10)
+        self.depth_subscription = self.create_subscription(Image,'/camera/depth/image_rect_raw',self.depth_image_callback,10)
         self.bridge = CvBridge()
+        self.depth_image = None
 
-    def image_callback(self, msg):
+    def colour_image_callback(self, msg):
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-            processed_image = self.detect_shapes(color_image)
-            processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-            self.publisher_.publish(processed_msg)
+            if self.depth_image is not None:
+                 processed_image = self.detect_shapes(color_image, self.depth_image)
+                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
+                 self.publisher_.publish(processed_msg)
         except Exception as e:
             self.get_logger().error(f"Error processing image: {e}")
+
+    def depth_image_callback(self, msg):
+        try:
+            self.depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
+        except Exception as e:
+            self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_shapes(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
