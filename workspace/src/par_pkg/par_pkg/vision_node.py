@@ -4,29 +4,23 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-import pyrealsense2 as rs
+# import pyrealsense2 as rs
 
 class OnRobotEyesCameraNode(Node):
     def __init__(self):
         super().__init__('vision_node')
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        self.subscription = self.create_subscription(Image,'/camera/color/image_raw',self.image_callback,10)
         self.bridge = CvBridge()
-        self.pipeline = rs.pipeline()
-        self.config = rs.config()
-        self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        self.pipeline.start(self.config)
 
-    def timer_callback(self):
-        frames = self.pipeline.wait_for_frames()
-        color_frame = frames.get_color_frame()
-        if not color_frame:
-            return
-
-        color_image = np.asanyarray(color_frame.get_data())
-        processed_image = self.detect_shapes(color_image)
-        msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-        self.publisher_.publish(msg)
+    def image_callback(self, msg):
+        try:
+            color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            processed_image = self.detect_shapes(color_image)
+            processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
+            self.publisher_.publish(processed_msg)
+        except Exception as e:
+            self.get_logger().error(f"Error processing image: {e}")
 
     def detect_shapes(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -55,9 +49,6 @@ class OnRobotEyesCameraNode(Node):
             x, y = approx[0][0]
             cv2.putText(image, shape, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         return image
-
-    def __del__(self):
-        self.pipeline.stop()
 
 def main(args=None):
     rclpy.init(args=args)
