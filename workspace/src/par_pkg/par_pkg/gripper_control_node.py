@@ -159,7 +159,7 @@ class GripperControlNode(Node):
             int(round(target_force*10.0))
         )
         self.state_update_timer_callback()
-        while(not self.gripper_reached_target(self._current_gripper_width, target_width)):
+        while(self._is_gripper_busy):
             self.state_update_timer_callback()
             feedback_msg = GripperSetWidth.Feedback()
             feedback_msg.current_width = self._current_gripper_width
