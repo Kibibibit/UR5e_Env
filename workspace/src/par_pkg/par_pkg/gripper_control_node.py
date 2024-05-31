@@ -38,8 +38,6 @@ class GripperControlNode(Node):
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperCheckRate", 50),
-                ("gripperPrecisionEpsilon", 1.0),
-                ("gripperInfoTopic", "/par/gripper/info"),
             ]
         )
         

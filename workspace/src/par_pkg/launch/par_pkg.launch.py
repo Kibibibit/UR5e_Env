@@ -17,7 +17,6 @@ def generate_launch_description():
         DeclareLaunchArgument('gripperPort', default_value="502"),
         
         #### GRIPPER BEHAVIOUR CONFIG
-        DeclareLaunchArgument('gripperPrecisionEpsilon', default_value='1.0'),
         DeclareLaunchArgument('gripperCheckRate', default_value='50'),
         DeclareLaunchArgument('gripperInfoPublishRate', default_value="5"),
         
@@ -34,8 +33,6 @@ def generate_launch_description():
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
                 {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
-                {'gripperPrecisionEpsilon': LaunchConfiguration('gripperPrecisionEpsilon')},
-                {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")}
             ]
         ),
         Node(
@@ -47,6 +44,7 @@ def generate_launch_description():
                 {'gripperJointPublishRate': LaunchConfiguration("gripperJointPublishRate")},
                 {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
+                {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")},
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
             ]

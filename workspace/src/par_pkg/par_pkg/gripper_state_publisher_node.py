@@ -37,6 +37,7 @@ class GripperStatePublisherNode(Node):
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperInfoPublishRate", 5),
+                ("gripperInfoTopic", "/par/gripper/info"),
                 ('gripperJointPublishRate', 100),
             ]
         )
