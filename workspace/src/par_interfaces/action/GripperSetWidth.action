@@ -12,8 +12,8 @@ float32 target_force
 ---
 ### Result Params:
 #### The final width the gripper ended the request at, in milimetres
-int32 final_width
+float32 final_width
 ---
 ### Feedback Params:
 #### The current width of the gripper at this step, in milimetres
-int32 current_width
+float32 current_width
