@@ -23,8 +23,8 @@ class RG():
             return
         self.gripper = gripper  # RG2/6
         if self.gripper == 'rg2':
-            self.max_width = 1100
-            self.max_force = 400
+            self.max_width = 110.0
+            self.max_force = 40.0
         elif self.gripper == 'rg6':
             self.max_width = 1600
             self.max_force = 1200
@@ -39,7 +39,7 @@ class RG():
         self.client.close()
 
     def get_fingertip_offset(self):
-        """Reads the current fingertip offset in 1/10 millimeters.
+        """Reads the current fingertip offset in millimeters.
         Please note that the value is a signed two's complement number.
         """
         result = self.client.read_holding_registers(
