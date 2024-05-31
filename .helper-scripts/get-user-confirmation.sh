@@ -27,7 +27,8 @@ if [[ "$SKIP_USER_CONFIRM" == "1" ]]
 then
     exit 0
 else
-    read -p "$MESSAGE [y/n]: " -n 1 -r
+    echo -e "\033[1;31m$MESSAGE [y/n]:\033[0m "
+    read -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then

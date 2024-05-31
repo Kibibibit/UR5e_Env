@@ -18,7 +18,7 @@ then
     xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
 
     # Assuming that passed, we build the docker
-    if [ $? -eq 0 ]
+    if [ $? -eq 1 ]
     then
         USER_UID="$(id -u)" \
             USER_GID="$(id -g)" \
@@ -26,7 +26,7 @@ then
             docker-compose build
     else
         # Otherwise print an error.
-        echo -e "\033[0;31mERROR: Failed to set up XAUTH files. This probably means the container was shut down unexpectedly. To resolve, run:\033[0m\n\
+        echo -e "\033[0;31mERROR: Failed to set up XAUTH files. This probably means the container was shut down unexpectedly. To resolve, run:\033[1;97m\n\
 sudo rm -rf $XAUTH\n\
 \033[0;31mand try again.\033[0m"
     fi
