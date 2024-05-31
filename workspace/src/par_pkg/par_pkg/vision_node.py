@@ -28,6 +28,7 @@ class OnRobotEyesCameraNode(Node):
     def depth_image_callback(self, msg):
         try:
             self.depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
+            self.get_logger().info("Depth image received")
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
@@ -42,6 +43,8 @@ class OnRobotEyesCameraNode(Node):
             approx = cv2.approxPolyDP(contour, epsilon, True)
             (x, y, w, h) = cv2.boundingRect(approx)
             depth = np.mean(depth_image[y:y+h, x:x+w])
+            self.get_logger().info(f"Detected contour : ({x} width, {y} height)")
+            self.get_logger().info(f"Contour depth: {depth}")
             
             if len(approx) == 3:
                 shape = "Triangle"
@@ -59,7 +62,7 @@ class OnRobotEyesCameraNode(Node):
                 color = (255, 255, 255)
             cv2.drawContours(color_image, [approx], -1, color, 2)
             x, y = approx[0][0]
-            cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         return color_image
 
 def main(args=None):
