@@ -2,35 +2,37 @@
 
 
 
-SKIP_USER_CONFIRM=0
-CONFIRMED=0
-while test $# != 0
-do
-    case "$1" in
-        -y) SKIP_USER_CONFIRM=1;;
-        --) shift; break;;
-    esac
-    shift
-done
+./.helper-scripts/get-user-confirmation.sh $@ \
+    -m "Are you sure? This will delete your exising container and image, and take potentially a long time  (About 5-10 minutes) to rebuild!"
 
-if [[ "$SKIP_USER_CONFIRM" == "1" ]]; then
-    CONFIRMED=1
-else
-    read -p "Are you sure? This will delete your exising container and image, and take potentially a long time  (About 5-10 minutes) to rebuild! [y/n]: " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        CONFIRMED=1
-    else
-        exit 0
-    fi
-fi
+if [ $? -eq 0 ]
+then
 
-if [[ "$CONFIRMED" == "1" ]]; then
+    # Delete the previous container
     ./docker-delete.sh -y
-    USER_UID="$(id -u)" \
-        USER_GID="$(id -g)" \
-        USERNAME="rosuser" \
-        docker-compose build
+
+    # Set up the required xauth files for the display bridge
+    XSOCK=/tmp/.X11-unix
+    XAUTH=/tmp/.docker.xauth
+    touch $XAUTH
+    xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
+
+    # Assuming that passed, we build the docker
+    if [ $? -eq 0 ]
+    then
+        USER_UID="$(id -u)" \
+            USER_GID="$(id -g)" \
+            USERNAME="rosuser" \
+            docker-compose build
+    else
+        # Otherwise print an error.
+        printf "\033[0;31mERROR: Failed to set up XAUTH files. This probably means the container was shut down unexpectedly. To resolve, run:\033[0m\n\
+sudo rm -rf $XAUTH\n\
+\033[0;31mand try again.\033[0m"
+    fi
+
+
+    
         
     
 fi
