@@ -78,8 +78,8 @@ RUN sudo apt-get update && sudo apt-get install -y ros-$ROS_DISTRO-rviz2
 RUN sudo apt-get update && sudo apt install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp
 RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
-# Install python requirements
-RUN pip install pymodbus==2.5.3
+# Install python requirements - We shouldn't need pyrealsense2 once the realsense ros node is setup
+RUN pip install pymodbus==2.5.3 pyrealsense2
 
 RUN mkdir -p /home/${USERNAME}/.post-build/
 COPY post_build_scripts/* /home/${USERNAME}/.post-build/
