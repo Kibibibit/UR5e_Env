@@ -10,7 +10,9 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(action_tutorials_interfaces REQUIRED)
+find_package(par_interfaces REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 add_library(action_server SHARED
   src/move_to_pose_action_server.cpp)
@@ -27,7 +29,9 @@ ament_target_dependencies(action_server
   "rclcpp"
   "rclcpp_action"
   "rclcpp_components"
-  "action_tutorials_interfaces")
+  "par_interfaces"
+  "moveit_ros_planning_interface"
+  "geometry_msgs")
 
 rclcpp_components_register_node(action_server PLUGIN "MoveToPoseActionServer" EXECUTABLE move_to_pose_action_server)
 
