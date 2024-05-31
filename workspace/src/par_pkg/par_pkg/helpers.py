@@ -23,3 +23,13 @@ def clamp(min_v, max_v, v):
     if (min_v > max_v):
         min_v, max_v = max_v, min_v
     return min(max_v, max(min_v, v))
+
+def lerp(t0, t1, t):
+    """
+        :param t0: The lower bound of the lerp
+        :param t1: The upper bound of the lerp
+        :param t: The amount to interpolate by
+
+        This function linearly interpolates between t0 and t1 by a factor of t
+    """
+    return (1.0 - t)*t0 + (t*t1)

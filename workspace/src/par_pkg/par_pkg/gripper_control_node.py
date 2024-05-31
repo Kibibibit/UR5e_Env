@@ -101,6 +101,8 @@ class GripperControlNode(Node):
         """This timer will publish info about the gripper now and then for other nodes if needed"""
         
        
+
+        self.get_logger().info(f"{self._gripper.max_width}/{self._gripper.get_width_with_offset()}")
         
         
         self._info_publisher: Publisher = self.create_publisher(

@@ -5,10 +5,8 @@ from rclpy.qos import QoSProfile
 from rclpy.node import Node, Publisher
 from .onrobot.onrobot import RG
 from pymodbus.exceptions import ConnectionException 
-
-from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
-from tf2_ros import TransformBroadcaster, TransformStamped
+from . import helpers as h
 
 UPPER_FINGER_JOINT = 0.785398
 LOWER_FINGER_JOINT = -0.558505
@@ -72,7 +70,7 @@ class GripperStatePublisherNode(Node):
 
         
         #TODO: Check this relationship is linear
-        rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
+        rotation: float = h.lerp(LOWER_FINGER_JOINT, UPPER_FINGER_JOINT, delta)
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
