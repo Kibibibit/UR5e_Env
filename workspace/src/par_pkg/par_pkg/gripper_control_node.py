@@ -112,15 +112,21 @@ class GripperControlNode(Node):
     def execute_set_width_callback(self, goal_handle: ServerGoalHandle):
         target_width = goal_handle.request.target_width
        
-        return self.execute_gripper_move(target_width, goal_handle, GripperSetWidth)
+        return self.execute_gripper_move(target_width, goal_handle, GripperSetWidth.Feedback, GripperSetWidth.Result)
     
     def execute_open_callback(self, goal_handle: ServerGoalHandle):
-        return self.execute_gripper_move(self._max_width, goal_handle, GripperFullOpen)
+        return self.execute_gripper_move(self._max_width, goal_handle, GripperFullOpen.Feedback, GripperFullOpen.Result)
 
     def execute_close_callback(self, goal_handle: ServerGoalHandle):
-        return self.execute_gripper_move(0.0, goal_handle, GripperFullClose)
+        return self.execute_gripper_move(0.0, goal_handle, GripperFullClose.Feedback, GripperFullClose.Result)
 
-    def execute_gripper_move(self, target_width, goal_handle: ServerGoalHandle, action_type):
+    def execute_gripper_move(
+            self, 
+            target_width, 
+            goal_handle: ServerGoalHandle, 
+            feedback_type,
+            result_type
+        ):
         target_force = goal_handle.request.target_force
         self.get_logger().info(f'Executing gripper action! width={target_width}, force={target_force}')
         if (self._is_gripper_busy):
@@ -143,7 +149,7 @@ class GripperControlNode(Node):
         self.state_update_timer_callback()
         while(self._is_gripper_busy):
             self.state_update_timer_callback()
-            feedback_msg = action_type.Feedback()
+            feedback_msg = feedback_type()
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)
             time.sleep(1.0/self._gripper_check_rate)
@@ -152,7 +158,7 @@ class GripperControlNode(Node):
         self.get_logger().info("Gripper move suceeded!")
         
         goal_handle.succeed()
-        result = action_type.Result()
+        result = result_type()
         result.final_width = self._current_gripper_width
         return result
 
