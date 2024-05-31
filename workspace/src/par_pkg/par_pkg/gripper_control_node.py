@@ -167,6 +167,7 @@ class GripperControlNode(Node):
             time.sleep(1.0/self._gripper_check_rate)
             self.get_logger().info(f"{self._is_gripper_busy}, {self._current_gripper_width}")
         
+        self.state_update_timer_callback()
         self.get_logger().info("Gripper move suceeded!")
         
         goal_handle.succeed()
