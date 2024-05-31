@@ -19,20 +19,6 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 - [Docker Post-install](https://docs.docker.com/engine/install/linux-postinstall/) - If you don't follow this, it won't work!
 - `docker-compose` - sudo apt install docker-compose
 
-### Installing moveit
-Moveit has to be built from source manually after starting the docker. Run the following steps:
-```bash
-./docker-build.sh
-./docker-start.sh
-./docker-attach.sh
-```
-Finally, run the following to start the moveit install. This takes about 30 minutes, but should only need to be run once.
-```bash
-cd ~/rosuser/.post-build
-./moveit_install.sh
-```
-You'll need to disconnect `CTRL+D` and reconnect with `docker-attach.sh` to source the new moveit repo. 
-
 
 ## Usage
 
