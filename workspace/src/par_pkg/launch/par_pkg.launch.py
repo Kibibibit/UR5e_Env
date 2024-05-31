@@ -35,7 +35,6 @@ def generate_launch_description():
                 {'gripperPort': LaunchConfiguration('gripperPort')},
                 {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
                 {'gripperPrecisionEpsilon': LaunchConfiguration('gripperPrecisionEpsilon')},
-                {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")}
             ]
         ),
@@ -48,6 +47,7 @@ def generate_launch_description():
                 {'gripperJointPublishRate': LaunchConfiguration("gripperJointPublishRate")},
                 {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
+                {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
             ]
         ),
