@@ -7,6 +7,7 @@ from par_interfaces.msg import GripperInfo
 from rclpy.action.server import ServerGoalHandle
 from . import helpers as h
 from pymodbus.exceptions import ConnectionException 
+import time
 
 ### gripper_control_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
@@ -86,7 +87,9 @@ class GripperControlNode(Node):
         """This is the current width of the gripper, updated every [gripper_check_rate] seconds. In milimetres"""
         self._is_gripper_busy = self.get_gripper_is_busy()
         """This is true if the gripper is currently preforming a move, and cannot take new instructions. Updated every [gripper_check_rate] seconds"""
-        
+        self._gripper_target_width = self._current_gripper_width
+        """This is the target width the gripper is trying to acheive, in mm"""
+
         self._max_width: float = self._gripper.max_width
         """This is the maximum width in milimetres the gripper can open. Trying to open wider than this will result in the gripper being clamped to this size"""
         self._max_force: float = self._gripper.max_force
@@ -161,7 +164,7 @@ class GripperControlNode(Node):
             feedback_msg = GripperSetWidth.Feedback()
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)
-            self._gripper_check_rate_object.sleep()
+            time.sleep(1.0/self._gripper_check_rate)
             self.get_logger().info(f"{self._is_gripper_busy}, {self._current_gripper_width}")
         
         self.get_logger().info("Gripper move suceeded!")
