@@ -112,15 +112,15 @@ class GripperControlNode(Node):
     def execute_set_width_callback(self, goal_handle: ServerGoalHandle):
         target_width = goal_handle.request.target_width
        
-        return self.execute_gripper_move(target_width, goal_handle)
+        return self.execute_gripper_move(target_width, goal_handle, GripperSetWidth)
     
     def execute_open_callback(self, goal_handle: ServerGoalHandle):
-        return self.execute_gripper_move(self._max_width, goal_handle)
+        return self.execute_gripper_move(self._max_width, goal_handle, GripperFullOpen)
 
     def execute_close_callback(self, goal_handle: ServerGoalHandle):
-        return self.execute_gripper_move(0.0, goal_handle)
+        return self.execute_gripper_move(0.0, goal_handle, GripperFullClose)
 
-    def execute_gripper_move(self, target_width, goal_handle: ServerGoalHandle):
+    def execute_gripper_move(self, target_width, goal_handle: ServerGoalHandle, action_type):
         target_force = goal_handle.request.target_force
         self.get_logger().info(f'Executing gripper action! width={target_width}, force={target_force}')
         if (self._is_gripper_busy):
@@ -143,7 +143,7 @@ class GripperControlNode(Node):
         self.state_update_timer_callback()
         while(self._is_gripper_busy):
             self.state_update_timer_callback()
-            feedback_msg = GripperSetWidth.Feedback()
+            feedback_msg = action_type.Feedback()
             feedback_msg.current_width = self._current_gripper_width
             goal_handle.publish_feedback(feedback_msg)
             time.sleep(1.0/self._gripper_check_rate)
@@ -152,7 +152,7 @@ class GripperControlNode(Node):
         self.get_logger().info("Gripper move suceeded!")
         
         goal_handle.succeed()
-        result = GripperSetWidth.Result()
+        result = action_type.Result()
         result.final_width = self._current_gripper_width
         return result
 
