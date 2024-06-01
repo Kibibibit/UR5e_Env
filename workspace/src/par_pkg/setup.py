@@ -22,14 +22,16 @@ setup(
     zip_safe=True,
     maintainer='Daniel Mills',
     maintainer_email='s3843035@student.rmit.edu.au',
-    description='TODO: Package description',
+    description='Python package for controlling a ur5e arm with moveit',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'gripper_control_node = par_pkg.gripper_control_node:main',
             'gripper_state_publisher_node = par_pkg.gripper_state_publisher_node:main',
-            'move_to_pose_node = par_pkg.move_to_pose_node:main'
+            'move_to_pose_node = par_pkg.move_to_pose_node:main',
+            'vision_node = par_pkg.vision_node:main',
+            'capture_image = par_pkg.capture_image:main'
         ],
     },
 )
