@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(par_interfaces)
+project(moveit_action_server)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,21 +7,26 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(par_interfaces REQUIRED)
 
-find_package(rosidl_default_generators REQUIRED)
-find_package(geometry_msgs REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/GripperSetWidth.action"
-  "action/GripperFullClose.action"
-  "action/GripperFullOpen.action"
-  "action/ParMoveitPose.action"
-  "msg/GripperInfo.msg"
-  DEPENDENCIES geometry_msgs
+add_executable(moveit_action_server_node src/moveit_action_server_node.cpp)
+target_include_directories(moveit_action_server_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(moveit_action_server_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(
+  moveit_action_server_node
+  "moveit_ros_planning_interface"
+  "rclcpp"
+  "std_msgs"
+  "par_interfaces"
 )
+
+install(TARGETS moveit_action_server_node
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
