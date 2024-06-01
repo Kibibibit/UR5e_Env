@@ -20,12 +20,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GripperFullOpen.action"
   "action/ParMoveitPose.action"
   "msg/GripperInfo.msg"
-<<<<<<< HEAD
   DEPENDENCIES geometry_msgs
 
-=======
-  "action/SetPose.action"
->>>>>>> 2522e8f0213b6ce5a48b7d2212e3ab508a20d9da
 )
 
 if(BUILD_TESTING)
