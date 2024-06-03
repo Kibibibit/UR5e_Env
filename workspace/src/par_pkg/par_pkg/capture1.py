@@ -52,13 +52,20 @@ class CubeDetectionNode(Node):
         if color_image is None or depth_image is None:
             self.get_logger().error("Color or depth image is None")
             return color_image
-        
+
+        self.get_logger().info(f"Color image shape: {color_image.shape}, Depth image shape: {depth_image.shape}")
+
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         if gray is None or gray.size == 0:
             self.get_logger().error("Gray image conversion failed or image is empty")
             return color_image
 
+        self.get_logger().info(f"Gray image shape: {gray.shape}")
+
         gray = np.float32(gray)
+
+        # Normalize and convert the grayscale image to 8-bit for Canny edge detection
+        gray_8bit = cv2.convertScaleAbs(gray)
 
         # Corner detection using Harris corner detection
         dst = cv2.cornerHarris(gray, 2, 3, 0.04)
@@ -66,10 +73,12 @@ class CubeDetectionNode(Node):
         color_image[dst > 0.01 * dst.max()] = [0, 0, 255]
 
         # Line detection using Hough Line Transform
-        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        edges = cv2.Canny(gray_8bit, 50, 150, apertureSize=3)
         if edges is None or edges.size == 0:
             self.get_logger().error("Edge detection failed or edges are empty")
             return color_image
+
+        self.get_logger().info(f"Edges shape: {edges.shape}")
 
         lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
         if lines is not None:
