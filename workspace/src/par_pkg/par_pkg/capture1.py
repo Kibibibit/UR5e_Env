@@ -48,19 +48,24 @@ class CubeDetectionNode(Node):
     def detect_cubes(self, color_image, depth_image):
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        
+        # Adaptive thresholding and Canny edge detection
         adaptive_thresh = cv2.adaptiveThreshold(
             blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
         )
+        edges = cv2.Canny(blurred, 50, 150)
+        
+        combined = cv2.bitwise_or(adaptive_thresh, edges)
+        
         kernel = np.ones((3, 3), np.uint8)
-        morph = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
-        edges = cv2.Canny(morph, 50, 150)
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        morph = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel)
+        
+        contours, hierarchy = cv2.findContours(morph, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
-        for contour in contours:
+        for i, contour in enumerate(contours):
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-            
-            if area < 100 or area > 5000:  # Ignore very small or very large contours
+            if hierarchy[0][i][3] != -1 or area < 100 or area > 5000:  # Ignore nested contours or contours that are too small/large
                 self.get_logger().info(f"Ignoring contour - Area: {area}")
                 continue
 
@@ -79,6 +84,7 @@ class CubeDetectionNode(Node):
                     cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
+                    break  # Move to the first detected cube
         
         return color_image
 
