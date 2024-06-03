@@ -31,7 +31,7 @@ ament_target_dependencies(
 
 target_compile_features(moveit_service_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(
-  moveit_action_server_node
+  moveit_service_node
   "moveit_ros_planning_interface"
   "rclcpp"
   "par_interfaces"
