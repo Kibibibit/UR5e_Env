@@ -34,7 +34,7 @@ class CubeDetectionNode(Node):
     def colour_image_callback(self, msg):
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-            if self.depth_image is not None:
+            if color_image is not None and self.depth_image is not None:
                 processed_image = self.detect_cubes(color_image, self.depth_image)
                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
                 self.publisher_.publish(processed_msg)
@@ -49,7 +49,14 @@ class CubeDetectionNode(Node):
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, color_image, depth_image):
+        if color_image is None or depth_image is None:
+            return color_image
+        
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        if gray is None or gray.size == 0:
+            self.get_logger().error("Gray image conversion failed")
+            return color_image
+
         gray = np.float32(gray)
 
         # Corner detection using Harris corner detection
@@ -59,6 +66,10 @@ class CubeDetectionNode(Node):
 
         # Line detection using Hough Line Transform
         edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        if edges is None or edges.size == 0:
+            self.get_logger().error("Edge detection failed")
+            return color_image
+
         lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
         if lines is not None:
             for rho, theta in lines[:, 0]:
