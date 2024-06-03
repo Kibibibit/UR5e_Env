@@ -14,7 +14,7 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & optio
 ) {
   
   using namespace std::placeholders;
-  this->action_server = rclcpp_action::create_server<ParMoveitPose>(
+  this->action_server = rclcpp_action::create_server<MoveitPose>(
     this,
     "par_moveit_pose",
     std::bind(&MoveitActionServerNode::handle_goal, this, _1, _2),
@@ -29,7 +29,7 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & optio
 
 rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
-  std::shared_ptr<const ParMoveitPose::Goal> goal
+  std::shared_ptr<const MoveitPose::Goal> goal
 ) {
   RCLCPP_INFO(this->get_logger(), "Received goal request with target_pose");
   (void)uuid;
@@ -38,20 +38,20 @@ rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
 }
 
 rclcpp_action::CancelResponse MoveitActionServerNode::handle_cancel(
-  const std::shared_ptr<GoalHandleParMoveitPose> goal_handle
+  const std::shared_ptr<GoalHandleMoveitPose> goal_handle
 ) {
   RCLCPP_INFO(this->get_logger(), "Recieved request to cancel goal!");
   (void)goal_handle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void MoveitActionServerNode::handle_accepted(const std::shared_ptr<GoalHandleParMoveitPose> goal_handle)
+void MoveitActionServerNode::handle_accepted(const std::shared_ptr<GoalHandleMoveitPose> goal_handle)
 {
   using namespace std::placeholders;
   std::thread{std::bind(&MoveitActionServerNode::execute, this, _1), goal_handle}.detach();
 }
 
-void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandleParMoveitPose> goal_handle)
+void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandleMoveitPose> goal_handle)
 {
 
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
@@ -64,9 +64,9 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandleParMoveitPo
 
   this->move_group_interface->setPoseTarget(goal->target_pose);
 
-  auto feedback = std::make_shared<ParMoveitPose::Feedback>();
+  auto feedback = std::make_shared<MoveitPose::Feedback>();
   feedback->current_pose = this->move_group_interface->getCurrentPose().pose;
-  auto result = std::make_shared<ParMoveitPose::Result>();
+  auto result = std::make_shared<MoveitPose::Result>();
   result->final_pose = this->move_group_interface->getCurrentPose().pose;
 
 

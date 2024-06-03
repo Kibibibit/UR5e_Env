@@ -5,33 +5,33 @@
 #include "std_msgs/msg/string.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
-#include "par_interfaces/action/par_moveit_pose.hpp"
+#include "par_interfaces/action/moveit_pose.hpp"
 
 
 class MoveitActionServerNode : public rclcpp::Node
 {
     public:
         using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
-        using ParMoveitPose = par_interfaces::action::ParMoveitPose;
-        using GoalHandleParMoveitPose = rclcpp_action::ServerGoalHandle<ParMoveitPose>;
+        using MoveitPose = par_interfaces::action::MoveitPose;
+        using GoalHandleMoveitPose = rclcpp_action::ServerGoalHandle<MoveitPose>;
         MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
     private:
 
         std::shared_ptr<MoveGroupInterface> move_group_interface;
             
 
-        rclcpp_action::Server<ParMoveitPose>::SharedPtr action_server;
+        rclcpp_action::Server<MoveitPose>::SharedPtr action_server;
         rclcpp_action::GoalResponse handle_goal(
             const rclcpp_action::GoalUUID & uuid,
-            std::shared_ptr<const ParMoveitPose::Goal> goal
+            std::shared_ptr<const MoveitPose::Goal> goal
         );
 
         void execute_plan(MoveGroupInterface::Plan plan);
 
-        rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandleParMoveitPose> goal_handle);
-        void handle_accepted(const std::shared_ptr<GoalHandleParMoveitPose> goal_handle);
+        rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandleMoveitPose> goal_handle);
+        void handle_accepted(const std::shared_ptr<GoalHandleMoveitPose> goal_handle);
 
-        void execute(const std::shared_ptr<GoalHandleParMoveitPose> goal_handle);
+        void execute(const std::shared_ptr<GoalHandleMoveitPose> goal_handle);
 
         bool executing_move = false;
 

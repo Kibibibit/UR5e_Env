@@ -18,8 +18,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GripperSetWidth.action"
   "action/GripperFullClose.action"
   "action/GripperFullOpen.action"
-  "action/ParMoveitPose.action"
+  "action/MoveitPose.action"
+  "action/MoveitPoint.action"
   "msg/GripperInfo.msg"
+  "srv/CurrentMoveitPose.srv"
   DEPENDENCIES geometry_msgs
 )
 
