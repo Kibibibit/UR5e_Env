@@ -50,11 +50,12 @@ class CubeDetectionNode(Node):
 
     def detect_cubes(self, color_image, depth_image):
         if color_image is None or depth_image is None:
+            self.get_logger().error("Color or depth image is None")
             return color_image
         
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         if gray is None or gray.size == 0:
-            self.get_logger().error("Gray image conversion failed")
+            self.get_logger().error("Gray image conversion failed or image is empty")
             return color_image
 
         gray = np.float32(gray)
@@ -67,7 +68,7 @@ class CubeDetectionNode(Node):
         # Line detection using Hough Line Transform
         edges = cv2.Canny(gray, 50, 150, apertureSize=3)
         if edges is None or edges.size == 0:
-            self.get_logger().error("Edge detection failed")
+            self.get_logger().error("Edge detection failed or edges are empty")
             return color_image
 
         lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
