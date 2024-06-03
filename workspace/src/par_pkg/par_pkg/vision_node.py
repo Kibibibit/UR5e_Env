@@ -4,7 +4,6 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-# import pyrealsense2 as rs
 
 class OnRobotEyesCameraNode(Node):
     def __init__(self):
@@ -19,9 +18,9 @@ class OnRobotEyesCameraNode(Node):
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
             if self.depth_image is not None:
-                 processed_image = self.detect_objects(color_image, self.depth_image)
-                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-                 self.publisher_.publish(processed_msg)
+                processed_image = self.detect_cubes(color_image, self.depth_image)
+                processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
+                self.publisher_.publish(processed_msg)
         except Exception as e:
             self.get_logger().error(f"Error processing image: {e}")
 
@@ -32,7 +31,9 @@ class OnRobotEyesCameraNode(Node):
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
-    def detect_objects(self, color_image, depth_image):
+    def detect_cubes(self, color_image, depth_image):
+        self.get_logger().info("Starting cube detection")
+        
         hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
         
         lower_bounds = [np.array([0, 50, 50]), np.array([50, 50, 50]), np.array([100, 50, 50])]
@@ -54,7 +55,7 @@ class OnRobotEyesCameraNode(Node):
         detected_cubes = []
         for contour in contours:
             if cv2.contourArea(contour) < 500 or cv2.contourArea(contour) > 50000:
-                continue   
+                continue
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             if len(approx) == 4 and cv2.isContourConvex(approx):
@@ -63,7 +64,7 @@ class OnRobotEyesCameraNode(Node):
                 if 0.9 <= aspect_ratio <= 1.1:  
                     depth = np.mean(depth_image[y:y+h, x:x+w])
                     if np.isnan(depth) or depth <= 0:
-                        continue             
+                        continue
                     roi_edges = edges[y:y+h, x:x+w]
                     lines = cv2.HoughLines(roi_edges, 1, np.pi / 180, 100)
                     if lines is not None:
@@ -73,8 +74,8 @@ class OnRobotEyesCameraNode(Node):
                         cv2.drawContours(color_image, [approx], -1, color, 2)
                         x, y = approx[0][0]
                         cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                        
-        self.get_logger().info("Cube detection complete")
+                        self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {depth:.2f}mm")
+        self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
         return color_image
 
 def main(args=None):
