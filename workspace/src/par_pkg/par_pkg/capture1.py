@@ -48,13 +48,18 @@ class CubeDetectionNode(Node):
     def detect_cubes(self, color_image, depth_image):
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blurred, 50, 150)
+        adaptive_thresh = cv2.adaptiveThreshold(
+            blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+        )
+        kernel = np.ones((3, 3), np.uint8)
+        morph = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
+        edges = cv2.Canny(morph, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         for contour in contours:
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-            
+
             if area < 100 or area > 5000:  # Ignore very small or very large contours
                 continue
 
