@@ -1,8 +1,6 @@
 #ifndef PAR_MOVEIT_ACTION_SERVER_NODE_H
 #define PAR_MOVEIT_ACTION_SERVER_NODE_H
-#include <string>
 #include <moveit/move_group_interface/move_group_interface.h>
-#include "std_msgs/msg/string.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "par_interfaces/action/moveit_pose.hpp"

@@ -11,7 +11,6 @@
 
   <depend>moveit_ros_planning_interface</depend>
   <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
   <depend>par_interfaces</depend>
 
 

@@ -1,6 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
 #include <memory>
-#include <string>
 #include "moveit_action_server_node.hpp"
 #include <functional>
 #include "rclcpp_action/rclcpp_action.hpp"

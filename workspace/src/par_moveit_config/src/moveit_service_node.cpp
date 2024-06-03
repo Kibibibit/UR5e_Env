@@ -1,6 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
 #include <memory>
-#include <string>
 #include "moveit_service_node.hpp"
 #include <functional>
 #include <moveit/move_group_interface/move_group_interface.h>

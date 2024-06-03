@@ -1,7 +1,6 @@
 #ifndef PAR_MOVEIT_SERVICE_NODE_H
 #define PAR_MOVEIT_SERVICE_NODE_H
 #include <moveit/move_group_interface/move_group_interface.h>
-#include "std_msgs/msg/string.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "par_interfaces/srv/current_moveit_pose.hpp"
 
