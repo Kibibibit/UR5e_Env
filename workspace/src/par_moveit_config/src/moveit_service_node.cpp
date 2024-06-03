@@ -35,7 +35,7 @@ void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentMoveitPose
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<MoveitServiceNode> node = std::make_shared<MoveitActionServiceNode>();
+  std::shared_ptr<MoveitServiceNode> node = std::make_shared<MoveitServiceNode>();
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   std::thread spinner = std::thread([&executor]() { executor.spin(); });
