@@ -37,5 +37,4 @@ ros2 launch ur_robot_driver ur_control.launch.py \
     robot_ip:=10.234.6.49 \
     launch_rviz:=$RVIZ \
     description_file:="/home/rosuser/workspace/src/par_pkg/urdf/arm-with-camera$GRIPPER.urdf.xacro" \
-    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro" \
-    use_sim_time:="true"
+    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro"

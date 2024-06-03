@@ -244,7 +244,6 @@ def launch_setup(context, *args, **kwargs):
             servo_params,
             robot_description,
             robot_description_semantic,
-            use_sim_time
         ],
         output="screen",
     )
