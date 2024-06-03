@@ -67,12 +67,7 @@ class CubeDetectionNode(Node):
         # Normalize and convert the grayscale image to 8-bit for Canny edge detection
         gray_8bit = cv2.convertScaleAbs(gray)
 
-        # Corner detection using Harris corner detection
-        dst = cv2.cornerHarris(gray, 2, 3, 0.04)
-        dst = cv2.dilate(dst, None)
-        color_image[dst > 0.01 * dst.max()] = [0, 0, 255]
-
-        # Line detection using Hough Line Transform
+        # Detect edges
         edges = cv2.Canny(gray_8bit, 50, 150, apertureSize=3)
         if edges is None or edges.size == 0:
             self.get_logger().error("Edge detection failed or edges are empty")
@@ -80,29 +75,21 @@ class CubeDetectionNode(Node):
 
         self.get_logger().info(f"Edges shape: {edges.shape}")
 
-        lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
-        if lines is not None:
-            for rho, theta in lines[:, 0]:
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a * rho
-                y0 = b * rho
-                x1 = int(x0 + 1000 * (-b))
-                y1 = int(y0 + 1000 * (a))
-                x2 = int(x0 - 1000 * (-b))
-                y2 = int(y0 - 1000 * (a))
-                cv2.line(color_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        # Find contours
+        contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) == 4:  # Looking for quadrilateral shapes
+                (x, y, w, h) = cv2.boundingRect(approx)
+                aspect_ratio = w / float(h)
+                if 0.95 <= aspect_ratio <= 1.05:  # Assuming the cube has an approximately square shape
+                    depth = np.mean(depth_image[y:y+h, x:x+w])
+                    cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
+                    cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                    self.move_to_cube(x, y, depth)
+                    break  # Move to the first detected cube
 
-        # Cube detection logic (simplified for illustration)
-        # You can refine this logic to better detect cubes by combining corners and lines
-        if dst.max() > 0.01 * dst.max():
-            x, y = np.where(dst > 0.01 * dst.max())[1][0], np.where(dst > 0.01 * dst.max())[0][0]
-            w, h = 100, 100  # Assume a fixed size for the cube for this example
-            depth = np.mean(depth_image[y:y+h, x:x+w])
-            cv2.rectangle(color_image, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            self.move_to_cube(x, y, depth)
-        
         return color_image
 
     def move_to_cube(self, x, y, depth):
