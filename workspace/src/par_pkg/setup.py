@@ -32,6 +32,8 @@ setup(
             'move_to_pose_node = par_pkg.move_to_pose_node:main',
             'vision_node = par_pkg.vision_node:main',
             'capture_image = par_pkg.capture_image:main'
+            'capture1 = par_pkg.capture_image:main'
+
         ],
     },
 )
