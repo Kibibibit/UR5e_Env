@@ -143,7 +143,12 @@ geometry_msgs::msg::Pose MoveitActionServerNode::get_pose_from_point(std::shared
 
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MoveitActionServerNode>());
+
+  std::shared_ptr<MoveitActionServerNode> node = std::make_shared<MoveitActionServerNode>();
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread spinner = std::thread([&executor]() { executor.spin(); });
+  spinner.join();
   rclcpp::shutdown();
   return 0;
 }
