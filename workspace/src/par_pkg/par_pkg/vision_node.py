@@ -68,6 +68,20 @@ class OnRobotEyesCameraNode(Node):
                         x, y = approx[0][0]
                         cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
+                        lines = cv2.HoughLines(edges, 1, np.pi / 180, 100)
+                        if lines is not None:
+                            for rho, theta in lines[:, 0]:
+                                a = np.cos(theta)
+                                b = np.sin(theta)
+                                x0 = a * rho
+                                y0 = b * rho
+                                x1 = int(x0 + 1000 * (-b))
+                                y1 = int(y0 + 1000 * (a))
+                                x2 = int(x0 - 1000 * (-b))
+                                y2 = int(y0 - 1000 * (a))
+                                cv2.line(color_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+
         self.get_logger().info("Cube detection complete")
         return color_image
 
