@@ -14,13 +14,16 @@ class OnRobotEyesCameraNode(Node):
         self.bridge = CvBridge()
         self.depth_image = None
 
-    def colour_image_callback(self, msg):
+    def color_image_callback(self, msg):
         try:
+            self.get_logger().info("Color image received")
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
             if self.depth_image is not None:
                 processed_image = self.detect_cubes(color_image, self.depth_image)
                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
                 self.publisher_.publish(processed_msg)
+            else:
+                self.get_logger().info("Depth image not yet received")
         except Exception as e:
             self.get_logger().error(f"Error processing image: {e}")
 
@@ -33,28 +36,16 @@ class OnRobotEyesCameraNode(Node):
 
     def detect_cubes(self, color_image, depth_image):
         self.get_logger().info("Starting cube detection")
-        
-        hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-        
-        lower_bounds = [np.array([0, 50, 50]), np.array([50, 50, 50]), np.array([100, 50, 50])]
-        upper_bounds = [np.array([10, 255, 255]), np.array([70, 255, 255]), np.array([130, 255, 255])]
-        
-        combined_mask = None
-        for lower, upper in zip(lower_bounds, upper_bounds):
-            mask = cv2.inRange(hsv, lower, upper)
-            combined_mask = mask if combined_mask is None else cv2.bitwise_or(combined_mask, mask)
-
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_CLOSE, kernel)
-        combined_mask = cv2.morphologyEx(combined_mask, cv2.MORPH_OPEN, kernel)
-        filtered_image = cv2.bitwise_and(color_image, color_image, mask=combined_mask)
-        gray = cv2.cvtColor(filtered_image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blurred, 50, 150)
+        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        sift = cv2.SIFT_create()
+        keypoints, descriptors = sift.detectAndCompute(gray, None)
+        keypoint_image = cv2.drawKeypoints(color_image, keypoints, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        edges = cv2.Canny(gray, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         detected_cubes = []
         for contour in contours:
-            if cv2.contourArea(contour) < 500 or cv2.contourArea(contour) > 50000:
+            area = cv2.contourArea(contour)
+            if area < 500 or area > 50000:
                 continue
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
@@ -64,17 +55,17 @@ class OnRobotEyesCameraNode(Node):
                 if 0.9 <= aspect_ratio <= 1.1:  
                     depth = np.mean(depth_image[y:y+h, x:x+w])
                     if np.isnan(depth) or depth <= 0:
+                        self.get_logger().info("Contour filtered out by depth validation")
                         continue
-                    roi_edges = edges[y:y+h, x:x+w]
-                    lines = cv2.HoughLines(roi_edges, 1, np.pi / 180, 100)
-                    if lines is not None:
+                    roi_keypoints = [kp for kp in keypoints if x <= kp.pt[0] <= x+w and y <= kp.pt[1] <= y+h]
+                    if len(roi_keypoints) >= 8: 
                         shape = "Cube"
                         detected_cubes.append((approx, depth))
                         color = (255, 0, 0)
                         cv2.drawContours(color_image, [approx], -1, color, 2)
                         x, y = approx[0][0]
                         cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                        self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {depth:.2f}mm")
+                        self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {depth:.2f}mm, keypoints: {len(roi_keypoints)}")
         self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
         return color_image
 
