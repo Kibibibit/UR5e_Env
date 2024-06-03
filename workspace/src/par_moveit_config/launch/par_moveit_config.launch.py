@@ -248,11 +248,12 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    moveit_action_server_node = Node(
-        package="moveit_action_server",
-        executable="moveit_action_server_node",
-        parameters=[
-            robot_description,
+    ## Here are our custom nodes
+
+    package_name = "par_moveit_config"
+
+    moveit_parameters = [
+         robot_description,
             robot_description_semantic,
             robot_description_kinematics,
             # robot_description_planning,
@@ -262,11 +263,23 @@ def launch_setup(context, *args, **kwargs):
             planning_scene_monitor_parameters,
             {"use_sim_time": use_sim_time},
             warehouse_ros_config,
-        ],
+    ]
+
+    moveit_action_server_node = Node(
+        package=package_name,
+        executable="moveit_action_server_node",
+        parameters=moveit_parameters,
         output="screen"
     )
 
-    nodes_to_start = [move_group_node, rviz_node, servo_node, moveit_action_server_node]
+    moveit_service_node = Node(
+        package=package_name,
+        executable="moveit_service_node",
+        parameters=moveit_parameters,
+        output="screen"
+    )
+
+    nodes_to_start = [move_group_node, rviz_node, servo_node, moveit_action_server_node, moveit_service_node]
 
     return nodes_to_start
 
