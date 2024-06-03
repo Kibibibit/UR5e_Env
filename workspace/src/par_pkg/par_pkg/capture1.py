@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-# This script will detect cubes, and upon detecting one, it will publish a command 
-# to move the robot arm to the location of the detected cube.
-
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
@@ -49,50 +46,32 @@ class CubeDetectionNode(Node):
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, color_image, depth_image):
-        if color_image is None or depth_image is None:
-            self.get_logger().error("Color or depth image is None")
-            return color_image
-
-        self.get_logger().info(f"Color image shape: {color_image.shape}, Depth image shape: {depth_image.shape}")
-
-        # Convert the image to HSV color space
-        hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
-
-        # Define the color range for the cube
-        lower_color = np.array([0, 50, 50])
-        upper_color = np.array([10, 255, 255])
-
-        # Threshold the HSV image to get only the specified color
-        mask = cv2.inRange(hsv, lower_color, upper_color)
-
-        # Perform morphological operations to clean up the mask
-        kernel = np.ones((5, 5), np.uint8)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-
-        # Find contours in the mask
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        edges = cv2.Canny(blurred, 50, 150)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
         for contour in contours:
-            epsilon = 0.04 * cv2.arcLength(contour, True)
+            epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
-            if len(approx) == 4:  # Looking for quadrilateral shapes
-                (x, y, w, h) = cv2.boundingRect(approx)
-                aspect_ratio = w / float(h)
-                if 0.9 <= aspect_ratio <= 1.1:  # Assuming the cube has an approximately square shape
-                    depth = np.mean(depth_image[y:y+h, x:x+w])
-                    if np.isnan(depth) or depth <= 0:
-                        continue
-                    cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
-                    cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-                    self.move_to_cube(x, y, depth)
-                    break  # Move to the first detected cube
-
+            (x, y, w, h) = cv2.boundingRect(approx)
+            depth = np.mean(depth_image[y:y+h, x:x+w])
+            aspect_ratio = w / float(h)
+            
+            if len(approx) == 4 and 0.9 <= aspect_ratio <= 1.1:
+                cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
+                cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                self.move_to_cube(x + w//2, y + h//2, depth)
+                break  # Move to the first detected cube
+        
         return color_image
 
     def move_to_cube(self, x, y, depth):
         command = f"move to x: {x}, y: {y}, depth: {depth}"
         self.get_logger().info(f"Publishing move command: {command}")
-        self.command_publisher.publish(String(data=command))
+        msg = String()
+        msg.data = command
+        self.command_publisher.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
