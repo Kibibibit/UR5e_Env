@@ -81,9 +81,7 @@ class CubeDetectionNode(Node):
     def move_to_cube(self, x, y, depth):
         command = f"move to x: {x}, y: {y}, depth: {depth}"
         self.get_logger().info(f"Publishing move command: {command}")
-        # Implement the robot arm movement logic here
-        # Example: self.move_robot_arm(x, y, depth)
-        print(f"Move command: {command}")  # Print the command instead of publishing
+        self.command_publisher.publish(String(data=command))
 
     def move_robot_arm(self, x, y, depth):
         # Implement the logic to move the UR5e arm to the specified coordinates
