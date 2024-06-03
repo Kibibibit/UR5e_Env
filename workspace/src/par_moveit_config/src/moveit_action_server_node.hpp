@@ -21,9 +21,10 @@ class MoveitActionServerNode : public rclcpp::Node
         using GoalHandleMoveitPose = rclcpp_action::ServerGoalHandle<MoveitPose>;
         using GoalHandleMoveitPoint = rclcpp_action::ServerGoalHandle<MoveitPoint>;
         MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+        ~MoveitActionServerNode();
     private:
 
-        std::shared_ptr<MoveGroupInterface> move_group_interface;
+        MoveGroupInterface * move_group_interface;
             
 
         rclcpp_action::Server<MoveitPose>::SharedPtr pose_action_server;

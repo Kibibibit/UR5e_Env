@@ -28,8 +28,13 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & optio
     std::bind(&MoveitActionServerNode::point_handle_accepted, this, _1)
   );
 
-  this->move_group_interface = std::make_shared<MoveGroupInterface>(MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator"));
+  this->move_group_interface = new MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator");
   this->move_group_interface->startStateMonitor();
+}
+
+MoveitActionServerNode::~MoveitActionServerNode() {
+  delete this->move_group_interface;
+
 }
 
 template <typename T>

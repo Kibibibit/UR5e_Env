@@ -16,14 +16,20 @@ MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node
     std::bind(&MoveitServiceNode::get_current_pose, this, _1, _2)
   );
 
-  this->move_group_interface = std::make_shared<MoveGroupInterface>(MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator"));
+  this->move_group_interface = new MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator");
   this->move_group_interface->startStateMonitor();
+
+}
+
+MoveitServiceNode::~MoveitServiceNode() {
+  delete this->move_group_interface;
 }
 
 void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response) {
   (void)request;
   response->pose = this->move_group_interface->getCurrentPose().pose;
 }
+
 
 
 int main(int argc, char * argv[]) {

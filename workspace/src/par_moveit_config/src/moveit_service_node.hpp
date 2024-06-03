@@ -11,9 +11,10 @@ class MoveitServiceNode : public rclcpp::Node
         using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
         using CurrentMoveitPose = par_interfaces::srv::CurrentMoveitPose;
         MoveitServiceNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+        ~MoveitServiceNode();
     private:
 
-        std::shared_ptr<MoveGroupInterface> move_group_interface;
+        MoveGroupInterface * move_group_interface;
         rclcpp::Service<CurrentMoveitPose>::SharedPtr service;
         
         void get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response);
