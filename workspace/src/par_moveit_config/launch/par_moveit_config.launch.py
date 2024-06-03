@@ -230,7 +230,6 @@ def launch_setup(context, *args, **kwargs):
             robot_description_kinematics,
             # robot_description_planning,
             warehouse_ros_config,
-            use_sim_time
         ],
     )
 
