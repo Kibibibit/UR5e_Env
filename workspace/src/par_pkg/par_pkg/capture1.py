@@ -52,11 +52,14 @@ class CubeDetectionNode(Node):
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         for contour in contours:
+            if cv2.contourArea(contour) < 100:  # Ignore small contours
+                continue
+
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             (x, y, w, h) = cv2.boundingRect(approx)
             aspect_ratio = w / float(h)
-            
+
             if len(approx) == 4 and 0.9 <= aspect_ratio <= 1.1:
                 depth_values = depth_image[y:y+h, x:x+w]
                 valid_depths = depth_values[depth_values > 0]
@@ -64,7 +67,8 @@ class CubeDetectionNode(Node):
                     depth = np.mean(valid_depths)
                     cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-                    self.move_to_cube(x + w//2, y + h//2, depth)
+                    self.move_to_cube(x + w // 2, y + h // 2, depth)
+                    self.get_logger().info(f"Detected cube at x: {x}, y: {y}, depth: {depth:.2f}mm")
                     break  # Move to the first detected cube
         
         return color_image
