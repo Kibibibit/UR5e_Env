@@ -38,5 +38,4 @@ done
 
 ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ \
     description_file:="/home/rosuser/workspace/src/par_pkg/urdf/arm-with-camera$GRIPPER.urdf.xacro" \
-    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro" \
-    use_sim_time:=true
+    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro"
