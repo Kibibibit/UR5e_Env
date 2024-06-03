@@ -25,7 +25,9 @@ ament_target_dependencies(
   "par_interfaces"
 )
 
-install(TARGETS moveit_action_server_node
+install(TARGETS 
+  moveit_action_server_node 
+  moveit_service_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
