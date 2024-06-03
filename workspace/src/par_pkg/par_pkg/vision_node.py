@@ -33,29 +33,32 @@ class OnRobotEyesCameraNode(Node):
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_objects(self, color_image, depth_image):
-        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
+        lower_color = np.array([0, 0, 0]) 
+        upper_color = np.array([180, 255, 255])
+        mask = cv2.inRange(hsv, lower_color, upper_color)
+        filtered_image = cv2.bitwise_and(color_image, color_image, mask=mask)
+
+        gray = cv2.cvtColor(filtered_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blurred, 50, 150)
+        adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        edges = cv2.Canny(adaptive_thresh, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         for contour in contours:
+            if cv2.contourArea(contour) < 100 or cv2.contourArea(contour) > 100000:
+                continue
+
             epsilon = 0.04 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
-            (x, y, w, h) = cv2.boundingRect(approx)
-            depth = np.mean(depth_image[y:y+h, x:x+w])
-            self.get_logger().info(f"Detected contour : ({x} width, {y} height)")
-            self.get_logger().info(f"Contour depth: {depth}")
-            
-            # if len(approx) > 6 and 0.9 <= w / h <= 1.1: 
-            #     shape = "Circle"
-            #     color = (0, 255, 0)
-            #     cv2.drawContours(color_image, [approx], -1, color, 2)
-            #     x, y = approx[0][0]
-            #     cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-           
-            if len(approx) == 4 and depth > 0:  
-                aspect_ratio = w / float(h)
-                if 0.95 <= aspect_ratio <= 1.05:
+
+            if len(approx) == 4:  
+                (x, y, w, h) = cv2.boundingRect(approx)
+                depth = np.mean(depth_image[y:y+h, x:x+w]) if depth_image is not None else 0
+                self.get_logger().info(f"Detected contour at ({x}, {y}) with width {w} and height {h}")
+                self.get_logger().info(f"Mean depth for contour: {depth}")
+
+                if 0.9 <= w / float(h) <= 1.1:  
                     roi = gray[y:y+h, x:x+w]
                     corners = cv2.goodFeaturesToTrack(roi, 4, 0.01, 10)
                     if corners is not None and len(corners) == 4:
@@ -63,7 +66,9 @@ class OnRobotEyesCameraNode(Node):
                         color = (255, 0, 0)
                         cv2.drawContours(color_image, [approx], -1, color, 2)
                         x, y = approx[0][0]
-                        cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)       
+                        cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        self.get_logger().info("Cube detection complete")
         return color_image
 
 def main(args=None):
