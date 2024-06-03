@@ -19,7 +19,7 @@ class OnRobotEyesCameraNode(Node):
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
             if self.depth_image is not None:
-                 processed_image = self.detect_shapes(color_image, self.depth_image)
+                 processed_image = self.detect_objects(color_image, self.depth_image)
                  processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
                  self.publisher_.publish(processed_msg)
         except Exception as e:
@@ -32,7 +32,7 @@ class OnRobotEyesCameraNode(Node):
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
-    def detect_shapes(self, color_image, depth_image):
+    def detect_objects(self, color_image, depth_image):
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
@@ -46,23 +46,24 @@ class OnRobotEyesCameraNode(Node):
             self.get_logger().info(f"Detected contour : ({x} width, {y} height)")
             self.get_logger().info(f"Contour depth: {depth}")
             
-            if len(approx) == 3:
-                shape = "Triangle"
-                color = (0, 255, 0)
-            elif len(approx) == 4:
-                (x, y, w, h) = cv2.boundingRect(approx)
+            # if len(approx) > 6 and 0.9 <= w / h <= 1.1: 
+            #     shape = "Circle"
+            #     color = (0, 255, 0)
+            #     cv2.drawContours(color_image, [approx], -1, color, 2)
+            #     x, y = approx[0][0]
+            #     cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+           
+            if len(approx) == 4 and depth > 0:  
                 aspect_ratio = w / float(h)
-                shape = "Square" if 0.95 <= aspect_ratio <= 1.05 else "Rectangle"
-                color = (255, 0, 0) if shape == "Square" else (0, 0, 255)
-            elif len(approx) > 4:
-                shape = "Circle"
-                color = (255, 255, 0)
-            else:
-                shape = "Unknown"
-                color = (255, 255, 255)
-            cv2.drawContours(color_image, [approx], -1, color, 2)
-            x, y = approx[0][0]
-            cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                if 0.95 <= aspect_ratio <= 1.05:
+                    roi = gray[y:y+h, x:x+w]
+                    corners = cv2.goodFeaturesToTrack(roi, 4, 0.01, 10)
+                    if corners is not None and len(corners) == 4:
+                        shape = "Cube"
+                        color = (255, 0, 0)
+                        cv2.drawContours(color_image, [approx], -1, color, 2)
+                        x, y = approx[0][0]
+                        cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)       
         return color_image
 
 def main(args=None):
