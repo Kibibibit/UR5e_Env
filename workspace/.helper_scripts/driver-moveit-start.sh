@@ -2,7 +2,7 @@
 
 RVIZ=true
 GRIPPER="-gripper"
-PAR_ACTION_SERVER="moveit_action_server moveit_action_server.launch.py"
+PAR_ACTION_SERVER="par_moveit_config par_moveit_config.launch.py"
 
 while test $# != 0
 do
