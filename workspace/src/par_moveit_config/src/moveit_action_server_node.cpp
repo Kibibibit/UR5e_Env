@@ -13,21 +13,28 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & optio
 ) {
   
   using namespace std::placeholders;
-  this->action_server = rclcpp_action::create_server<MoveitPose>(
+  this->pose_action_server = rclcpp_action::create_server<MoveitPose>(
     this,
     "par_moveit_pose",
-    std::bind(&MoveitActionServerNode::handle_goal, this, _1, _2),
-    std::bind(&MoveitActionServerNode::handle_cancel, this, _1),
-    std::bind(&MoveitActionServerNode::handle_accepted, this, _1)
+    std::bind(&MoveitActionServerNode::handle_goal<MoveitPose::Goal>, this, _1, _2),
+    std::bind(&MoveitActionServerNode::handle_cancel<MoveitPose>, this, _1),
+    std::bind(&MoveitActionServerNode::pose_handle_accepted, this, _1)
+  );
+  this->point_action_server = rclcpp_action::create_server<MoveitPoint>(
+    this,
+    "par_moveit_point",
+    std::bind(&MoveitActionServerNode::handle_goal<MoveitPoint::Goal>, this, _1, _2),
+    std::bind(&MoveitActionServerNode::handle_cancel<MoveitPoint>, this, _1),
+    std::bind(&MoveitActionServerNode::point_handle_accepted, this, _1)
   );
 
   this->move_group_interface = std::make_shared<MoveGroupInterface>(MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator"));
 }
 
-
+template <typename T>
 rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
-  std::shared_ptr<const MoveitPose::Goal> goal
+  std::shared_ptr<const T> goal
 ) {
   RCLCPP_INFO(this->get_logger(), "Received goal request with target_pose");
   (void)uuid;
@@ -35,38 +42,43 @@ rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
+template <typename T>
 rclcpp_action::CancelResponse MoveitActionServerNode::handle_cancel(
-  const std::shared_ptr<GoalHandleMoveitPose> goal_handle
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle
 ) {
   RCLCPP_INFO(this->get_logger(), "Recieved request to cancel goal!");
   (void)goal_handle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void MoveitActionServerNode::handle_accepted(const std::shared_ptr<GoalHandleMoveitPose> goal_handle)
+void MoveitActionServerNode::pose_handle_accepted(
+  const std::shared_ptr<GoalHandleMoveitPose> goal_handle)
 {
   using namespace std::placeholders;
-  std::thread{std::bind(&MoveitActionServerNode::execute, this, _1), goal_handle}.detach();
+  std::thread{std::bind(&MoveitActionServerNode::execute<MoveitPose, MoveitPose::Feedback, MoveitPose::Result>, this, _1, _2), goal_handle, this->get_pose_from_pose(goal_handle)}.detach();
 }
 
-void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandleMoveitPose> goal_handle)
+void MoveitActionServerNode::point_handle_accepted(
+  const std::shared_ptr<GoalHandleMoveitPoint> goal_handle)
+{
+  using namespace std::placeholders;
+  std::thread{std::bind(&MoveitActionServerNode::execute<MoveitPoint, MoveitPoint::Feedback, MoveitPoint::Result>, this, _1, _2), goal_handle, this->get_pose_from_point(goal_handle)}.detach();
+}
+
+template <typename T, typename F, typename R>
+void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle, Pose target_pose)
 {
 
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
 
-  const auto goal = goal_handle->get_goal();
 
   rclcpp::Rate loop_rate(1);
+  this->move_group_interface->setPoseTarget(target_pose);
 
-  
-
-  this->move_group_interface->setPoseTarget(goal->target_pose);
-
-  auto feedback = std::make_shared<MoveitPose::Feedback>();
+  auto feedback = std::make_shared<F>();
   feedback->current_pose = this->move_group_interface->getCurrentPose().pose;
-  auto result = std::make_shared<MoveitPose::Result>();
+  auto result = std::make_shared<R>();
   result->final_pose = this->move_group_interface->getCurrentPose().pose;
-
 
   MoveGroupInterface::Plan plan;
   bool success = static_cast<bool>(this->move_group_interface->plan(plan));
@@ -112,6 +124,15 @@ void MoveitActionServerNode::execute_plan(moveit::planning_interface::MoveGroupI
   this->executing_move = false;
 }
 
+geometry_msgs::msg::Pose MoveitActionServerNode::get_pose_from_pose(std::shared_ptr<GoalHandleMoveitPose> goal_handle) {
+  return goal_handle->get_goal()->target_pose;
+}
+
+geometry_msgs::msg::Pose MoveitActionServerNode::get_pose_from_point(std::shared_ptr<GoalHandleMoveitPoint> goal_handle) {
+  Pose pose = this->move_group_interface->getCurrentPose().pose;
+  pose.position = goal_handle->get_goal()->target_point;
+  return pose;
+}
 
 
 int main(int argc, char * argv[]) {
