@@ -59,8 +59,9 @@ class CubeDetectionNode(Node):
         for contour in contours:
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-
+            
             if area < 100 or area > 5000:  # Ignore very small or very large contours
+                self.get_logger().info(f"Ignoring contour - Area: {area}")
                 continue
 
             epsilon = 0.02 * perimeter
@@ -68,9 +69,9 @@ class CubeDetectionNode(Node):
             (x, y, w, h) = cv2.boundingRect(approx)
             aspect_ratio = w / float(h)
 
-            self.get_logger().info(f"Detected contour - Area: {area}, Perimeter: {perimeter}, Aspect Ratio: {aspect_ratio}")
+            self.get_logger().info(f"Detected contour - Area: {area}, Perimeter: {perimeter}, Aspect Ratio: {aspect_ratio}, Vertices: {len(approx)}")
 
-            if len(approx) == 4 and 0.95 <= aspect_ratio <= 1.05:
+            if len(approx) == 4 and 0.8 <= aspect_ratio <= 1.2:
                 depth_values = depth_image[y:y+h, x:x+w]
                 valid_depths = depth_values[depth_values > 0]
                 if valid_depths.size > 0:
@@ -78,7 +79,6 @@ class CubeDetectionNode(Node):
                     cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
-                    break  # Move to the first detected cube
         
         return color_image
 
