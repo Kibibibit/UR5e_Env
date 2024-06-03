@@ -55,28 +55,23 @@ class CubeDetectionNode(Node):
 
         self.get_logger().info(f"Color image shape: {color_image.shape}, Depth image shape: {depth_image.shape}")
 
-        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-        if gray is None or gray.size == 0:
-            self.get_logger().error("Gray image conversion failed or image is empty")
-            return color_image
+        # Convert the image to HSV color space
+        hsv_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
-        self.get_logger().info(f"Gray image shape: {gray.shape}")
+        # Define the color range for the cube (this might need tuning based on the cube's color)
+        lower_color = np.array([0, 50, 50])
+        upper_color = np.array([10, 255, 255])
 
-        gray = np.float32(gray)
+        # Threshold the HSV image to get only the specified color
+        mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
-        # Normalize and convert the grayscale image to 8-bit for Canny edge detection
-        gray_8bit = cv2.convertScaleAbs(gray)
+        # Perform morphological operations to clean up the mask
+        kernel = np.ones((5, 5), np.uint8)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-        # Detect edges
-        edges = cv2.Canny(gray_8bit, 50, 150, apertureSize=3)
-        if edges is None or edges.size == 0:
-            self.get_logger().error("Edge detection failed or edges are empty")
-            return color_image
-
-        self.get_logger().info(f"Edges shape: {edges.shape}")
-
-        # Find contours
-        contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Find contours in the mask
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         for contour in contours:
             epsilon = 0.04 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
