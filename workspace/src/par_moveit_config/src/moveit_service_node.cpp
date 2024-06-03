@@ -23,7 +23,6 @@ MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node
 void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response) {
   (void)request;
   response->pose = this->move_group_interface->getCurrentPose().pose;
-  RCLCPP_INFO(this->get_logger(), "Returing pose in frame %s", this->move_group_interface->getCurrentPose().header.frame_id);
 }
 
 
