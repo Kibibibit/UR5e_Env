@@ -1,0 +1,5 @@
+geometry_msgs/Point target_point
+---
+geometry_msgs/Pose final_pose
+---
+geometry_msgs/Pose current_pose

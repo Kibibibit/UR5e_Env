@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(moveit_action_server)
+project(par_moveit_config)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -9,24 +9,43 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(par_interfaces REQUIRED)
 
 add_executable(moveit_action_server_node src/moveit_action_server_node.cpp)
+add_executable(moveit_service_node src/moveit_service_node.cpp)
+
 target_include_directories(moveit_action_server_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+  target_include_directories(moveit_service_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
 target_compile_features(moveit_action_server_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(
   moveit_action_server_node
   "moveit_ros_planning_interface"
   "rclcpp"
-  "std_msgs"
   "par_interfaces"
 )
 
-install(TARGETS moveit_action_server_node
+target_compile_features(moveit_service_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(
+  moveit_service_node
+  "moveit_ros_planning_interface"
+  "rclcpp"
+  "par_interfaces"
+)
+
+install(TARGETS 
+  moveit_action_server_node 
+  moveit_service_node
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
