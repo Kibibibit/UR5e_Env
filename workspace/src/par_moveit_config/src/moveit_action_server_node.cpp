@@ -160,11 +160,22 @@ int main(int argc, char * argv[]) {
 
   std::shared_ptr<MoveitActionServerNode> node = std::make_shared<MoveitActionServerNode>("moveit_service_node", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
   rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(node);
-  std::thread spinner = std::thread([&executor]() { executor.spin(); });
+  
 
   MoveGroupInterface * move_group_interface = new MoveGroupInterface(node, "ur_manipulator");
   move_group_interface->startStateMonitor();
+  std::make_shared<moveit::planning_interface::MoveGroupInterface>(node, moveit::planning_interface::MoveGroupInterface::Options(
+            "ur_manipulator",
+            "robot_description"
+        ));
+    move_group_interface->setEndEffectorLink("tool0"); 
+   move_group_interface->setPoseReferenceFrame("world"); 
+    move_group_interface->startStateMonitor(); 
+
+    executor.add_node(node);
+
+
+  std::thread spinner = std::thread([&executor]() { executor.spin(); });
 
   node->set_move_group_interface(move_group_interface);
 
