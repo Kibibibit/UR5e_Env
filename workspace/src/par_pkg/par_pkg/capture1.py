@@ -46,27 +46,28 @@ class CubeDetectionNode(Node):
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, color_image, depth_image):
-        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
         
-        # Adaptive thresholding and Canny edge detection
-        adaptive_thresh = cv2.adaptiveThreshold(
-            blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
-        )
+        # Define range of colors to detect (example values, you may need to adjust these)
+        lower_color = np.array([0, 50, 50])
+        upper_color = np.array([10, 255, 255])
+        
+        mask = cv2.inRange(hsv, lower_color, upper_color)
+        result = cv2.bitwise_and(color_image, color_image, mask=mask)
+        
+        gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
         
-        combined = cv2.bitwise_or(adaptive_thresh, edges)
-        
         kernel = np.ones((3, 3), np.uint8)
-        morph = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel)
-        
-        contours, hierarchy = cv2.findContours(morph, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        morph = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        for i, contour in enumerate(contours):
+        for contour in contours:
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-            if hierarchy[0][i][3] != -1 or area < 100 or area > 5000:  # Ignore nested contours or contours that are too small/large
-                self.get_logger().info(f"Ignoring contour - Area: {area}")
+            
+            if area < 100 or area > 5000:
                 continue
 
             epsilon = 0.02 * perimeter
@@ -74,17 +75,22 @@ class CubeDetectionNode(Node):
             (x, y, w, h) = cv2.boundingRect(approx)
             aspect_ratio = w / float(h)
 
-            self.get_logger().info(f"Detected contour - Area: {area}, Perimeter: {perimeter}, Aspect Ratio: {aspect_ratio}, Vertices: {len(approx)}")
-
             if len(approx) == 4 and 0.8 <= aspect_ratio <= 1.2:
                 depth_values = depth_image[y:y+h, x:x+w]
                 valid_depths = depth_values[depth_values > 0]
                 if valid_depths.size > 0:
                     depth = np.mean(valid_depths)
-                    cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)
+                    cv2.drawContours(color_image, [approx], -1, (0, 255, 0), 3)  # Draw the contour in green
+                    
+                    # Create a mask for the detected cube
+                    mask_cube = np.zeros_like(color_image)
+                    cv2.drawContours(mask_cube, [approx], -1, (255, 255, 255), thickness=cv2.FILLED)
+                    
+                    # Apply color to the detected cube area
+                    color_image[mask_cube == 255] = [0, 255, 0]  # Apply green color
+                    
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
-                    break  # Move to the first detected cube
         
         return color_image
 
