@@ -82,12 +82,7 @@ template <typename T, typename F, typename R>
 void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle, Pose target_pose)
 {
 
-  auto result = std::make_shared<R>();
-
-  if (!this->move_group_interface_is_set) {
-    goal_handle->abort(result);
-    RCLCPP_ERROR(this->get_logger(), "Tried to execute goal before move_group_interface set!");
-  }
+  
 
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
 
@@ -97,7 +92,8 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
 
   auto feedback = std::make_shared<F>();
   feedback->current_pose = this->move_group_interface->getCurrentPose().pose;
-  result->final_pose = this->move_group_interface->getCurrentPose().pose;
+  auto result = std::make_shared<R>();
+  result->final_pose = feedback->current_pose;
 
   MoveGroupInterface::Plan plan;
   this->move_group_interface->setStartStateToCurrentState();
