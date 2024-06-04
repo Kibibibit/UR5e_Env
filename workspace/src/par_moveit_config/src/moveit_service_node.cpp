@@ -19,18 +19,13 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
     std::bind(&MoveitServiceNode::get_current_pose, this, _1, _2)
   );
 
-  auto mgi_options = moveit::planning_interface::MoveGroupInterface::Options(
-            "ur_manipulator",
-            "/",
-            "robot_description");
-
-  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), mgi_options);
-  move_group_interface->setPlanningTime(5.0);
-  move_group_interface->setNumPlanningAttempts(10);
-  move_group_interface->setMaxVelocityScalingFactor(0.1);
-  move_group_interface->setMaxAccelerationScalingFactor(0.1);
-  executor_->add_node(node_);
-  executor_thread_ = std::thread([this]() { this->executor_->spin(); });
+  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator");
+  this->move_group_interface->setPlanningTime(5.0);
+  this->move_group_interface->setNumPlanningAttempts(10);
+  this->move_group_interface->setMaxVelocityScalingFactor(0.1);
+  this->move_group_interface->setMaxAccelerationScalingFactor(0.1);
+  this->executor_->add_node(node_);
+  this->executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
 }
 
