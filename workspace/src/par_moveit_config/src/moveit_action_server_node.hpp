@@ -8,6 +8,7 @@
 #include "geometry_msgs/msg/pose.h"
 #include "geometry_msgs/msg/point.h"
 #include <functional>
+#include <string>
 
 using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
 
@@ -21,8 +22,7 @@ class MoveitActionServerNode : public rclcpp::Node
         using MoveitPoint = par_interfaces::action::MoveitPoint;
         using GoalHandleMoveitPose = rclcpp_action::ServerGoalHandle<MoveitPose>;
         using GoalHandleMoveitPoint = rclcpp_action::ServerGoalHandle<MoveitPoint>;
-        MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
-        ~MoveitActionServerNode();
+        MoveitActionServerNode(const std::string & node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
         void set_move_group_interface(MoveGroupInterface * move_group_interface);
 

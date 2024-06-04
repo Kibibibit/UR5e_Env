@@ -5,10 +5,11 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include <thread>
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <string>
 
 
-MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & options) : Node(
-  "moveit_action_server_node",
+MoveitActionServerNode::MoveitActionServerNode(const std::string & node_name, const rclcpp::NodeOptions & options) : Node(
+  node_name,
   options
 ) {
   
@@ -157,7 +158,7 @@ void MoveitActionServerNode::set_move_group_interface(MoveGroupInterface * move_
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<MoveitActionServerNode> node = std::make_shared<MoveitActionServerNode>();
+  std::shared_ptr<MoveitActionServerNode> node = std::make_shared<MoveitActionServerNode>("moveit_service_node", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   std::thread spinner = std::thread([&executor]() { executor.spin(); });
