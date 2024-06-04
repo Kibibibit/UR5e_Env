@@ -11,8 +11,7 @@ MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node
 ), 
 node_(std::make_shared<rclcpp::Node>("moveit_service_group_node")), 
 executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
-  
-  node_namespace_ = ((std::string) this->get_namespace()).erase(0, 1);
+
 
   using namespace std::placeholders;
   this->service= this->create_service<CurrentMoveitPose>(
@@ -21,8 +20,8 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
   );
 
   auto mgi_options = moveit::planning_interface::MoveGroupInterface::Options(
-            node_namespace_ + "_ur_manipulator",
-            "/" + node_namespace_,
+            "ur_manipulator",
+            "/",
             "robot_description");
 
   this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), mgi_options);
