@@ -1,16 +1,11 @@
 import rclpy
 from rclpy.node import Node
-
 from rclpy.qos import ReliabilityPolicy, QoSProfile
+from rclpy.action import ActionClient
+from par_interfaces.action import ParMoveItPose
 
-import time
-
-from rclpy.logging import get_logger
-
-#will need proper import path
-from moveit.planning import MoveItPy
-# from moveit2.moveit_py.moveit.planning import MoveItPy
 from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Pose
 
 
 class MoveToPoseNode(Node): 
@@ -20,53 +15,50 @@ class MoveToPoseNode(Node):
 
         self.position_subscriber = self.create_subscription(
             PoseStamped,
-            '/topic', 
+            '/goal_pose', #look into actual topic name on robot, its similar 
             self.pose_callback, 
             QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
         )
 
+        self.moveit_action_client = ActionClient(self, ParMoveItPose, 'par_moveit_pose')
 
-    def plan_and_execute(
-        self,
-        robot,
-        planning_component,
-        single_plan_parameters=None,
-        multi_plan_parameters=None,
-        sleep_time=0.0,
-    ):
-        """Helper function to plan and execute a motion."""
-        # plan to goal
-        self.get_logger().info("Planning trajectory")
-        if multi_plan_parameters is not None:
-            plan_result = planning_component.plan(
-                multi_plan_parameters=multi_plan_parameters
-            )
-        elif single_plan_parameters is not None:
-            plan_result = planning_component.plan(
-                single_plan_parameters=single_plan_parameters
-            )
-        else:
-            plan_result = planning_component.plan()
+    def pose_callback(self, pose_stamped: PoseStamped):
+        goal_pose = Pose()
 
-        # execute the plan
-        if plan_result:
-            self.get_logger().info("Executing plan")
-            robot_trajectory = plan_result.trajectory
-            robot.execute(robot_trajectory, controllers=[])
-        else:
-            self.get_logger().error("Planning failed")
+        goal_pose = pose_stamped.pose
 
-        time.sleep(sleep_time)
+        self.send_pose(goal_pose)
 
-    def pose_callback(self, pose: PoseStamped):
-        # unsure where to put this
-        # need to fill in parameters properly
-        cobot = MoveItPy()
-        cobot_arm = cobot.get_planning_component("")
-        cobot_arm.set_goal_state(pose_stamped_msg=pose, pose_link="")
+    def send_pose(self, goal_pose:Pose):
+        goal_msg = ParMoveItPose.Goal()
+        goal_msg.target_pose = goal_pose
 
-        # plan to goal
-        self.plan_and_execute(cobot, cobot_arm, sleep_time=3.0)
+        self.moveit_action_client.wait_for_server()
+        self.send_goal_future = self.moveit_action_client.send_goal_async(goal_msg, feedback_callback= self.feedback_callback)
+        self.send_goal_future.add_done_callback(self.goal_response_callback)
+
+    def goal_response_callback(self, future):
+        goal_handle = future.result()
+
+        if not goal_handle.accepted:
+            self.get_logger("Goal rejected")
+            return
+        
+        self.get_logger.info("Goal accepted")
+
+        self.get_result_future = goal_handle.get_result_async()
+        self.get_result_future.add_done_callback(self.get_result_callback)
+
+    def get_result_callback(self, future):
+        result = future.result().result
+        self.get_logger.info(f"Move finished at pose: {result.final_pose}")
+
+
+    def feedback_callback(self, feedback_msg):
+        feedback = feedback_msg.feedback
+        self.get_logger.info(f"Current Pose:{feedback.current_pose}")
+
+
 
 def main(args=None):
     rclpy.init(args=args)
