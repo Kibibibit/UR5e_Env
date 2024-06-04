@@ -9,7 +9,7 @@ MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node
   "moveit_service_node",
   options
 ), 
-node_(std::make_shared<rclcpp::Node>("moveit_service_node")), 
+node_(std::make_shared<rclcpp::Node>("moveit_service_group_node")), 
 executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
   
   node_namespace_ = ((std::string) this->get_namespace()).erase(0, 1);
@@ -21,7 +21,7 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
   );
 
   auto mgi_options = moveit::planning_interface::MoveGroupInterface::Options(
-            node_namespace_ + "ur_manipulator",
+            node_namespace_ + "_ur_manipulator",
             "/" + node_namespace_,
             "robot_description");
 
