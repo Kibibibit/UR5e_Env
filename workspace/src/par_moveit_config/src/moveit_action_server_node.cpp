@@ -105,7 +105,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
     current_pose.orientation.x,
     current_pose.orientation.y,
     current_pose.orientation.z,
-    current_pose.orientation.w,
+    current_pose.orientation.w
 
   );
 
@@ -116,7 +116,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
     target_pose.orientation.x,
     target_pose.orientation.y,
     target_pose.orientation.z,
-    target_pose.orientation.w,
+    target_pose.orientation.w
 
   );
 
