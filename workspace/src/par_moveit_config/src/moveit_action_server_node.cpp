@@ -8,10 +8,12 @@
 #include <string>
 
 
-MoveitActionServerNode::MoveitActionServerNode(const std::string & node_name, const rclcpp::NodeOptions & options) : Node(
-  node_name,
+MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & options) : Node(
+  "moveit_action_server_node",
   options
-) {
+), 
+node_(std::make_shared<rclcpp::Node>("moveit_action_server_node")), 
+executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
   
   using namespace std::placeholders;
   this->pose_action_server = rclcpp_action::create_server<MoveitPose>(
@@ -29,9 +31,15 @@ MoveitActionServerNode::MoveitActionServerNode(const std::string & node_name, co
     std::bind(&MoveitActionServerNode::point_handle_accepted, this, _1)
   );
 
-  move_group_interface_is_set = false;
   executing_move = false;
 
+  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator");
+  this->move_group_interface->setPlanningTime(5.0);
+  this->move_group_interface->setNumPlanningAttempts(10);
+  this->move_group_interface->setMaxVelocityScalingFactor(0.1);
+  this->move_group_interface->setMaxAccelerationScalingFactor(0.1);
+  this->executor_->add_node(node_);
+  this->executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
 }
 
@@ -92,6 +100,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
   result->final_pose = this->move_group_interface->getCurrentPose().pose;
 
   MoveGroupInterface::Plan plan;
+  this->move_group_interface->setStartStateToCurrentState();
   bool success = static_cast<bool>(this->move_group_interface->plan(plan));
 
   std::thread execution_thread;
@@ -150,39 +159,15 @@ geometry_msgs::msg::Pose MoveitActionServerNode::get_pose_from_point(std::shared
   return pose;
 }
 
-void MoveitActionServerNode::set_move_group_interface(MoveGroupInterface * move_group_interface) {
-  this->move_group_interface = move_group_interface;
-  this->move_group_interface_is_set = true;
-}
+
 
 int main(int argc, char * argv[]) {
-  rclcpp::init(argc, argv);
+    rclcpp::init(argc, argv);
+    rclcpp::NodeOptions node_options;
+    node_options.automatically_declare_parameters_from_overrides(true);
+    auto move_group_node = std::make_shared<MoveitActionServerNode>(node_options);
+    rclcpp::spin(move_group_node);
 
-  std::shared_ptr<MoveitActionServerNode> node = std::make_shared<MoveitActionServerNode>("moveit_service_node", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
-  rclcpp::executors::SingleThreadedExecutor executor;
-  
-
-  MoveGroupInterface * move_group_interface = new MoveGroupInterface(node, "ur_manipulator");
-  move_group_interface->startStateMonitor();
-  std::make_shared<moveit::planning_interface::MoveGroupInterface>(node, moveit::planning_interface::MoveGroupInterface::Options(
-            "ur_manipulator",
-            "robot_description"
-        ));
-    move_group_interface->setEndEffectorLink("tool0"); 
-   move_group_interface->setPoseReferenceFrame("world"); 
-    move_group_interface->startStateMonitor(); 
-
-    executor.add_node(node);
-
-
-  std::thread spinner = std::thread([&executor]() { executor.spin(); });
-
-  node->set_move_group_interface(move_group_interface);
-
-  spinner.join();
-  rclcpp::shutdown();
-
-  delete move_group_interface;
-
-  return 0;
+    rclcpp::shutdown();
+    return 0;
 }

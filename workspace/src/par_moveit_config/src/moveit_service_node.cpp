@@ -9,7 +9,7 @@ MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node
   "moveit_service_node",
   options
 ), 
-node_(std::make_shared<rclcpp::Node>("moveit_service_group_node")), 
+node_(std::make_shared<rclcpp::Node>("moveit_service_node")), 
 executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
 
 

@@ -22,15 +22,18 @@ class MoveitActionServerNode : public rclcpp::Node
         using MoveitPoint = par_interfaces::action::MoveitPoint;
         using GoalHandleMoveitPose = rclcpp_action::ServerGoalHandle<MoveitPose>;
         using GoalHandleMoveitPoint = rclcpp_action::ServerGoalHandle<MoveitPoint>;
-        MoveitActionServerNode(const std::string & node_name, const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+        MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-        void set_move_group_interface(MoveGroupInterface * move_group_interface);
 
     private:
 
-        MoveGroupInterface * move_group_interface;
+        rclcpp::Node::SharedPtr node_;
+        rclcpp::Executor::SharedPtr executor_;
+        std::thread executor_thread_;
+        std::string node_namespace_;
+
+        moveit::planning_interface::MoveGroupInterfacePtr move_group_interface;
         
-        std::atomic<bool> move_group_interface_is_set;
         std::atomic<bool> executing_move;
 
         rclcpp_action::Server<MoveitPose>::SharedPtr pose_action_server;
