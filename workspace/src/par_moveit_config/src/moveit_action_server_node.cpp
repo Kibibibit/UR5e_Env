@@ -88,16 +88,43 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
 
 
   rclcpp::Rate loop_rate(1);
-  this->move_group_interface->setPoseTarget(target_pose);
+  
 
   auto feedback = std::make_shared<F>();
-  feedback->current_pose = this->move_group_interface->getCurrentPose().pose;
+
+  Pose current_pose = this->move_group_interface->getCurrentPose().pose
+
+  feedback->current_pose = current_pose;
   auto result = std::make_shared<R>();
-  result->final_pose = feedback->current_pose;
+  result->final_pose = current_pose;
+
+  RCLCPP_INFO(this->get_logger(), "Currently at pose: xyz: %f %f %f xyzw: %f %f %f %f",
+    current_pose.position.x,
+    current_pose.position.y,
+    current_pose.position.z,
+    current_pose.orientation.x,
+    current_pose.orientation.y,
+    current_pose.orientation.z,
+    current_pose.orientation.w,
+
+  );
+
+  RCLCPP_INFO(this->get_logger(), "Going to pose: xyz: %f %f %f xyzw: %f %f %f %f",
+    target_pose.position.x,
+    target_pose.position.y,
+    target_pose.position.z,
+    target_pose.orientation.x,
+    target_pose.orientation.y,
+    target_pose.orientation.z,
+    target_pose.orientation.w,
+
+  );
 
   MoveGroupInterface::Plan plan;
   this->move_group_interface->setStartStateToCurrentState();
+  this->move_group_interface->setPoseTarget(target_pose);
   bool success = static_cast<bool>(this->move_group_interface->plan(plan));
+
 
   std::thread execution_thread;
 
