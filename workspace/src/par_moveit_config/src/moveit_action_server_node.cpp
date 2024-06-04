@@ -92,7 +92,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
 
   auto feedback = std::make_shared<F>();
 
-  Pose current_pose = this->move_group_interface->getCurrentPose().pose
+  Pose current_pose = this->move_group_interface->getCurrentPose().pose;
 
   feedback->current_pose = current_pose;
   auto result = std::make_shared<R>();
