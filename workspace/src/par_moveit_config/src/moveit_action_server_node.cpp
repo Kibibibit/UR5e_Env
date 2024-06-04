@@ -77,7 +77,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
 
   if (!this->move_group_interface_is_set) {
     goal_handle->abort(result);
-    RCLCPP_ERROR(this->get_logger(), "Tried to execute goal before move_group_interface set!")
+    RCLCPP_ERROR(this->get_logger(), "Tried to execute goal before move_group_interface set!");
   }
 
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
