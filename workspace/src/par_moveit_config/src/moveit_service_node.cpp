@@ -4,42 +4,39 @@
 #include <functional>
 #include <moveit/move_group_interface/move_group_interface.h>
 
-
-MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node(
-  "moveit_service_node",
-  options
-) {
-  
-  using namespace std::placeholders;
-  this->service= this->create_service<CurrentMoveitPose>(
-    "par_get_current_moveit_pose",
-    std::bind(&MoveitServiceNode::get_current_pose, this, _1, _2)
-  );
-
-  this->move_group_interface = new MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator");
-  this->move_group_interface->startStateMonitor();
-
-}
-
-MoveitServiceNode::~MoveitServiceNode() {
-  delete this->move_group_interface;
-}
-
-void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response) {
+void get_current_pose(MoveGroupInterface* move_group_interface,
+                      const std::shared_ptr<CurrentMoveitPose::Request> request,
+                      const std::shared_ptr<CurrentMoveitPose::Response> response)
+{
   (void)request;
-  response->pose = this->move_group_interface->getCurrentPose().pose;
+  response->pose = move_group_interface->getCurrentPose().pose;
 }
 
-
-
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[])
+{
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<MoveitServiceNode> node = std::make_shared<MoveitServiceNode>();
+  std::shared_ptr<rclcpp::Node> node = std::make_shared<rclcpp::Node>(
+      "moveit_service_node", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
+
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   std::thread spinner = std::thread([&executor]() { executor.spin(); });
+
+  MoveGroupInterface* move_group_interface;
+  rclcpp::Service<CurrentMoveitPose>::SharedPtr service;
+
+  move_group_interface = new MoveGroupInterface(std::shared_ptr<rclcpp::Node>(node), "ur_manipulator");
+  move_group_interface->startStateMonitor();
+
+  using namespace std::placeholders;
+  service = node->create_service<CurrentMoveitPose>("par_get_current_moveit_pose",
+                                                    std::bind(&get_current_pose, move_group_interface, _1, _2));
+
   spinner.join();
   rclcpp::shutdown();
+
+  delete move_group_interface;
+
   return 0;
 }

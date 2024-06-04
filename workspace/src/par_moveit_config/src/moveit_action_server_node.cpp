@@ -28,14 +28,12 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions & optio
     std::bind(&MoveitActionServerNode::point_handle_accepted, this, _1)
   );
 
-  this->move_group_interface = new MoveGroupInterface(std::shared_ptr<rclcpp::Node>(this), "ur_manipulator");
-  this->move_group_interface->startStateMonitor();
-}
+  move_group_interface_is_set = false;
+  executing_move = false;
 
-MoveitActionServerNode::~MoveitActionServerNode() {
-  delete this->move_group_interface;
 
 }
+
 
 template <typename T>
 rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
@@ -75,6 +73,13 @@ template <typename T, typename F, typename R>
 void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle, Pose target_pose)
 {
 
+  auto result = std::make_shared<R>();
+
+  if (!this->move_group_interface_is_set) {
+    goal_handle->abort(result);
+    RCLCPP_ERROR(this->get_logger(), "Tried to execute goal before move_group_interface set!")
+  }
+
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
 
 
@@ -83,7 +88,6 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
 
   auto feedback = std::make_shared<F>();
   feedback->current_pose = this->move_group_interface->getCurrentPose().pose;
-  auto result = std::make_shared<R>();
   result->final_pose = this->move_group_interface->getCurrentPose().pose;
 
   MoveGroupInterface::Plan plan;
@@ -96,7 +100,12 @@ void MoveitActionServerNode::execute(const std::shared_ptr<rclcpp_action::Server
     execution_thread = std::thread{std::bind(&MoveitActionServerNode::execute_plan, this, _1), plan};
   } else {
     goal_handle->abort(result);
-    RCLCPP_ERROR(this->get_logger(), "Goal Failed!");
+    if (this->executing_move){
+      RCLCPP_ERROR(this->get_logger(), "Goal failed as a move is already being executed!");
+    } else{
+      RCLCPP_ERROR(this->get_logger(), "Goal Failed!");
+    }
+   
     return;
   }
 
@@ -140,6 +149,10 @@ geometry_msgs::msg::Pose MoveitActionServerNode::get_pose_from_point(std::shared
   return pose;
 }
 
+void MoveitActionServerNode::set_move_group_interface(MoveGroupInterface * move_group_interface) {
+  this->move_group_interface = move_group_interface;
+  this->move_group_interface_is_set = true;
+}
 
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
@@ -148,7 +161,16 @@ int main(int argc, char * argv[]) {
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   std::thread spinner = std::thread([&executor]() { executor.spin(); });
+
+  MoveGroupInterface * move_group_interface = new MoveGroupInterface(node, "ur_manipulator");
+  move_group_interface->startStateMonitor();
+
+  node->set_move_group_interface(move_group_interface);
+
   spinner.join();
   rclcpp::shutdown();
+
+  delete move_group_interface;
+
   return 0;
 }

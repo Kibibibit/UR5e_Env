@@ -9,11 +9,12 @@
 #include "geometry_msgs/msg/point.h"
 #include <functional>
 
+using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
 
 class MoveitActionServerNode : public rclcpp::Node
 {
     public:
-        using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
+        
         using Pose = geometry_msgs::msg::Pose;
         using Point = geometry_msgs::msg::Point;
         using MoveitPose = par_interfaces::action::MoveitPose;
@@ -22,10 +23,15 @@ class MoveitActionServerNode : public rclcpp::Node
         using GoalHandleMoveitPoint = rclcpp_action::ServerGoalHandle<MoveitPoint>;
         MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
         ~MoveitActionServerNode();
+
+        void set_move_group_interface(MoveGroupInterface * move_group_interface);
+
     private:
 
         MoveGroupInterface * move_group_interface;
-            
+        
+        std::atomic<bool> move_group_interface_is_set;
+        std::atomic<bool> executing_move;
 
         rclcpp_action::Server<MoveitPose>::SharedPtr pose_action_server;
         rclcpp_action::Server<MoveitPoint>::SharedPtr point_action_server;
@@ -50,7 +56,7 @@ class MoveitActionServerNode : public rclcpp::Node
         Pose get_pose_from_pose(std::shared_ptr<GoalHandleMoveitPose> goal_handle);
         Pose get_pose_from_point(std::shared_ptr<GoalHandleMoveitPoint> goal_handle);
 
-        bool executing_move = false;
+        
 
 
 };
