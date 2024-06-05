@@ -44,28 +44,29 @@ class OnRobotEyesCameraNode(Node):
             approx = cv2.approxPolyDP(contour, epsilon, True)
             (x, y, w, h) = cv2.boundingRect(approx)
             depth = np.mean(depth_image[y:y+h, x:x+w])
-            self.get_logger().info(f"Detected contour : ({x} width, {y} height)")
-            self.get_logger().info(f"Contour depth: {depth}")
             
-            if len(approx) == 4 and depth > 0:  
+            self.get_logger().info(f"Detected contour with bounding box: x={x}, y={y}, w={w}, h={h}")
+            self.get_logger().info(f"Depth: {depth}")
+            
+            if len(approx) == 4 and depth > 0:
                 aspect_ratio = w / float(h)
+                self.get_logger().info(f"Aspect ratio: {aspect_ratio}")
                 if 0.95 <= aspect_ratio <= 1.05:
-                    roi = gray[y:y+h, x:x+w]
-                    corners = cv2.goodFeaturesToTrack(roi, 4, 0.01, 10)
-                    if corners is not None and len(corners) == 4:
-                        shape = "Cube"
-                        color = (255, 0, 0)
-                        
-                        # Create a mask for the detected cube
-                        mask_cube = np.zeros_like(color_image)
-                        cv2.drawContours(mask_cube, [approx], -1, (255, 255, 255), thickness=cv2.FILLED)
-                        
-                        # Apply color to the detected cube area
-                        color_image[mask_cube == 255] = [0, 255, 0]  # Apply green color
-
-                        cv2.drawContours(color_image, [approx], -1, color, 2)
-                        x, y = approx[0][0]
-                        cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)       
+                    shape = "Cube"
+                    color = (255, 0, 0)
+                    
+                    # Create a mask for the detected cube
+                    mask_cube = np.zeros_like(color_image)
+                    cv2.drawContours(mask_cube, [approx], -1, (255, 255, 255), thickness=cv2.FILLED)
+                    
+                    # Apply color to the detected cube area
+                    color_image[mask_cube == 255] = [0, 255, 0]  # Apply green color
+                    
+                    cv2.drawContours(color_image, [approx], -1, color, 2)
+                    x, y = approx[0][0]
+                    cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    self.get_logger().info(f"Detected a cube at (x: {x}, y: {y}, depth: {depth:.2f}mm)")
+        
         return color_image
 
 def main(args=None):
