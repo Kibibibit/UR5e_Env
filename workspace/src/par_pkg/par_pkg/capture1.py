@@ -71,6 +71,7 @@ class OnRobotEyesCameraNode(Node):
                     # Apply color to the detected cube area
                     color_image[mask_cube[:, :, 0] == 255] = [0, 255, 0]  # Apply green color
                     
+                    # Draw the contour in a different color to highlight the edges
                     cv2.drawContours(color_image, [approx], -1, color, 2)
                     x, y = approx[0][0]
                     cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
