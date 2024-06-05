@@ -11,15 +11,24 @@ find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(par_interfaces REQUIRED)
 
-add_executable(moveit_action_server_node src/moveit_action_server_node.cpp)
-add_executable(moveit_service_node src/moveit_service_node.cpp)
+
+
+
+add_executable(moveit_action_server_node src/moveit_action_server_node.cpp src/helpers.cpp)
+add_executable(moveit_service_node src/moveit_service_node.cpp src/helpers.cpp)
+
 
 target_include_directories(moveit_action_server_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-  target_include_directories(moveit_service_node PUBLIC
+  $<INSTALL_INTERFACE:include>
+  )
+target_include_directories(moveit_service_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+)
+
+
+
 
 target_compile_features(moveit_action_server_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(

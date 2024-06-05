@@ -2,14 +2,16 @@
 #define PAR_MOVEIT_SERVICE_NODE_H
 #include <moveit/move_group_interface/move_group_interface.h>
 #include "rclcpp/rclcpp.hpp"
-#include "par_interfaces/srv/current_moveit_pose.hpp"
+#include "par_interfaces/srv/current_waypoint_pose.hpp"
+#include "par_interfaces/srv/current_pose.hpp"
 #include <string>
 
 class MoveitServiceNode : public rclcpp::Node
 {
     public:
         using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
-        using CurrentMoveitPose = par_interfaces::srv::CurrentMoveitPose;
+        using CurrentWaypointPose = par_interfaces::srv::CurrentWaypointPose;
+        using CurrentPose = par_interfaces::srv::CurrentPose;
         explicit MoveitServiceNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
     private:
 
@@ -19,10 +21,11 @@ class MoveitServiceNode : public rclcpp::Node
         std::string node_namespace_;
 
         moveit::planning_interface::MoveGroupInterfacePtr move_group_interface;
-        rclcpp::Service<CurrentMoveitPose>::SharedPtr service;
-        
-        void get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response);
+        rclcpp::Service<CurrentWaypointPose>::SharedPtr waypoint_service;
+        rclcpp::Service<CurrentPose>::SharedPtr pose_service;
 
+        void get_current_waypoint_pose(const std::shared_ptr<CurrentWaypointPose::Request> request, const std::shared_ptr<CurrentWaypointPose::Response> response);
+        void get_current_pose(const std::shared_ptr<CurrentPose::Request> request, const std::shared_ptr<CurrentPose::Response> response);
 
 };
 

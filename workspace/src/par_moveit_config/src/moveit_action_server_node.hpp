@@ -1,31 +1,39 @@
 #ifndef PAR_MOVEIT_ACTION_SERVER_NODE_H
 #define PAR_MOVEIT_ACTION_SERVER_NODE_H
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
-#include "par_interfaces/action/moveit_pose.hpp"
-#include "par_interfaces/action/moveit_point.hpp"
+#include "par_interfaces/action/waypoint_move.hpp"
+#include "par_interfaces/msg/waypoint_pose.hpp"
 #include "geometry_msgs/msg/pose.h"
 #include "geometry_msgs/msg/point.h"
 #include <functional>
 #include <string>
 
+//TODO: Make these launch params
+#define EEF_STEP 0.06
+#define JUMP_THRESHOLD 6.0
+
 using MoveGroupInterface = moveit::planning_interface::MoveGroupInterface;
+using Pose = geometry_msgs::msg::Pose;
+using Point = geometry_msgs::msg::Point;
+using Quaternion = geometry_msgs::msg::Quaternion;
+
+using WaypointPose = par_interfaces::msg::WaypointPose;
 
 class MoveitActionServerNode : public rclcpp::Node
 {
     public:
         
-        using Pose = geometry_msgs::msg::Pose;
-        using Point = geometry_msgs::msg::Point;
-        using MoveitPose = par_interfaces::action::MoveitPose;
-        using MoveitPoint = par_interfaces::action::MoveitPoint;
-        using GoalHandleMoveitPose = rclcpp_action::ServerGoalHandle<MoveitPose>;
-        using GoalHandleMoveitPoint = rclcpp_action::ServerGoalHandle<MoveitPoint>;
+
+        using WaypointMove = par_interfaces::action::WaypointMove;
+        using GoalHandle = rclcpp_action::ServerGoalHandle<WaypointMove>;
         MoveitActionServerNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-
     private:
+
+        double move_plane_height;
 
         rclcpp::Node::SharedPtr node_;
         rclcpp::Executor::SharedPtr executor_;
@@ -36,31 +44,16 @@ class MoveitActionServerNode : public rclcpp::Node
         
         std::atomic<bool> executing_move;
 
-        rclcpp_action::Server<MoveitPose>::SharedPtr pose_action_server;
-        rclcpp_action::Server<MoveitPoint>::SharedPtr point_action_server;
+        rclcpp_action::Server<WaypointMove>::SharedPtr action_server;
 
-        template <typename T>
         rclcpp_action::GoalResponse handle_goal(
             const rclcpp_action::GoalUUID & uuid,
-            std::shared_ptr<const T> goal
+            std::shared_ptr<const WaypointMove::Goal> goal
         );
-
-        void execute_plan(MoveGroupInterface::Plan plan);
-
-        template <typename T>
-        rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle);
-        
-        void pose_handle_accepted(const std::shared_ptr<GoalHandleMoveitPose> goal_handle);
-        void point_handle_accepted(const std::shared_ptr<GoalHandleMoveitPoint> goal_handle);
-
-        template <typename T, typename F, typename R>
-        void execute(const std::shared_ptr<rclcpp_action::ServerGoalHandle<T>> goal_handle, Pose target_pose);
-
-        Pose get_pose_from_pose(std::shared_ptr<GoalHandleMoveitPose> goal_handle);
-        Pose get_pose_from_point(std::shared_ptr<GoalHandleMoveitPoint> goal_handle);
-
-        
-
+        rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandle> goal_handle);
+        void handle_accepted(const std::shared_ptr<GoalHandle> goal_handle);
+        void execute_plan(moveit_msgs::msg::RobotTrajectory trajectory);
+        void execute(const std::shared_ptr<GoalHandle> goal_handle);
 
 };
 

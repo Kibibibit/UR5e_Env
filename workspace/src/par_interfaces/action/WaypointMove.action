@@ -1,0 +1,12 @@
+# WaypointMove.action
+## This action moves the gripper to a target point and rotation,
+## following cartesian waypoints.
+
+### Request Params:
+par_interfaces/WaypointPose target_pose
+---
+### Result Params:
+par_interfaces/WaypointPose final_pose
+---
+### Feedback Params:
+par_interfaces/WaypointPose current_pose

@@ -4,6 +4,7 @@
 #include <functional>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <string>
+#include "helpers.hpp"
 
 MoveitServiceNode::MoveitServiceNode(const rclcpp::NodeOptions & options) : Node(
   "moveit_service_node",
@@ -14,8 +15,12 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
 
 
   using namespace std::placeholders;
-  this->service= this->create_service<CurrentMoveitPose>(
-    "par_get_current_moveit_pose",
+  this->waypoint_service= this->create_service<CurrentWaypointPose>(
+    "par_moveit/get_current_waypoint_pose",
+    std::bind(&MoveitServiceNode::get_current_waypoint_pose, this, _1, _2)
+  );
+  this->pose_service= this->create_service<CurrentPose>(
+    "par_moveit/get_current_pose",
     std::bind(&MoveitServiceNode::get_current_pose, this, _1, _2)
   );
 
@@ -30,11 +35,15 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
 }
 
 
-void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentMoveitPose::Request> request, const std::shared_ptr<CurrentMoveitPose::Response> response) {
+void MoveitServiceNode::get_current_waypoint_pose(const std::shared_ptr<CurrentWaypointPose::Request> request, const std::shared_ptr<CurrentWaypointPose::Response> response) {
+  (void)request;
+  response->pose = waypoint_pose_from_pose(this->move_group_interface->getCurrentPose().pose);
+}
+
+void MoveitServiceNode::get_current_pose(const std::shared_ptr<CurrentPose::Request> request, const std::shared_ptr<CurrentPose::Response> response) {
   (void)request;
   response->pose = this->move_group_interface->getCurrentPose().pose;
 }
-
 
 
 int main(int argc, char **argv) {

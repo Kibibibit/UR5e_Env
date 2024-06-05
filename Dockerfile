@@ -84,8 +84,6 @@ RUN export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # Install python requirements - We shouldn't need pyrealsense2 once the realsense ros node is setup
 RUN pip install pymodbus==2.5.3 pyrealsense2
 
-RUN sudo apt-get update && sudo apt install -y chrony
-
 EXPOSE 50002 
 
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
