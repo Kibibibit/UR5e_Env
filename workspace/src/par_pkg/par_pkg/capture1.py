@@ -61,16 +61,16 @@ class OnRobotEyesCameraNode(Node):
                     mask_cube = np.zeros_like(color_image_bgra, dtype=np.uint8)
                     cv2.drawContours(mask_cube, [approx], -1, (255, 255, 255, 255), thickness=cv2.FILLED)
                     
-                    # Apply transparent green color to the detected cube area
-                    green_transparent = [0, 255, 0, 64]  # Green with 75% transparency
-                    color_image_bgra[mask_cube[:, :, 3] == 255] = green_transparent
+                    # Apply transparent bloody red color to the detected cube area
+                    bloody_red_transparent = [0, 0, 139, 26]  # Bloody red with 90% transparency
+                    color_image_bgra[mask_cube[:, :, 3] == 255] = bloody_red_transparent
                     
-                    # Draw the contour with a semi-transparent red color
-                    red_transparent = (0, 0, 255, 64)  # Red with 75% transparency
-                    cv2.drawContours(color_image_bgra, [approx], -1, red_transparent, 2)
+                    # Draw the contour with a semi-transparent dark blue color
+                    dark_blue_transparent = (139, 0, 0, 64)  # Dark blue with 75% transparency
+                    cv2.drawContours(color_image_bgra, [approx], -1, dark_blue_transparent, 2)
                     
                     x, y = approx[0][0]
-                    cv2.putText(color_image_bgra, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255, 255), 2)
+                    cv2.putText(color_image_bgra, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (139, 0, 0, 255), 2)
                     self.get_logger().info(f"Detected a cube at (x: {x}, y: {y}, depth: {depth:.2f}mm)")
 
         return color_image_bgra
