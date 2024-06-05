@@ -11,7 +11,7 @@ geometry_msgs::msg::Pose pose_from_waypoint_pose(par_interfaces::msg::WaypointPo
   geometry_msgs::msg::Pose pose;
 
   pose.position = waypoint_pose.position;
-  pose.orientation =  quaternion_from_rpy(M_PI, 0.0, waypoint_pose.rotation);
+  pose.orientation =  quaternion_from_rpy(M_PI, waypoint_pose.rotation, 0.0);
   return pose;
 }
 
@@ -21,7 +21,7 @@ par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Po
   par_interfaces::msg::WaypointPose waypoint_pose;
 
   waypoint_pose.position = pose.position;
-  waypoint_pose.rotation = rpy_from_quaternion(pose.orientation).z;
+  waypoint_pose.rotation = rpy_from_quaternion(pose.orientation).y;
   return waypoint_pose;
 }
 
