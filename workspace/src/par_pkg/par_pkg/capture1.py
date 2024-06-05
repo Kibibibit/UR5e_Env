@@ -31,7 +31,9 @@ class CubeDetectionNode(Node):
     def colour_image_callback(self, msg):
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            self.get_logger().info("Color image received")
             if self.depth_image is not None:
+                self.get_logger().info("Processing images")
                 processed_image = self.detect_cubes(color_image, self.depth_image)
                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
                 self.publisher_.publish(processed_msg)
@@ -90,6 +92,7 @@ class CubeDetectionNode(Node):
                     
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
+                    self.get_logger().info(f"Detected cube at (x: {x}, y: {y}, depth: {depth:.2f}mm)")
         
         return color_image
 
