@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
-from cv_bridge import CvBridge
+from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
@@ -29,25 +29,32 @@ class CubeDetectionNode(Node):
         self.depth_image = None
 
     def colour_image_callback(self, msg):
+        self.get_logger().info("Received color image")
         try:
             color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-            self.get_logger().info("Color image received")
+            self.get_logger().info("Converted color image")
             if self.depth_image is not None:
-                self.get_logger().info("Processing images")
+                self.get_logger().info("Depth image available, processing images")
                 processed_image = self.detect_cubes(color_image, self.depth_image)
                 processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
                 self.publisher_.publish(processed_msg)
+        except CvBridgeError as e:
+            self.get_logger().error(f"CvBridge error: {e}")
         except Exception as e:
-            self.get_logger().error(f"Error processing image: {e}")
+            self.get_logger().error(f"Error processing color image: {e}")
 
     def depth_image_callback(self, msg):
+        self.get_logger().info("Received depth image")
         try:
             self.depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
-            self.get_logger().info("Depth image received")
+            self.get_logger().info("Converted depth image")
+        except CvBridgeError as e:
+            self.get_logger().error(f"CvBridge error: {e}")
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, color_image, depth_image):
+        self.get_logger().info("Detecting cubes")
         hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
         
         # Define range of colors to detect (example values, you may need to adjust these)
@@ -64,12 +71,14 @@ class CubeDetectionNode(Node):
         kernel = np.ones((3, 3), np.uint8)
         morph = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
         contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        self.get_logger().info(f"Found {len(contours)} contours")
 
         for contour in contours:
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
             
             if area < 100 or area > 5000:
+                self.get_logger().info(f"Ignored contour with area {area}")
                 continue
 
             epsilon = 0.02 * perimeter
@@ -78,10 +87,12 @@ class CubeDetectionNode(Node):
             aspect_ratio = w / float(h)
 
             if len(approx) == 4 and 0.8 <= aspect_ratio <= 1.2:
+                self.get_logger().info("Found cube-like contour")
                 depth_values = depth_image[y:y+h, x:x+w]
                 valid_depths = depth_values[depth_values > 0]
                 if valid_depths.size > 0:
                     depth = np.mean(valid_depths)
+                    self.get_logger().info(f"Depth: {depth:.2f}mm")
                     
                     # Create a mask for the detected cube
                     mask_cube = np.zeros_like(color_image)
@@ -92,7 +103,6 @@ class CubeDetectionNode(Node):
                     
                     cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
-                    self.get_logger().info(f"Detected cube at (x: {x}, y: {y}, depth: {depth:.2f}mm)")
         
         return color_image
 
