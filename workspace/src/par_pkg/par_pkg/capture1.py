@@ -80,7 +80,6 @@ class CubeDetectionNode(Node):
                 valid_depths = depth_values[depth_values > 0]
                 if valid_depths.size > 0:
                     depth = np.mean(valid_depths)
-                    cv2.drawContours(color_image, [approx], -1, (0, 255, 0), 3)  # Draw the contour in green
                     
                     # Create a mask for the detected cube
                     mask_cube = np.zeros_like(color_image)
@@ -89,7 +88,7 @@ class CubeDetectionNode(Node):
                     # Apply color to the detected cube area
                     color_image[mask_cube == 255] = [0, 255, 0]  # Apply green color
                     
-                    cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                    cv2.putText(color_image, f"Cube, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     self.move_to_cube(x + w // 2, y + h // 2, depth)
         
         return color_image
