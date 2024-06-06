@@ -21,8 +21,8 @@ GRIPPER_BUSY_BIT = 0
 
 
 
-UPPER_FINGER_JOINT = 0.785398
-LOWER_FINGER_JOINT = -0.558505
+UPPER_FINGER_JOINT = 1.875697
+LOWER_FINGER_JOINT = 3.1069965
 
 class GripperStatePublisherNode(Node):
 
@@ -101,7 +101,7 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
+        delta: float = (float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
 
         
         #TODO: Check this relationship is linear

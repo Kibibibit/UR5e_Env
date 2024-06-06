@@ -27,5 +27,5 @@ $PKG_LIST"
 # Build, source and return home
 cd $WORKSPACE_FOLDER
 colcon build --packages-select $PKG_LIST
-source $WORKSPACE_FOLDER/install/setup.bash
+. $WORKSPACE_FOLDER/install/setup.bash
 cd $RETURN

@@ -4,8 +4,8 @@
     <xacro:arg name="name" default="ur"/>
     <xacro:arg name="ur_type" default="ur5x"/>
     <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
-    <xacro:include filename="onrobot_quick_changer_model.urdf"/>
-    <xacro:include filename="onrobot_eyes_model.urdf"/>
+    <xacro:include filename="onrobot_quick_changer.urdf"/>
+    <xacro:include filename="onrobot_eyes.urdf"/>
     <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
 
     <xacro:macro name="ur" params="name ur_type"/>

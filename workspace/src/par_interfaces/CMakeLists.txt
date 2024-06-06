@@ -12,12 +12,19 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/WaypointPose.msg"
+  "msg/GripperInfo.msg"
   "action/GripperSetWidth.action"
   "action/GripperFullClose.action"
   "action/GripperFullOpen.action"
-  "msg/GripperInfo.msg"
+  "action/WaypointMove.action"
+  
+  "srv/CurrentWaypointPose.srv"
+  "srv/CurrentPose.srv"
+  DEPENDENCIES geometry_msgs
 )
 
 if(BUILD_TESTING)

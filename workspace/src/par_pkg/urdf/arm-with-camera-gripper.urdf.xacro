@@ -4,7 +4,7 @@
     <xacro:arg name="name" default="ur"/>
     <xacro:arg name="ur_type" default="ur5x"/>
     <xacro:include filename="arm-with-camera.urdf.xacro"/>
-    <xacro:include filename="onrobot_rg2_model.urdf"/>
+    <xacro:include filename="onrobot_rg2_gripper.urdf"/>
 
     <joint name="gripper_joint" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 0"/>

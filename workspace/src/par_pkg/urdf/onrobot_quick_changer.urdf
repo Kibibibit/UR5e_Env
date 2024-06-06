@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot name="onrobot_quick_changer_model">
+    <link name="onrobot_quick_changer_base_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/visual/quick_changer.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/quick_changer.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="onrobot_quick_changer_tool_link"/>
+    <joint name="onrobot_quick_changer_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0.00234"/>
+        <parent link="onrobot_quick_changer_base_link"/>
+        <child link="onrobot_quick_changer_tool_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+</robot>
