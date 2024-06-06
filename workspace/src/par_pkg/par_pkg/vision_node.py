@@ -35,72 +35,37 @@ class OnRobotEyesCameraNode(Node):
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, color_image, depth_image):
-        self.get_logger().info("Starting cube detection")
-        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        self.get_logger().info("Starting cube detection using depth image")
+        depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
+        depth_normalized = np.uint8(depth_normalized)
+        blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
-        lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=50, minLineLength=50, maxLineGap=10)
-        if lines is not None:
-            for line in lines:
-                x1, y1, x2, y2 = line[0]
-                cv2.line(color_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        intersections = self.find_intersections(lines)
-        for point in intersections:
-            cv2.circle(color_image, point, 5, (255, 0, 0), -1)
-        detected_cubes = self.detect_squares(intersections, depth_image)
-        for square in detected_cubes:
-            for point in square:
-                cv2.circle(color_image, point, 5, (0, 0, 255), -1)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        detected_cubes = []
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area < 100 or area > 10000:
+                continue
+            epsilon = 0.02 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            if len(approx) == 4 and cv2.isContourConvex(approx):
+                (x, y, w, h) = cv2.boundingRect(approx)
+                aspect_ratio = w / float(h)
+                if 0.9 <= aspect_ratio <= 1.1:
+                    depth = np.mean(depth_image[y:y+h, x:x+w])
+                    if np.isnan(depth) or depth <= 0:
+                        self.get_logger().info("Contour filtered out by depth validation")
+                        continue
+                    shape = "Cube"
+                    detected_cubes.append((approx, depth))
+                    color = (255, 0, 0)
+                    cv2.drawContours(color_image, [approx], -1, color, 2)
+                    x, y = approx[0][0]
+                    cv2.putText(color_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {depth:.2f}mm")
 
         self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
         return color_image
-    
-    def find_intersections(self, lines):
-        if lines is None:
-            return []
-        intersections = []
-        for i, line1 in enumerate(lines):
-            for line2 in lines[i+1:]:
-                intersection = self.calculate_intersection(line1[0], line2[0])
-                if intersection is not None:
-                    intersections.append(intersection)
-        return intersections
-
-    def calculate_intersection(self, line1, line2):
-        x1, y1, x2, y2 = line1
-        x3, y3, x4, y4 = line2
-        denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-        if denom == 0:
-            return None
-        intersect_x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom
-        intersect_y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom
-        if (min(x1, x2) <= intersect_x <= max(x1, x2) and
-                min(y1, y2) <= intersect_y <= max(y1, y2) and
-                min(x3, x4) <= intersect_x <= max(x3, x4) and
-                min(y3, y4) <= intersect_y <= max(y3, y4)):
-            return int(intersect_x), int(intersect_y)
-        return None
-    def detect_squares(self, intersections, depth_image):
-        squares = []
-        if len(intersections) < 4:
-            return squares
-
-        for i in range(len(intersections)):
-            for j in range(i+1, len(intersections)):
-                for k in range(j+1, len(intersections)):
-                    for l in range(k+1, len(intersections)):
-                        pts = [intersections[i], intersections[j], intersections[k], intersections[l]]
-                        pts = np.array(pts, dtype='float32')
-                        rect = cv2.minAreaRect(pts)
-                        box = cv2.boxPoints(rect)
-                        box = np.int0(box)
-                        w, h = rect[1]
-                        aspect_ratio = w / float(h) if w > h else h / float(w)
-                        if 0.9 <= aspect_ratio <= 1.1:
-                            square_depth = np.mean([depth_image[y, x] for x, y in box])
-                            if not np.isnan(square_depth) and square_depth > 0:
-                                squares.append(box)
-        return squares
 
 def main(args=None):
     rclpy.init(args=args)
