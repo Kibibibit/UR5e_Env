@@ -10,37 +10,32 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include "helpers.hpp"
 
-MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions &options) : Node(
-                                                                                         "moveit_action_server_node",
-                                                                                         options),
-                                                                                     node_(std::make_shared<rclcpp::Node>("moveit_action_server_node")),
-                                                                                     executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions& options)
+  : Node("moveit_action_server_node", options)
+  , node_(std::make_shared<rclcpp::Node>("moveit_action_server_node"))
+  , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
 {
-
   using namespace std::placeholders;
   this->action_server = rclcpp_action::create_server<WaypointMove>(
-      this,
-      "par_moveit/waypoint_move",
-      std::bind(&MoveitActionServerNode::handle_goal, this, _1, _2),
+      this, "par_moveit/waypoint_move", std::bind(&MoveitActionServerNode::handle_goal, this, _1, _2),
       std::bind(&MoveitActionServerNode::handle_cancel, this, _1),
       std::bind(&MoveitActionServerNode::handle_accepted, this, _1));
 
   executing_move = false;
   move_plane_height = 0.7;
-  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator");
+  this->move_group_interface =
+      std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator");
   this->move_group_interface->setPlanningTime(5.0);
   this->move_group_interface->setNumPlanningAttempts(10);
   this->move_group_interface->setMaxVelocityScalingFactor(0.1);
   this->move_group_interface->setMaxAccelerationScalingFactor(0.1);
   this->executor_->add_node(node_);
-  
-  this->executor_thread_ = std::thread([this]()
-                                       { this->executor_->spin(); });
+
+  this->executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 }
 
-rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
-    const rclcpp_action::GoalUUID &uuid,
-    std::shared_ptr<const WaypointMove::Goal> goal)
+rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(const rclcpp_action::GoalUUID& uuid,
+                                                                std::shared_ptr<const WaypointMove::Goal> goal)
 {
   RCLCPP_INFO(this->get_logger(), "Received goal request with target_pose");
   (void)uuid;
@@ -48,24 +43,21 @@ rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse MoveitActionServerNode::handle_cancel(
-    const std::shared_ptr<GoalHandle> goal_handle)
+rclcpp_action::CancelResponse MoveitActionServerNode::handle_cancel(const std::shared_ptr<GoalHandle> goal_handle)
 {
   RCLCPP_INFO(this->get_logger(), "Recieved request to cancel goal!");
   (void)goal_handle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void MoveitActionServerNode::handle_accepted(
-    const std::shared_ptr<GoalHandle> goal_handle)
+void MoveitActionServerNode::handle_accepted(const std::shared_ptr<GoalHandle> goal_handle)
 {
   using namespace std::placeholders;
-  std::thread{std::bind(&MoveitActionServerNode::execute, this, _1), goal_handle}.detach();
+  std::thread{ std::bind(&MoveitActionServerNode::execute, this, _1), goal_handle }.detach();
 }
 
 void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_handle)
 {
-
   RCLCPP_INFO(this->get_logger(), "Executing Goal");
 
   std::vector<Pose> waypoints;
@@ -76,33 +68,29 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
   Pose target_pose = pose_from_waypoint_pose(target_waypoint_pose);
   WaypointPose current_waypoint_pose = waypoint_pose_from_pose(this->move_group_interface->getCurrentPose().pose);
 
+  if (will_translate(current_waypoint_pose, target_waypoint_pose))
+  {
+    // Compute the path
+    // Step 1 -> go to plane height
+    WaypointPose step_1_pose;
+    step_1_pose.position = current_waypoint_pose.position;
+    step_1_pose.position.z = this->move_plane_height;
+    step_1_pose.rotation = current_waypoint_pose.rotation;
 
-  // Compute the path
-  // Step 1 -> go to plane height
-  WaypointPose step_1_pose;
-  step_1_pose.position = current_waypoint_pose.position;
-  step_1_pose.position.z = this->move_plane_height;
-  step_1_pose.rotation = current_waypoint_pose.rotation;
+    waypoints.push_back(pose_from_waypoint_pose(step_1_pose));
 
-  waypoints.push_back(pose_from_waypoint_pose(step_1_pose));
+    // Step 2 -> Rotate to match target rotation, and translate to match x/y
+    WaypointPose step_2_pose;
+    step_2_pose.position = target_waypoint_pose.position;
+    step_2_pose.position.z = this->move_plane_height;
+    step_2_pose.rotation = target_waypoint_pose.rotation;
 
-  // Step 2 -> Rotate to match target rotation, and translate to match x/y
-  WaypointPose step_2_pose;
-  step_2_pose.position = target_waypoint_pose.position;
-  step_2_pose.position.z = this->move_plane_height;
-  step_2_pose.rotation = target_waypoint_pose.rotation;
-
-  waypoints.push_back(pose_from_waypoint_pose(step_2_pose));
-
-  // Step 3 -> Go to target pose
+    waypoints.push_back(pose_from_waypoint_pose(step_2_pose));
+  }
 
   waypoints.push_back(target_pose);
 
-
   rclcpp::Rate loop_rate(1);
-
-
-  
 
   std::shared_ptr<WaypointMove::Feedback> feedback = std::make_shared<WaypointMove::Feedback>();
   std::shared_ptr<WaypointMove::Result> result = std::make_shared<WaypointMove::Result>();
@@ -113,14 +101,15 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
   this->move_group_interface->setStartStateToCurrentState();
 
   moveit_msgs::msg::RobotTrajectory trajectory;
-  bool success = static_cast<bool>(this->move_group_interface->computeCartesianPath(waypoints, EEF_STEP, JUMP_THRESHOLD, trajectory));
+  bool success = static_cast<bool>(
+      this->move_group_interface->computeCartesianPath(waypoints, EEF_STEP, JUMP_THRESHOLD, trajectory));
 
   std::thread execution_thread;
 
   if (success && rclcpp::ok() && !this->executing_move)
   {
     using namespace std::placeholders;
-    execution_thread = std::thread{std::bind(&MoveitActionServerNode::execute_plan, this, _1), trajectory};
+    execution_thread = std::thread{ std::bind(&MoveitActionServerNode::execute_plan, this, _1), trajectory };
   }
   else
   {
@@ -140,7 +129,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
   while (rclcpp::ok() && this->executing_move)
   {
     current_waypoint_pose = waypoint_pose_from_pose(this->move_group_interface->getCurrentPose().pose);
-    feedback->current_pose = current_waypoint_pose; 
+    feedback->current_pose = current_waypoint_pose;
     if (goal_handle->is_canceling())
     {
       result->final_pose = current_waypoint_pose;
@@ -172,7 +161,7 @@ void MoveitActionServerNode::execute_plan(moveit_msgs::msg::RobotTrajectory traj
   this->executing_move = false;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
   rclcpp::NodeOptions node_options;
