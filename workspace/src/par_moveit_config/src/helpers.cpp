@@ -65,14 +65,14 @@ geometry_msgs::msg::Vector3 rpy_from_quaternion(geometry_msgs::msg::Quaternion q
   return angles;
 }
 
-bool equal_approx(double a, double b, double margin = 0.0001) {
+bool equal_approx(double a, double b, double margin) {
   return abs(b-a) < margin;
 }
 
-bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin=0.0001) {
+bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin) {
   bool x_move = !equal_approx(a.position.x, b.position.y, margin);
   bool y_move = !equal_approx(a.position.y, b.position.y, margin);
-  bool rotation = !equal_approx(a.rotation, b.rotation);
+  bool rotation = !equal_approx(a.rotation, b.rotation, margin);
 
   return x_move || y_move || rotation;
 }

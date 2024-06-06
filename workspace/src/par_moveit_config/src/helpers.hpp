@@ -10,8 +10,8 @@ geometry_msgs::msg::Quaternion quaternion_from_rpy(double roll, double pitch, do
 geometry_msgs::msg::Vector3 rpy_from_quaternion(geometry_msgs::msg::Quaternion q);
 geometry_msgs::msg::Pose pose_from_waypoint_pose(par_interfaces::msg::WaypointPose waypoint_pose);
 par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Pose pose);
-bool equal_approx(double a, double b, double margin = 0.0001);
-bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin=0.0001);
+bool equal_approx(double a, double b, double margin);
+bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin);
 
 
 #endif

@@ -68,7 +68,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
   Pose target_pose = pose_from_waypoint_pose(target_waypoint_pose);
   WaypointPose current_waypoint_pose = waypoint_pose_from_pose(this->move_group_interface->getCurrentPose().pose);
 
-  if (will_translate(current_waypoint_pose, target_waypoint_pose))
+  if (will_translate(current_waypoint_pose, target_waypoint_pose, 0.0001))
   {
     // Compute the path
     // Step 1 -> go to plane height
