@@ -78,6 +78,6 @@ bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::Wa
   RCLCPP_INFO(rclcpp::get_logger("translate"), "X: a:%f b:%f (%d)", a.position.x, b.position.x, x_move);
   RCLCPP_INFO(rclcpp::get_logger("translate"), "Y: a:%f b:%f (%d)", a.position.y, b.position.y, y_move);
   RCLCPP_INFO(rclcpp::get_logger("translate"), "R: a:%f b:%f (%d)", a.rotation, b.rotation, rotation);
-
+  RCLCPP_INFO(rclcpp::get_logger("translate"), "Should translate? %d", x_move || y_move || rotation);
   return x_move || y_move || rotation;
 }
