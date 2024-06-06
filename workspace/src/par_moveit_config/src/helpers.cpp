@@ -12,7 +12,7 @@ geometry_msgs::msg::Pose pose_from_waypoint_pose(par_interfaces::msg::WaypointPo
   geometry_msgs::msg::Pose pose;
 
   pose.position = waypoint_pose.position;
-  pose.orientation =  quaternion_from_rpy(M_PI, 0.0, waypoint_pose.rotation);
+  pose.orientation =  quaternion_from_rpy(M_PI, 0.0, waypoint_pose.rotation+M_PI_2);
   return pose;
 }
 
@@ -22,7 +22,7 @@ par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Po
   par_interfaces::msg::WaypointPose waypoint_pose;
 
   waypoint_pose.position = pose.position;
-  waypoint_pose.rotation = rpy_from_quaternion(pose.orientation).z;
+  waypoint_pose.rotation = rpy_from_quaternion(pose.orientation).z-M_PI_2;
   return waypoint_pose;
 }
 
@@ -74,10 +74,5 @@ bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::Wa
   bool x_move = !equal_approx(a.position.x, b.position.x, margin);
   bool y_move = !equal_approx(a.position.y, b.position.y, margin);
   bool rotation = !equal_approx(a.rotation, b.rotation, margin);
-
-  RCLCPP_INFO(rclcpp::get_logger("translate"), "X: a:%f b:%f (%d)", a.position.x, b.position.x, x_move);
-  RCLCPP_INFO(rclcpp::get_logger("translate"), "Y: a:%f b:%f (%d)", a.position.y, b.position.y, y_move);
-  RCLCPP_INFO(rclcpp::get_logger("translate"), "R: a:%f b:%f (%d)", a.rotation, b.rotation, rotation);
-  RCLCPP_INFO(rclcpp::get_logger("translate"), "Should translate? %d", x_move || y_move || rotation);
   return x_move || y_move || rotation;
 }
