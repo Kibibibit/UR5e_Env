@@ -37,9 +37,16 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions& option
 rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(const rclcpp_action::GoalUUID& uuid,
                                                                 std::shared_ptr<const WaypointMove::Goal> goal)
 {
-  RCLCPP_INFO(this->get_logger(), "Received goal request with target_pose");
+  RCLCPP_INFO(this->get_logger(), "Received goal request with target_pose (XYZ: %f %f %f, R: %f)",
+    goal->target_pose.position.x,
+    goal->target_pose.position.y,
+    goal->target_pose.position.z,
+    goal->target_pose.rotation
+  );
   (void)uuid;
-  (void)goal;
+  if (goal->target_pose.rotation > M_PI_2 || goal->target_pose.rotation < -M_PI_2) {
+    return rclcpp_action::GoalResponse::REJECT;
+  }
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
