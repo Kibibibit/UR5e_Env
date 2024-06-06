@@ -45,6 +45,11 @@ rclcpp_action::GoalResponse MoveitActionServerNode::handle_goal(const rclcpp_act
   );
   (void)uuid;
   if (goal->target_pose.rotation > M_PI_2 || goal->target_pose.rotation < -M_PI_2) {
+    RCLCPP_ERROR(this->get_logger(), "Rejecting goal: Rotation %f is outside range [%f, %f]", 
+    goal->target_pose.rotation,
+    -M_PI_2,
+    M_PI_2
+    );
     return rclcpp_action::GoalResponse::REJECT;
   }
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
