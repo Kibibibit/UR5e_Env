@@ -86,22 +86,15 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
 
   waypoints.push_back(pose_from_waypoint_pose(step_1_pose));
 
-  // Step 2 -> Rotate to match target rotation
+  // Step 2 -> Rotate to match target rotation, and translate to match x/y
   WaypointPose step_2_pose;
-  step_2_pose.position = step_1_pose.position;
+  step_2_pose.position = target_waypoint_pose.position;
+  step_2_pose.position.z = this->move_plane_height;
   step_2_pose.rotation = target_waypoint_pose.rotation;
 
   waypoints.push_back(pose_from_waypoint_pose(step_2_pose));
 
-  // Step 3 -> Translate to match target x/y
-  WaypointPose step_3_pose;
-  step_3_pose.position = target_waypoint_pose.position;
-  step_3_pose.position.z = this->move_plane_height;
-  step_3_pose.rotation = target_waypoint_pose.rotation;
-
-  waypoints.push_back(pose_from_waypoint_pose(step_3_pose));
-
-  // Step 4, go to target pose
+  // Step 3 -> Go to target pose
 
   waypoints.push_back(target_pose);
 
