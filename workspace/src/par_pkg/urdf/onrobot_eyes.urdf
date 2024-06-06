@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot name="onrobot_eyes_model">
+    <link name="onrobot_eyes_base_link">
+        <visual>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/visual/onrobot_eyes.dae" />
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/onrobot_eyes.stl" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="onrobot_eyes_tool_link"/>
+    <joint name="onrobot_eyes_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0.012"/>
+        <parent link="onrobot_eyes_base_link"/>
+        <child link="onrobot_eyes_tool_link"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+</robot>

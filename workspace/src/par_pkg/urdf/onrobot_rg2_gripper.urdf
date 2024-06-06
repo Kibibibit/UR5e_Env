@@ -6,6 +6,11 @@
                 <mesh filename="package://par_pkg/meshes/visual/rg2_base_link.dae" />
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/rg2_base_link.stl" />
+            </geometry>
+        </collision>
 
     </link>
     <link name="left_outer_knuckle">
@@ -14,6 +19,11 @@
                 <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle.dae" />
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/rg2_outer_knuckle.stl" />
+            </geometry>
+        </collision>
     </link>
     <link name="left_inner_knuckle">
         <visual>
@@ -21,6 +31,11 @@
                 <mesh filename="package://par_pkg/meshes/visual/rg2_inner_knuckle.dae" />
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/rg2_inner_knuckle.stl" />
+            </geometry>
+        </collision>
     </link>
     <link name="left_finger">
         <visual>
@@ -30,7 +45,7 @@
         </visual>
         <collision>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_finger.stl" />
+                <mesh filename="package://par_pkg/meshes/collision/rg2_finger.stl" />
             </geometry>
         </collision>
     </link>
@@ -40,6 +55,11 @@
                 <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle.dae" />
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/rg2_outer_knuckle.stl" />
+            </geometry>
+        </collision>
     </link>
     <link name="right_inner_knuckle">
         <visual>
@@ -47,6 +67,11 @@
                 <mesh filename="package://par_pkg/meshes/visual/rg2_inner_knuckle.dae" />
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://par_pkg/meshes/collision/rg2_inner_knuckle.stl" />
+            </geometry>
+        </collision>
     </link>
     <link name="right_finger">
         <visual>
@@ -56,7 +81,7 @@
         </visual>
         <collision>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_finger.stl" />
+                <mesh filename="package://par_pkg/meshes/collision/rg2_finger.stl" />
             </geometry>
         </collision>
     </link>
