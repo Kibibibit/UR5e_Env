@@ -1,5 +1,6 @@
 #include "helpers.hpp"
 #include <cmath>
+#include "rclcpp/rclcpp.hpp"
 #include "par_interfaces/msg/waypoint_pose.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/quaternion.hpp"
@@ -73,6 +74,10 @@ bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::Wa
   bool x_move = !equal_approx(a.position.x, b.position.x, margin);
   bool y_move = !equal_approx(a.position.y, b.position.y, margin);
   bool rotation = !equal_approx(a.rotation, b.rotation, margin);
+
+  RCLCPP_INFO(rclcpp::get_logger("translate"), "X: a:%f b:%f (%d)", a.position.x, b.position.x, x_move);
+  RCLCPP_INFO(rclcpp::get_logger("translate"), "Y: a:%f b:%f (%d)", a.position.y, b.position.y, y_move);
+  RCLCPP_INFO(rclcpp::get_logger("translate"), "R: a:%f b:%f (%d)", a.rotation, b.rotation, rotation);
 
   return x_move || y_move || rotation;
 }
