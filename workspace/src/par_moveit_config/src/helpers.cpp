@@ -70,7 +70,7 @@ bool equal_approx(double a, double b, double margin) {
 }
 
 bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin) {
-  bool x_move = !equal_approx(a.position.x, b.position.y, margin);
+  bool x_move = !equal_approx(a.position.x, b.position.x, margin);
   bool y_move = !equal_approx(a.position.y, b.position.y, margin);
   bool rotation = !equal_approx(a.rotation, b.rotation, margin);
 
