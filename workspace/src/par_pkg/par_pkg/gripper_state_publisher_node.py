@@ -101,7 +101,7 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
+        delta: float = (float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
 
         
         #TODO: Check this relationship is linear
