@@ -80,13 +80,18 @@ class RG2Client():
             self.__log(colour_string(ANSIColour.BLUE,f"Attempting to connect to gripper@{self.ip}:{self.port}..."))
             self.__client.connect()
             self.__log(colour_string(ANSIColour.GREEN,"Connected to modbus successfully!"))
+            self.connected = True
+        except Exception as e:
+            self.__error("Failed to connect to eyebox or gripper with exception: " +e)
+            return False
+        
+        try:
             self.__log(colour_string(ANSIColour.BLUE,"Attempting to get gripper status..."))
             self.get_status()
             self.__log(colour_string(ANSIColour.GREEN,"Gripper returned status successfully. Ready to go!"))
-            self.connected = True
-            return True
         except Exception as e:
-            self.__error("Failed to connect to gripper with exception: " +e)
+            self.__error("Failed to get to gripper status! This probably means the gripper is not attached to the quickchanger! Exception: " +e)
+            self.connected = False
             return False
     
     def close_connection(self):
