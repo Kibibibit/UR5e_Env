@@ -8,6 +8,7 @@ from pymodbus.exceptions import ConnectionException
 from sensor_msgs.msg import JointState
 from . import helpers as h
 from par_interfaces.msg import GripperInfo
+import math
 
 ### gripper_state_publisher_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
@@ -21,8 +22,8 @@ GRIPPER_BUSY_BIT = 0
 
 
 
-UPPER_FINGER_JOINT = 1.875697
-LOWER_FINGER_JOINT = 3.1069965
+UPPER_FINGER_JOINT = 1.87361095202
+LOWER_FINGER_JOINT = 3.18697121414
 
 class GripperStatePublisherNode(Node):
 
@@ -97,20 +98,19 @@ class GripperStatePublisherNode(Node):
 
     def gripper_joint_publish_callback(self):
 
-        gripper_width = self._gripper.get_width_with_offset()
+        gripper_width = self._gripper.get_width()
         now = self.get_clock().now()
 
         
-        delta: float = (float(gripper_width)/float(self._gripper_max_width-self._gripper.get_fingertip_offset()))
+        # This formula is based on a linear regression to approximate the angle of the motors
+        # from the width of the gripper. It's not super accurate but it's very close.
+        angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
 
-        
-        #TODO: Check this relationship is linear
-        rotation: float = h.lerp(LOWER_FINGER_JOINT, UPPER_FINGER_JOINT, delta)
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ["finger_joint"]
-        joint_state.position= [rotation]
+        joint_state.position= [angle]
 
         self._joint_publisher.publish(joint_state)
 
