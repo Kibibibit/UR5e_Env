@@ -119,9 +119,12 @@ class RG2Client():
     
     def __read_register(self, address:int) -> int:
         if (self.connected):
-            result = self.__client.read_holding_registers(
-                address=address, count=1, unit=65)
-            return result.registers[0]
+            try:
+                result = self.__client.read_holding_registers(
+                    address=address, count=1, unit=65)
+                return result.registers[0]
+            except Exception as e:
+                raise e
         else:
             self.__warn("Tried to read when gripper not connected!")
             return None
