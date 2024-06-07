@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+from std_msgs.msg import String
+from cv_bridge import CvBridge
+import cv2
+import numpy as np
+from geometry_msgs.msg import Twist
+
+def boolean_filter(depth_image, min_depth, max_depth):
+    # إنشاء فلتر بولياني بناءً على قيم العمق
+    mask = (depth_image >= min_depth) & (depth_image <= max_depth)
+    return mask
+
+def detect_objects_depth(color_image, depth_image, logger):
+    min_depth = 300  # الحد الأدنى لقيم العمق
+    max_depth = 800  # الحد الأقصى لقيم العمق
+
+    # تطبيق الفلتر البولياني
+    depth_mask = boolean_filter(depth_image, min_depth, max_depth)
+    
+    gray = depth_image.astype(np.uint8)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blurred, 50, 150)
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    detected_cubes = []
+    board_detected = False
+
+    for contour in contours:
+        epsilon = 0.02 * cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, epsilon, True)
+        (x, y, w, h) = cv2.boundingRect(approx)
+        depth_values = depth_image[y:y+h, x:x+w]
+        
+        # استخدام القيم المفلترة فقط
+        valid_depths = depth_values[depth_mask[y:y+h, x:x+w]]
+
+        if len(approx) == 4 and 0.9 <= w / h <= 1.1:  # Assuming the board and cubes are square in shape
+            aspect_ratio = w / float(h)
+            if 0.9 <= aspect_ratio <= 1.1 and valid_depths.size > 0:
+                depth = np.mean(valid_depths)
+                if min_depth < depth < max_depth:
+                    shape = "Cube"
+                    color = (0, 0, 139, 230)  # Dark blue with 90% transparency
+                    cv2.drawContours(color_image, [approx], -1, color, -1)  # Filled contour
+                    cv2.drawContours(color_image, [approx], -1, (255, 0, 0), 2)  # Blue outline
+                    detected_cubes.append((x + w // 2, y + h // 2, depth, "Cube"))
+                    logger.info(f"Detected a cube at (x: {x + w // 2}, y: {y + h // 2}, depth: {depth:.2f}mm)")
+                elif depth <= min_depth:  # Assuming the board is shallower than the minimum depth
+                    shape = "Board"
+                    color = (0, 255, 0)  # Green
+                    cv2.drawContours(color_image, [approx], -1, color, 2)
+                    board_detected = True
+                    logger.info(f"Detected the board at (x: {x + w // 2}, y: {y + h // 2}, depth: {depth:.2f}mm)")
+
+    return color_image, detected_cubes, board_detected
+
+def check_game_state(detected_cubes, board_detected):
+    if not board_detected:
+        return "waiting"
+    elif len(detected_cubes) == 0:
+        return "waiting"
+    elif len(detected_cubes) == 1:
+        return "user_turn"
+    else:
+        return "robot_turn"
+
+def move_to_cube(command_publisher, cube_info):
+    x, y, depth, color = cube_info
+    twist = Twist()
+
+    # حساب المسافة المطلوبة للتحرك
+    distance_threshold = 0.2  # Adjust based on your robot and environment
+    angular_threshold = 0.1   # Adjust based on your robot and environment
+    linear_speed = 0.1        # Adjust speed as needed
+    angular_speed = 0.1       # Adjust speed as needed
+
+    current_position = (0, 0)  # Assume starting at origin; update with actual position
+    current_angle = 0  # Assume facing forward; update with actual orientation
+
+    # حساب الفارق بين الموقع الحالي والموقع المستهدف
+    dx = x - current_position[0]
+    dy = y - current_position[1]
+    distance = np.sqrt(dx**2 + dy**2)
+
+    # حساب الزاوية المطلوبة للتحرك نحو الهدف
+    target_angle = np.arctan2(dy, dx)
+    angle_diff = target_angle - current_angle
+
+    if distance > distance_threshold:
+        # إذا كانت المسافة أكبر من العتبة، تحرك نحو الهدف
+        twist.linear.x = linear_speed
+        twist.angular.z = 0.0  # Go straight
+    elif np.abs(angle_diff) > angular_threshold:
+        # إذا كانت الزاوية تختلف بشكل كبير، قم بالدوران
+        twist.linear.x = 0.0
+        twist.angular.z = angular_speed if angle_diff > 0 else -angular_speed  # Rotate to align with the target
+
+    command_publisher.publish(twist)
+
+class CubeDetectionAndMovementNode(Node):
+    def __init__(self):
+        super().__init__('cube_detection_and_movement_node')
+        self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
+        self.command_publisher = self.create_publisher(String, 'move_command', 10)
+        self.subscription = self.create_subscription(Image, '/camera/color/image_raw', self.color_image_callback, 10)
+        self.depth_subscription = self.create_subscription(Image, '/camera/depth/image_rect_raw', self.depth_image_callback, 10)
+        self.bridge = CvBridge()
+        self.depth_image = None
+        self.detected_cubes = []
+        self.board_detected = False
+
+    def color_image_callback(self, msg):
+        try:
+            color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+            if self.depth_image is not None:
+                processed_image, self.detected_cubes, self.board_detected = detect_objects_depth(color_image, self.depth_image, self.get_logger())
+                processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
+                self.publisher_.publish(processed_msg)
+                
+                game_state = check_game_state(self.detected_cubes, self.board_detected)
+                self.get_logger().info(f"Game state: {game_state}")
+                
+                if game_state == "user_turn":
+                    self.get_logger().info("User's turn to play.")
+                elif game_state == "robot_turn":
+                    self.get_logger().info("Robot's turn to play.")
+                    if self.board_detected and len(self.detected_cubes) >= 2:
+                        move_to_cube(self.command_publisher, self.detected_cubes[0])
+                        move_to_cube(self.command_publisher, self.detected_cubes[1])
+        except Exception as e:
+            self.get_logger().error(f"Error processing image: {e}")
+
+    def depth_image_callback(self, msg):
+        try:
+            self.depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
+            self.get_logger().info("Depth image received")
+        except Exception as e:
+            self.get_logger().error(f"Error processing depth image: {e}")
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = CubeDetectionAndMovementNode()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
