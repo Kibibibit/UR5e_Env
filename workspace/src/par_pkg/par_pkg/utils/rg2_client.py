@@ -90,7 +90,7 @@ class RG2Client():
             self.get_status()
             self.__log(colour_string(ANSIColour.GREEN,"Gripper returned status successfully. Ready to go!"))
         except ModbusIOException as e:
-            self.__error("Failed to get to gripper status! This probably means the gripper is not attached to the quickchanger! Exception: " +e)
+            self.__error("Failed to get to gripper status! This probably means the gripper is not attached to the quickchanger!")
             self.connected = False
             return False
     
