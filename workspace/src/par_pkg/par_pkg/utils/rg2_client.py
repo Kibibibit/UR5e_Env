@@ -121,6 +121,9 @@ class RG2Client():
         if (self.connected):
             result = self.__client.read_holding_registers(
                 address=address, count=1, unit=65)
+            print(result is ModbusIOException)
+            print(type(result) == ModbusIOException)
+            print(result)
             if (result is ModbusIOException):
                 raise result
             return result.registers[0]
