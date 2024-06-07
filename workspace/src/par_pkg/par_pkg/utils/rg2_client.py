@@ -82,6 +82,7 @@ class RG2Client():
         if (not self.__client.connect()):
             self.__error("Failed to connect to eyebox or gripper!")
             return False
+        self.connected = True
         self.__log(colour_string(ANSIColour.GREEN,"Connected to modbus successfully!"))
             
         try:
