@@ -121,6 +121,8 @@ class RG2Client():
         if (self.connected):
             result = self.__client.read_holding_registers(
                 address=address, count=1, unit=65)
+            if (result is ModbusIOException):
+                raise result
             return result.registers[0]
         else:
             self.__warn("Tried to read when gripper not connected!")
@@ -131,8 +133,10 @@ class RG2Client():
 
     def __set_register(self, address:int, value):
         if (self.connected):
-            self.__client.write_register(
+            result = self.__client.write_register(
                 address=address, value=value, unit=65)
+            if result is ModbusIOException:
+                raise result
         else:
             self.__warn("Tried to set when gripper not connected!")
 
