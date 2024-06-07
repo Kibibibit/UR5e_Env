@@ -48,7 +48,7 @@ class RG():
         return offset_mm
 
     def get_width(self):
-        """Reads current width between gripper fingers in 1/10 millimeters.
+        """Reads current width between gripper fingers in millimeters.
         Please note that the width is provided without any fingertip offset,
         as it is measured between the insides of the aluminum fingers.
         """
@@ -173,12 +173,17 @@ class RG():
         result = self.client.write_registers(
             address=0, values=params, unit=65)
 
-    def open_gripper(self, force_val=400):
+    def open_gripper(self, force_val=40.0):
         """Opens gripper."""
         params = [force_val, self.max_width, 16]
         print("Start opening gripper.")
         result = self.client.write_registers(
             address=0, values=params, unit=65)
+
+    def get_depth(self):
+        """Gets the depth of the gripper, relative to the fully closed position, in milimetres."""
+        result = self.client.read_holding_registers(0x0107, 1, unit=65)
+        return result.registers[0]/10.0
 
     def move_gripper(self, width_val, force_val=400):
         """Moves gripper to the specified width."""

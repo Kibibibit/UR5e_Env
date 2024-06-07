@@ -6,18 +6,15 @@ from rclpy.node import Node, Publisher
 from .onrobot.onrobot import RG
 from pymodbus.exceptions import ConnectionException 
 from sensor_msgs.msg import JointState
-from . import helpers as h
+from .utils import helpers as h
 from par_interfaces.msg import GripperInfo
+from .utils.rg2_client import RG2Client
+
 
 ### gripper_state_publisher_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
 # Created: 2024-05-30
 # Updated: 2024-05-31
-
-
-
-GRIPPER_BUSY_BIT = 0
-"""In the gripper status array, this is the index for the busy state of the gripper"""
 
 
 
@@ -66,14 +63,9 @@ class GripperStatePublisherNode(Node):
             10 # TODO: Replace this with a launch parameter maybe?
         )
 
-        self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
+        self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
-        try: 
-            # Weirdly, calling self._gripper.open_connection() doesn't trigger a connection error.
-            # Asking for any other method does though
-            self._gripper.get_status()
-        except ConnectionException: 
-            self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
+        if (not self._gripper.open_connection()):
             exit() 
         
         self._gripper_max_width:float = self._gripper.max_width
