@@ -1,4 +1,5 @@
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+from pymodbus.exceptions import ModbusIOException
 import rclpy.logging as logger
 from .colour_string import *
 import math
@@ -76,20 +77,18 @@ class RG2Client():
         if (self.connected):
             self.__warn("Already connected to gripper@{self.ip}:{self.port}!")
             return True
-        try:
-            self.__log(colour_string(ANSIColour.BLUE,f"Attempting to connect to gripper@{self.ip}:{self.port}..."))
-            self.__client.connect()
-            self.__log(colour_string(ANSIColour.GREEN,"Connected to modbus successfully!"))
-            self.connected = True
-        except Exception as e:
-            self.__error("Failed to connect to eyebox or gripper with exception: " +e)
-            return False
         
+        self.__log(colour_string(ANSIColour.BLUE,f"Attempting to connect to gripper@{self.ip}:{self.port}..."))
+        if (not self.__client.connect()):
+            self.__error("Failed to connect to eyebox or gripper!")
+            return False
+        self.__log(colour_string(ANSIColour.GREEN,"Connected to modbus successfully!"))
+            
         try:
             self.__log(colour_string(ANSIColour.BLUE,"Attempting to get gripper status..."))
             self.get_status()
             self.__log(colour_string(ANSIColour.GREEN,"Gripper returned status successfully. Ready to go!"))
-        except Exception as e:
+        except ModbusIOException as e:
             self.__error("Failed to get to gripper status! This probably means the gripper is not attached to the quickchanger! Exception: " +e)
             self.connected = False
             return False
@@ -119,12 +118,9 @@ class RG2Client():
     
     def __read_register(self, address:int) -> int:
         if (self.connected):
-            try:
-                result = self.__client.read_holding_registers(
-                    address=address, count=1, unit=65)
-                return result.registers[0]
-            except Exception as e:
-                raise e
+            result = self.__client.read_holding_registers(
+                address=address, count=1, unit=65)
+            return result.registers[0]
         else:
             self.__warn("Tried to read when gripper not connected!")
             return None
