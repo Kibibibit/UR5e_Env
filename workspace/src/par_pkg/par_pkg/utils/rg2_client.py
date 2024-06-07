@@ -79,7 +79,10 @@ class RG2Client():
         try:
             self.__log(colour_string(ANSIColour.BLUE,f"Attempting to connect to gripper@{self.ip}:{self.port}..."))
             self.__client.connect()
-            self.__log(colour_string(ANSIColour.GREEN,"Gripper connected successfully!"))
+            self.__log(colour_string(ANSIColour.GREEN,"Connected to modbus successfully!"))
+            self.__log(colour_string(ANSIColour.BLUE,"Attempting to get gripper status..."))
+            self.get_status()
+            self.__log(colour_string(ANSIColour.GREEN,"Gripper returned status successfully. Ready to go!"))
             self.connected = True
             return True
         except Exception as e:
