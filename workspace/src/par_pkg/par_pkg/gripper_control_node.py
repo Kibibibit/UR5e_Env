@@ -28,7 +28,6 @@ class GripperControlNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperCheckRate", 50),
@@ -36,8 +35,6 @@ class GripperControlNode(Node):
         )
         
         # Look-up parameters values
-        self._gripper_type = self.get_parameter('gripperType').value
-        """This is the type of gripper, and should be rg2 or rg6"""
         self._gripper_ip = self.get_parameter('gripperIp').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_port = self.get_parameter('gripperPort').value
@@ -90,7 +87,7 @@ class GripperControlNode(Node):
             self.execute_open_callback
         )
         
-        self.get_logger().info(f"Gripper Action Node starting on host: {self._gripper_ip}:{self._gripper_port}. TYPE = {self._gripper_type}")
+        self.get_logger().info(f"Gripper Action Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
         
 
     def state_update_timer_callback(self):

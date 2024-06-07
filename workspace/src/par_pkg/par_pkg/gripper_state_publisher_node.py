@@ -30,7 +30,6 @@ class GripperStatePublisherNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperInfoPublishRate", 5),
@@ -40,8 +39,6 @@ class GripperStatePublisherNode(Node):
         )
 
         # Look-up parameters values
-        self._gripper_type = self.get_parameter('gripperType').value
-        """This is the type of gripper, and should be rg2 or rg6"""
         self._gripper_ip = self.get_parameter('gripperIp').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_port = self.get_parameter('gripperPort').value
@@ -81,7 +78,7 @@ class GripperStatePublisherNode(Node):
         self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
         """This timer will publish info about the gripper now and then for other nodes if needed"""
 
-        
+        self.get_logger().info(f"Gripper State Publisher Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
     
 
     def close_connection(self):
@@ -108,7 +105,6 @@ class GripperStatePublisherNode(Node):
 
     def gripper_info_callback(self):
         msg = GripperInfo()
-        msg.gripper_type = self._gripper_type
         msg.port = str(self._gripper_port)
         msg.ip = self._gripper_ip
         msg.max_force = self._gripper_max_force
