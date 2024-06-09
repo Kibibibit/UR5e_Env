@@ -7,8 +7,8 @@ string ip
 string port
 
 ### The maximum width the gripper can open in milimetres
-float32 max_width
+float64 max_width
 ### The maximum force the gripper can exert, in newtons
-float32 max_force
+float64 max_force
 ### The offset in milimetres caused by the rubber fingertips on the gripper
-float32 fingertip_offset
+float64 fingertip_offset

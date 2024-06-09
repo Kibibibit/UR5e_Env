@@ -21,6 +21,7 @@ def generate_launch_description():
         
         #### GRIPPER TOPICS
         DeclareLaunchArgument("gripperInfoTopic", default_value="/par/gripper/info"),
+        DeclareLaunchArgument("gripperStateTopic",default_value="/par/gripper"),
         
         Node(
             package='par_pkg',
@@ -44,6 +45,8 @@ def generate_launch_description():
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")},
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
+                {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
+                {'gripperStateTopic': LaunchConfiguration('griperStateTopic')}
             ]
         ),
         #Node(

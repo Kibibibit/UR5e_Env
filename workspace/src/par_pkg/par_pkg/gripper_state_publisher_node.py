@@ -3,22 +3,21 @@
 import rclpy
 from rclpy.qos import QoSProfile
 from rclpy.node import Node, Publisher
-from .onrobot.onrobot import RG
-from pymodbus.exceptions import ConnectionException 
 from sensor_msgs.msg import JointState
-from .utils import helpers as h
-from par_interfaces.msg import GripperInfo
+from par_interfaces.msg import GripperInfo, GripperState
 from .utils.rg2_client import RG2Client
 import math
 
 ### gripper_state_publisher_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
 # Created: 2024-05-30
-# Updated: 2024-05-31
+# Updated: 2024-06-09
 
 
 
-
+### These come from blender, manually measuring things.
+### Would have preferred to get real measurements from onrobot
+### but could not find them and did not receive a reply asking on robot themselves
 UPPER_FINGER_JOINT = 1.87361095202
 LOWER_FINGER_JOINT = 3.18697121414
 
@@ -36,6 +35,8 @@ class GripperStatePublisherNode(Node):
                 ("gripperInfoPublishRate", 5),
                 ("gripperInfoTopic", "/par/gripper/info"),
                 ('gripperJointPublishRate', 100),
+                ("gripperCheckRate", 50),
+                ('gripperStateTopic',"/par/gripper")
             ]
         )
 
@@ -50,17 +51,21 @@ class GripperStatePublisherNode(Node):
         """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
         self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
         """The topic that the gripper info will be published to."""
+        self._gripper_check_rate = self.get_parameter('gripperCheckRate').value
+        """This is how often the node checks the current gripper state, in Hz"""
+        self._gripper_state_topic = self.get_parameter('gripperStateTopic').value
+        """The topic that the current gripper state will be published to"""
 
     
         self._qos_profile = QoSProfile(depth=10)
         self._joint_publisher: Publisher = self.create_publisher(JointState, 'joint_states', self._qos_profile)
+        self._state_publisher: Publisher = self.create_publisher(GripperState, self._gripper_state_topic, self._qos_profile)
 
         self._info_publisher: Publisher = self.create_publisher(
             GripperInfo,
             self._gripper_info_topic,
-            10 # TODO: Replace this with a launch parameter maybe?
+            self._qos_profile
         )
-
         self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
         if (not self._gripper.open_connection()):
@@ -78,6 +83,8 @@ class GripperStatePublisherNode(Node):
 
         self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
         """This timer will publish info about the gripper now and then for other nodes if needed"""
+
+        self._gripper_state_timer = self.create_timer(1.0/self._gripper_check_rate, self.gripper_state_publish_callback)
 
         self.get_logger().info(f"Gripper State Publisher Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
     
@@ -112,7 +119,12 @@ class GripperStatePublisherNode(Node):
         msg.fingertip_offset = self._gripper_fingertip_offset
         self._info_publisher.publish(msg)
 
-        
+    def gripper_state_publish_callback(self):
+        msg = GripperState()
+        msg.width = self._gripper.get_width_with_offset()
+        msg.depth = self._gripper.get_actual_depth()
+        msg.busy = self._gripper.get_busy()
+        self._state_publisher.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
