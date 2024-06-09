@@ -16,7 +16,7 @@
     <link name="left_outer_knuckle">
         <visual>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle.dae" />
+                <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle_v2.dae" />
             </geometry>
         </visual>
         <collision>
@@ -52,7 +52,7 @@
     <link name="right_outer_knuckle">
         <visual>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle.dae" />
+                <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle_v2.dae" />
             </geometry>
         </visual>
         <collision>
