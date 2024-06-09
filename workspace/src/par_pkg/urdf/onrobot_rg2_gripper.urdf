@@ -3,7 +3,7 @@
     <link name="onrobot_rg2_base_link">
         <visual>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_base_link.dae" />
+                <mesh filename="package://par_pkg/meshes/visual/rg2_base_link_v2.dae" />
             </geometry>
         </visual>
         <collision>
@@ -40,7 +40,7 @@
     <link name="left_finger">
         <visual>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_finger.dae" />
+                <mesh filename="package://par_pkg/meshes/visual/rg2_finger_v2.dae" />
             </geometry>
         </visual>
         <collision>
@@ -76,7 +76,7 @@
     <link name="right_finger">
         <visual>
             <geometry>
-                <mesh filename="package://par_pkg/meshes/visual/rg2_finger.dae" />
+                <mesh filename="package://par_pkg/meshes/visual/rg2_finger_v2.dae" />
             </geometry>
         </visual>
         <collision>
