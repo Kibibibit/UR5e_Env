@@ -1,22 +1,16 @@
 import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
-from .onrobot.onrobot import RG
 from par_interfaces.action import GripperSetWidth, GripperFullClose, GripperFullOpen
 from rclpy.action.server import ServerGoalHandle
-from . import helpers as h
-from pymodbus.exceptions import ConnectionException 
+from .utils import helpers as h
 import time
+from .utils.rg2_client import RG2Client
 
 ### gripper_control_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
 # Created: 2024-05-23
-# Updated: 2024-05-31
-
-
-
-GRIPPER_BUSY_BIT = 0
-"""In the gripper status array, this is the index for the busy state of the gripper"""
+# Updated: 2024-06-07
 
 
 ### This is the node that will handle opening and closing, and other tasks for it.
@@ -34,7 +28,6 @@ class GripperControlNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperCheckRate", 50),
@@ -42,8 +35,6 @@ class GripperControlNode(Node):
         )
         
         # Look-up parameters values
-        self._gripper_type = self.get_parameter('gripperType').value
-        """This is the type of gripper, and should be rg2 or rg6"""
         self._gripper_ip = self.get_parameter('gripperIp').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_port = self.get_parameter('gripperPort').value
@@ -51,16 +42,12 @@ class GripperControlNode(Node):
         self._gripper_check_rate = self.get_parameter('gripperCheckRate').value
         """This is how often the node checks the current gripper state, in Hz"""
 
-        
-        self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
+        self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
-        try: 
-            # Weirdly, calling self._gripper.open_connection() doesn't trigger a connection error.
-            # Asking for any other method does though
-            self._gripper.get_status()
-        except ConnectionException: 
-            self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
-            exit() 
+
+        if (not self._gripper.open_connection()):
+            exit()
+        
         
         self._current_gripper_width = self.get_gripper_width()
         """This is the current width of the gripper, updated every [gripper_check_rate] seconds. In milimetres"""
@@ -100,7 +87,7 @@ class GripperControlNode(Node):
             self.execute_open_callback
         )
         
-        self.get_logger().info(f"Gripper Action Node starting on host: {self._gripper_ip}:{self._gripper_port}. TYPE = {self._gripper_type}")
+        self.get_logger().info(f"Gripper Action Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
         
 
     def state_update_timer_callback(self):
@@ -140,10 +127,7 @@ class GripperControlNode(Node):
             target_force:float = h.clamp(0, self._max_force, target_force)
         
         
-        self._gripper.move_gripper(
-            int(round(target_width*10.0)), 
-            int(round(target_force*10.0))
-        )
+        self._gripper.move_gripper(target_width, target_force)
         self.state_update_timer_callback()
         while(self._is_gripper_busy):
             self.state_update_timer_callback()
@@ -170,7 +154,7 @@ class GripperControlNode(Node):
 
     def get_gripper_is_busy(self) -> bool:
         """Returns true if the gripper is currently preforming an action"""
-        return self.get_gripper_status()[GRIPPER_BUSY_BIT]
+        return self._gripper.get_busy()
 
     def close_connection(self):
         self._gripper.close_connection()

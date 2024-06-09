@@ -6,8 +6,9 @@ from rclpy.node import Node, Publisher
 from .onrobot.onrobot import RG
 from pymodbus.exceptions import ConnectionException 
 from sensor_msgs.msg import JointState
-from . import helpers as h
+from .utils import helpers as h
 from par_interfaces.msg import GripperInfo
+from .utils.rg2_client import RG2Client
 import math
 
 ### gripper_state_publisher_node.py ###
@@ -15,10 +16,6 @@ import math
 # Created: 2024-05-30
 # Updated: 2024-05-31
 
-
-
-GRIPPER_BUSY_BIT = 0
-"""In the gripper status array, this is the index for the busy state of the gripper"""
 
 
 
@@ -34,7 +31,6 @@ class GripperStatePublisherNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
                 ("gripperInfoPublishRate", 5),
@@ -44,8 +40,6 @@ class GripperStatePublisherNode(Node):
         )
 
         # Look-up parameters values
-        self._gripper_type = self.get_parameter('gripperType').value
-        """This is the type of gripper, and should be rg2 or rg6"""
         self._gripper_ip = self.get_parameter('gripperIp').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_port = self.get_parameter('gripperPort').value
@@ -67,14 +61,9 @@ class GripperStatePublisherNode(Node):
             10 # TODO: Replace this with a launch parameter maybe?
         )
 
-        self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
+        self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
-        try: 
-            # Weirdly, calling self._gripper.open_connection() doesn't trigger a connection error.
-            # Asking for any other method does though
-            self._gripper.get_status()
-        except ConnectionException: 
-            self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
+        if (not self._gripper.open_connection()):
             exit() 
         
         self._gripper_max_width:float = self._gripper.max_width
@@ -90,7 +79,7 @@ class GripperStatePublisherNode(Node):
         self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
         """This timer will publish info about the gripper now and then for other nodes if needed"""
 
-        
+        self.get_logger().info(f"Gripper State Publisher Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
     
 
     def close_connection(self):
@@ -102,9 +91,9 @@ class GripperStatePublisherNode(Node):
         now = self.get_clock().now()
 
         
-        # This formula is based on a linear regression to approximate the angle of the motors
-        # from the width of the gripper. It's not super accurate but it's very close.
-        angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
+        # This formula is based on a mathematical model that is very close to accurate but
+        # not quite right. It should provide accurate enough information for RVIZ
+        angle = math.acos(gripper_width/115.0)+math.pi/2.0
 
 
         joint_state: JointState = JointState()
@@ -116,7 +105,6 @@ class GripperStatePublisherNode(Node):
 
     def gripper_info_callback(self):
         msg = GripperInfo()
-        msg.gripper_type = self._gripper_type
         msg.port = str(self._gripper_port)
         msg.ip = self._gripper_ip
         msg.max_force = self._gripper_max_force

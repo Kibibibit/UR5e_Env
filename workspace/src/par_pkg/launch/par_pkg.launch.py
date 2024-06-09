@@ -12,7 +12,6 @@ def generate_launch_description():
         DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
         
         #### GRIPPER SETUP
-        DeclareLaunchArgument('gripperType', default_value="rg2"),
         DeclareLaunchArgument('gripperIp', default_value='10.234.6.47'),
         DeclareLaunchArgument('gripperPort', default_value="502"),
         
@@ -29,7 +28,6 @@ def generate_launch_description():
             name='gripper_control_node',
             output='screen',
             parameters=[
-                {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
                 {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
@@ -42,7 +40,6 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'gripperJointPublishRate': LaunchConfiguration("gripperJointPublishRate")},
-                {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")},
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},

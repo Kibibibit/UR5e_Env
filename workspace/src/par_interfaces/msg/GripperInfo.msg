@@ -1,9 +1,6 @@
 # GripperInfo.msg
 ## Contains data about the gripper detected by the system
 
-### The type of gripper, will probably be RG2 or RG6
-string gripper_type
-
 ### The ip address of the gripper
 string ip
 ### The port of the gripper
