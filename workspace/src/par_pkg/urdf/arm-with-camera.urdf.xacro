@@ -3,7 +3,8 @@
 
     <xacro:arg name="name" default="ur" />
     <xacro:arg name="ur_type" default="ur5x" />
-    <xacro:include filename="$(find par_pkg)/urdf/ur.urdf.xacro" />
+    <xacro:arg name="parent" default="mount_plate_attach_link"/>
+    <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
     <xacro:include filename="onrobot_quick_changer.urdf" />
     <xacro:include filename="onrobot_eyes.urdf" />
     <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro" />
@@ -11,7 +12,7 @@
     <xacro:property name="plate_depth" value="0.0127" />
     <xacro:property name="plate_size" value="0.30" />
 
-    <xacro:ur_robot name="ur" parent="mount_plate_attach_link" />
+    <xacro:macro name="ur" params="name ur_type parent" />
     <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true"
         add_plug="false" use_mesh="false">
         <!-- 
