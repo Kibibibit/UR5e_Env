@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e">
+    <!-- There is currently no way to change this, we will need a custom launch file for the ur drivers -->
+    <xacro:arg name="gripper" default="true"/>
     <xacro:arg name="ur_type" default="ur5e"/>
     <xacro:arg name="joint_limit_params"
         default="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml" />
@@ -19,6 +21,7 @@
         kinematics_parameters_file="$(arg kinematics_params)"
         physical_parameters_file="$(arg physical_params)"
         visual_parameters_file="$(arg visual_params)"
+        gripper="$(arg gripper)"
     >
 
     </xacro:ur_assembly>
