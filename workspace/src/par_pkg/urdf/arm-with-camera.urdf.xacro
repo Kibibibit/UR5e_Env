@@ -49,6 +49,8 @@
         <axis xyz="0 0 0" />
     </joint>
 
+
+    <link name="world"/>
     <link name="mount_plate_attach_link"/>
     <link name="mount_plate_base_link">
         <visual>
@@ -65,7 +67,12 @@
         </collision>
     </link>
 
-
+    <joint name="world_joint" type="fixed">
+        <parent link="world"/>
+        <child link="mount_plate_base_link"/>
+        
+    </joint>
+    
     <joint name="mount_joint" type="fixed">
         <origin xyz="0 0 ${plate_depth}" />
         <parent link="mount_plate_base_link" />
