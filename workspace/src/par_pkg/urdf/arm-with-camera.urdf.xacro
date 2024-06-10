@@ -6,6 +6,12 @@
 
     <xacro:arg name="name" default="ur" />
     <xacro:arg name="ur_type" default="ur5x" />
+    <xacro:arg name="tf_prefix" default="" />
+    <xacro:arg name="joint_limit_params" default="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml"/>
+    <xacro:arg name="kinematics_params" default="$(find ur_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
+    <xacro:arg name="physical_params" default="$(find ur_description)/config/$(arg ur_type)/physical_parameters.yaml"/>
+    <xacro:arg name="visual_params" default="$(find ur_description)/config/$(arg ur_type)/visual_parameters.yaml"/>
+
     <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro" />
     <xacro:include filename="onrobot_quick_changer.urdf" />
     <xacro:include filename="onrobot_eyes.urdf" />
@@ -14,6 +20,11 @@
 
     <xacro:ur_robot
         name="$(arg name)"
+        tf_prefix="$(arg tf_prefix)"
+        joint_limit_params="$(arg joint_limit_params)"
+        kinematics_params="$(arg kinematics_params)"
+        physical_params="$(arg physical_params)"
+        visual_params="$(arg visual_params)"
         parent="mount_plate_attach_link"
     >
         <origin xyz="0 0 0"/>
