@@ -1,18 +1,24 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="$(arg name)">
 
+    <xacro:property name="plate_depth" value="0.0127" />
+    <xacro:property name="plate_size" value="0.30" />
+
     <xacro:arg name="name" default="ur" />
     <xacro:arg name="ur_type" default="ur5x" />
-    <xacro:arg name="parent" default="mount_plate_attach_link"/>
-    <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
+    <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro" />
     <xacro:include filename="onrobot_quick_changer.urdf" />
     <xacro:include filename="onrobot_eyes.urdf" />
     <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro" />
 
-    <xacro:property name="plate_depth" value="0.0127" />
-    <xacro:property name="plate_size" value="0.30" />
 
-    <xacro:macro name="ur" params="name ur_type parent" />
+    <xacro:ur_robot
+        name="$(arg name)"
+        ur_type="$(arg ur_type)"
+        parent="mount_plate_attach_link"
+    >
+        <origin xyz="0 0 0"/>
+    </xacro:ur_robot>
     <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true"
         add_plug="false" use_mesh="false">
         <!-- 
@@ -33,7 +39,7 @@
         <axis xyz="0 0 0" />
     </joint>
 
-
+    <link name="mount_plate_attach_link"/>
     <link name="mount_plate_base_link">
         <visual>
             <origin xyz="0 0 ${plate_depth/2}" />
@@ -48,13 +54,7 @@
             </geometry>
         </collision>
     </link>
-    <link name="mount_plate_attach_link"/>
 
-    <joint name="world_joint" type="fixed">
-        <parent link="world" />
-        <child link="mount_plate_base_link" />
-        <axis xyz="0 0 0" />
-    </joint>
 
     <joint name="mount_joint" type="fixed">
         <origin xyz="0 0 ${plate_depth}" />
