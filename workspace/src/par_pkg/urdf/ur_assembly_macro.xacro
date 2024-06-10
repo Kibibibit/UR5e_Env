@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e">
+
+    <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro" />
+    <xacro:include filename="$(find par_pkg)/urdf/onrobot_eyes.xacro" />
+    <xacro:include filename="$(find par_pkg)/urdf/onrobot_quick_changer.xacro" />
+
+    <xacro:include filename="$(find par_pkg)/urdf/onrobot_rg2_gripper.urdf"/>
+
+
+    <xacro:property name="mount_plate_size" value="0.2" />
+    <xacro:property name="mount_plate_depth" value="0.0127" />
+
+    <xacro:macro
+        name="ur_assembly"
+        params="
+        parent
+        ur_type
+        joint_limits_parameters_file
+        kinematics_parameters_file
+        physical_parameters_file
+        visual_parameters_file
+        low_poly:='true'
+        gripper:='true'
+        mounting_angle:=0
+        camera_angle:=0
+    ">
+
+        <joint name="gripper" type="fixed">
+            <parent link="onrobot_quick_changer_tool_link"/>
+            <child link="onrobot_rg2_base_link"/>
+        </joint>
+
+
+        <link name="mount_plate_link">
+            <visual>
+                <origin xyz="0 0 -${mount_plate_depth/2}" />
+                <geometry>
+                    <box size="${mount_plate_size} ${mount_plate_size} ${mount_plate_depth}" />
+                </geometry>
+            </visual>
+            <collision>
+                <origin xyz="0 0 -${mount_plate_depth/2}" />
+                <geometry>
+                    <box size="${mount_plate_size} ${mount_plate_size} ${mount_plate_depth}" />
+                </geometry>
+            </collision>
+        </link>
+
+
+        <xacro:ur_robot
+            name="${ur_type}"
+            tf_prefix=""
+            parent="mount_plate_link"
+            joint_limits_parameters_file="${joint_limits_parameters_file}"
+            kinematics_parameters_file="${kinematics_parameters_file}"
+            physical_parameters_file="${physical_parameters_file}"
+            visual_parameters_file="${visual_parameters_file}"
+        >
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </xacro:ur_robot>
+
+        <xacro:onrobot_eyes
+            parent="tool0"
+            low_poly="${low_poly}"
+            camera_angle="${camera_angle}"
+        />
+
+        <xacro:onrobot_quick_changer
+            parent="onrobot_eyes_base_link"
+            low_poly="${low_poly}"
+        />
+
+
+        <joint name="mount_plate_joint" type="fixed">
+            <origin xyz="0 0 ${mount_plate_depth}" rpy="0 0 ${mounting_angle}" />
+            <parent link="world" />
+            <child link="mount_plate_link" />
+        </joint>
+
+
+    </xacro:macro>
+
+
+</robot>

@@ -7,6 +7,7 @@
     <xacro:include filename="arm-with-camera.srdf.xacro"/>
 
     <disable_collisions link1="onrobot_eyes_base_link" link2="onrobot_rg2_base_link" reason="Never" />
+    <disable_collisions link1="onrobot_eyes_link" link2="onrobot_rg2_base_link" reason="Never" />
     <disable_collisions link1="onrobot_quick_changer_base_link" link2="onrobot_rg2_base_link" reason="Adjacent" />
 
 

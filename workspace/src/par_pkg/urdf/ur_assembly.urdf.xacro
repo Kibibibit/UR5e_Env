@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ur5e">
+    <xacro:arg name="ur_type" default="ur5e"/>
+    <xacro:arg name="joint_limit_params"
+        default="$(find ur_description)/config/$(arg ur_type)/joint_limits.yaml" />
+    <xacro:arg name="kinematics_params"
+        default="$(find ur_description)/config/$(arg ur_type)/default_kinematics.yaml" />
+    <xacro:arg name="physical_params"
+        default="$(find ur_description)/config/$(arg ur_type)/physical_parameters.yaml" />
+    <xacro:arg name="visual_params"
+        default="$(find ur_description)/config/$(arg ur_type)/visual_parameters.yaml" />
+
+    <xacro:include filename="$(find par_pkg)/urdf/ur_assembly_macro.xacro" />
+    <link name="world" />
+    <xacro:ur_assembly
+        parent="world"
+        ur_type="$(arg ur_type)"
+        joint_limits_parameters_file="$(arg joint_limit_params)"
+        kinematics_parameters_file="$(arg kinematics_params)"
+        physical_parameters_file="$(arg physical_params)"
+        visual_parameters_file="$(arg visual_params)"
+    >
+
+    </xacro:ur_assembly>
+
+</robot>

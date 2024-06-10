@@ -36,6 +36,6 @@ do
 done
 
 
-ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ \
-    description_file:="/home/rosuser/workspace/src/par_pkg/urdf/arm-with-camera$GRIPPER.urdf.xacro" \
+ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ low_poly:=true \
+    description_file:="/home/rosuser/workspace/src/par_pkg/urdf/ur_assembly.urdf.xacro" \
     moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro"

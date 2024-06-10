@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="onrobot_eyes">
+
+    <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro" />
+    <xacro:macro name="onrobot_eyes"
+        params="
+        parent
+        camera_angle:=0
+        low_poly:='true'
+    ">
+
+        <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true"
+            add_plug="false" use_mesh="false">
+            <!-- 
+            These measurements are not 100% accurate, they're the best
+            I could get based on manually aligning it in blender.
+            We need to preform camera extrinsics calibration manually to get these values.
+            industrial_calibration seems like a good package for doing this.
+        -->
+            <origin xyz="-0.01091 0.105055 0.019792" rpy="-${pi/2} -${pi/2} 0" />
+        </xacro:sensor_d415>
+
+        <link name="onrobot_eyes_base_link"/>
+        <link name="onrobot_eyes_link">
+            <visual>
+                <geometry>
+                    <xacro:if value="${low_poly}">
+                        <mesh filename="package://par_pkg/meshes/visual/onrobot_eyes_low_poly.dae" />
+                    </xacro:if>
+                    <xacro:if value="${not low_poly}">
+                        <mesh filename="package://par_pkg/meshes/visual/onrobot_eyes.dae" />
+                    </xacro:if>
+                </geometry>
+            </visual>
+            <collision>
+                <geometry>
+                    <mesh filename="package://par_pkg/meshes/collision/onrobot_eyes.stl" />
+                </geometry>
+            </collision>
+        </link>
+
+        <link name="onrobot_eyes_tool_link" />
+
+        <joint name="onrobot_eyes_base_joint" type="fixed">
+            <origin rpy="0 0 ${pi}"/>
+            <parent link="${parent}"/>
+            <child link="onrobot_eyes_base_link"/>
+        </joint>
+
+        <joint name="onrobot_eyes_joint" type="fixed">
+            <origin rpy="0 0 ${camera_angle}" />
+            <parent link="onrobot_eyes_base_link" />
+            <child link="onrobot_eyes_link" />
+        </joint>
+
+        <joint name="onrobot_eyes_tool_joint" type="fixed">
+            <origin rpy="0 0 0" xyz="0 0 0.012"/>
+            <parent link="onrobot_eyes_base_link" />
+            <child link="onrobot_eyes_tool_link" />
+        </joint>
+
+
+    </xacro:macro>
+
+</robot>
