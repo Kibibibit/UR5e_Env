@@ -14,7 +14,6 @@
 
     <xacro:ur_robot
         name="$(arg name)"
-        ur_type="$(arg ur_type)"
         parent="mount_plate_attach_link"
     >
         <origin xyz="0 0 0"/>
