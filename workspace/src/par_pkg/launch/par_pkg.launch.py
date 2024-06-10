@@ -46,7 +46,7 @@ def generate_launch_description():
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
                 {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
-                {'gripperStateTopic': LaunchConfiguration('griperStateTopic')}
+                {'gripperStateTopic': LaunchConfiguration('gripperStateTopic')}
             ]
         ),
         #Node(
