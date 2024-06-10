@@ -1,75 +1,76 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="$(arg name)">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="$(arg name)">
 
-    <xacro:arg name="name" default="ur"/>
-    <xacro:arg name="ur_type" default="ur5x"/>
-    <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
-    <xacro:include filename="onrobot_quick_changer.urdf"/>
-    <xacro:include filename="onrobot_eyes.urdf"/>
-    <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro"/>
+    <xacro:arg name="name" default="ur" />
+    <xacro:arg name="ur_type" default="ur5x" />
+    <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
+    <xacro:include filename="onrobot_quick_changer.urdf" />
+    <xacro:include filename="onrobot_eyes.urdf" />
+    <xacro:include filename="$(find realsense2_description)/urdf/_d415.urdf.xacro" />
 
     <xacro:property name="plate_depth" value="0.0127" />
-    <xacro:property name="plate_size" value="0.30"/>
+    <xacro:property name="plate_size" value="0.30" />
 
-    <xacro:macro name="ur" params="name ur_type"/>
-    <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true" add_plug="false" use_mesh="false">
+    <xacro:macro name="ur" params="name ur_type" />
+    <xacro:sensor_d415 parent="onrobot_eyes_base_link" use_nominal_extrinsics="true"
+        add_plug="false" use_mesh="false">
         <!-- 
             These measurements are not 100% accurate, they're the best
             I could get based on manually aligning it in blender.
             We need to preform camera extrinsics calibration manually to get these values.
             industrial_calibration seems like a good package for doing this.
         -->
-        <origin xyz="-0.01091 0.105055 0.019792" rpy="-${pi/2} -${pi/2} 0"/>
+        <origin xyz="-0.01091 0.105055 0.019792" rpy="-${pi/2} -${pi/2} 0" />
     </xacro:sensor_d415>
 
     <!-- This is the camera link provided by Sam, not sure how it was obtained -->
-    <link name="camera_sam_link"/>
+    <link name="camera_sam_link" />
     <joint name="camera_sam_link_joint" type="fixed">
-        <origin rpy="0 -${pi/2} ${pi/2}" xyz="-0.018 -0.11 0.031"/>
-        <parent link="wrist_3_link"/>
-        <child link="camera_sam_link"/>
-        <axis xyz="0 0 0"/>
+        <origin rpy="0 -${pi/2} ${pi/2}" xyz="-0.018 -0.11 0.031" />
+        <parent link="wrist_3_link" />
+        <child link="camera_sam_link" />
+        <axis xyz="0 0 0" />
     </joint>
 
     <link name="mount_link">
         <visual>
-            <origin xyz="0 0 ${plate_depth/2}"/>
+            <origin xyz="0 0 ${plate_depth/2}" />
             <geometry>
                 <box size="${plate_size} ${plate_size} ${plate_depth}" />
-            <geometry/>
+            </geometry>
         </visual>
         <collision>
-        <origin xyz="0 0 ${plate_depth/2}"/>
+            <origin xyz="0 0 ${plate_depth/2}" />
             <geometry>
                 <box size="${plate_size} ${plate_size} ${plate_depth}" />
-            <geometry/>
+            </geometry>
         </collision>
     </link>
 
     <joint name="world_joint" type="fixed">
-        <parent link="world"/>
-        <child link="mount_link"/>
-        <axis xyz="0 0 0"/>
+        <parent link="world" />
+        <child link="mount_link" />
+        <axis xyz="0 0 0" />
     </joint>
 
     <joint name="mount_joint" type="fixed">
-        <origin xyz="0 0 ${plate_depth}"/>
-        <parent link="mount_link"/>
-        <child link="base_link"/>
-        <axis xyz="0 0 0"/>
+        <origin xyz="0 0 ${plate_depth}" />
+        <parent link="mount_link" />
+        <child link="base_link" />
+        <axis xyz="0 0 0" />
     </joint>
 
     <joint name="eyes_joint" type="fixed">
-        <origin rpy="0 0 ${pi}" xyz="0 0 0"/>
-        <parent link="tool0"/>
-        <child link="onrobot_eyes_base_link"/>
-        <axis xyz="0 0 0"/>
+        <origin rpy="0 0 ${pi}" xyz="0 0 0" />
+        <parent link="tool0" />
+        <child link="onrobot_eyes_base_link" />
+        <axis xyz="0 0 0" />
     </joint>
     <joint name="quick_changer_joint" type="fixed">
-        <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
-        <parent link="onrobot_eyes_tool_link"/>
-        <child link="onrobot_quick_changer_base_link"/>
-        <axis xyz="0 0 0"/>
+        <origin rpy="0 0 ${pi/2}" xyz="0 0 0" />
+        <parent link="onrobot_eyes_tool_link" />
+        <child link="onrobot_quick_changer_base_link" />
+        <axis xyz="0 0 0" />
     </joint>
 
 </robot>
