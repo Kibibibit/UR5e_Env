@@ -21,10 +21,10 @@
     <xacro:ur_robot
         name="$(arg name)"
         tf_prefix="$(arg tf_prefix)"
-        joint_limit_params="$(arg joint_limit_params)"
-        kinematics_params="$(arg kinematics_params)"
-        physical_params="$(arg physical_params)"
-        visual_params="$(arg visual_params)"
+        joint_limit_parameter_file="$(arg joint_limit_params)"
+        kinematics_parameter_file="$(arg kinematics_params)"
+        physical_parameter_file="$(arg physical_params)"
+        visual_parameter_file="$(arg visual_params)"
         parent="mount_plate_attach_link"
     >
         <origin xyz="0 0 0"/>
