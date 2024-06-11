@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/GripperFullClose.action"
   "action/GripperFullOpen.action"
   "action/WaypointMove.action"
+  "action/PickAndPlace.action"
   
   "srv/CurrentWaypointPose.srv"
   "srv/CurrentPose.srv"
