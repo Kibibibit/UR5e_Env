@@ -2,48 +2,68 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
 
 
-    <!-- There is currently no way to change this, we will need a custom launch file for the ur drivers -->
-    <xacro:arg name="gripper" default="true"/>
+    <!-- There is currently no way to change this, we will need a custom launch file for the ur
+    drivers -->
+    <xacro:arg name="gripper" default="true" />
 
     <xacro:arg name="name" default="ur5e" />
     <xacro:arg name="prefix" default="" />
 
-    <xacro:include filename="$(find ur_moveit_config)/srdf/ur.srdf.xacro" />
+    <xacro:include filename="$(find ur_moveit_config)/srdf/ur_macro.srdf.xacro" />
 
+    <xacro:property name="ik_group" value="$(arg prefix)$(arg name)_manipulator_end_effector"/>
 
-    
     <xacro:ur_srdf name="$(arg name)" prefix="$(arg prefix)" />
     <disable_collisions link1="wrist_3_link" link2="onrobot_eyes_base_link" reason="Adjacent" />
     <disable_collisions link1="wrist_3_link" link2="onrobot_eyes_link" reason="Adjacent" />
-    <disable_collisions link1="onrobot_eyes_base_link" link2="onrobot_quick_changer_base_link" reason="Adjacent" />
-    <disable_collisions link1="wrist_3_link" link2="onrobot_quick_changer_base_link" reason="Adjacent" />
-    <disable_collisions link1="onrobot_eyes_link" link2="onrobot_quick_changer_base_link" reason="Adjacent" />
+    <disable_collisions link1="onrobot_eyes_base_link" link2="onrobot_quick_changer_base_link"
+        reason="Adjacent" />
+    <disable_collisions link1="wrist_3_link" link2="onrobot_quick_changer_base_link"
+        reason="Adjacent" />
+    <disable_collisions link1="onrobot_eyes_link" link2="onrobot_quick_changer_base_link"
+        reason="Adjacent" />
     <disable_collisions link1="camera_link" link2="onrobot_eyes_base_link" reason="Never" />
-    <disable_collisions link1="camera_link" link2="onrobot_eyes_link" reason="Never"/>
+    <disable_collisions link1="camera_link" link2="onrobot_eyes_link" reason="Never" />
 
-    <disable_collisions link1="base_link_inertia" link2="mount_plate_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link_inertia" link2="mount_plate_link" reason="Adjacent" />
 
 
     <xacro:if value="$(arg gripper)">
-        <disable_collisions link1="onrobot_eyes_base_link" link2="onrobot_rg2_base_link" reason="Never" />
+
+        <group name="${ik_group}">
+            <chain base_link="$(arg prefix)base_link" tip_link="end_effector_link"/>
+        </group>
+
+        <disable_collisions link1="onrobot_eyes_base_link" link2="onrobot_rg2_base_link"
+            reason="Never" />
         <disable_collisions link1="onrobot_eyes_link" link2="onrobot_rg2_base_link" reason="Never" />
-        <disable_collisions link1="onrobot_quick_changer_base_link" link2="onrobot_rg2_base_link" reason="Adjacent" />
-    
-    
+        <disable_collisions link1="onrobot_quick_changer_base_link" link2="onrobot_rg2_base_link"
+            reason="Adjacent" />
+
+
         <disable_collisions link1="right_finger" link2="right_inner_knuckle" reason="Adjacent" />
         <disable_collisions link1="right_finger" link2="right_outer_knuckle" reason="Adjacent" />
         <disable_collisions link1="right_inner_knuckle" link2="right_outer_knuckle" reason="Never" />
-        
+
         <disable_collisions link1="left_finger" link2="left_inner_knuckle" reason="Adjacent" />
         <disable_collisions link1="left_finger" link2="left_outer_knuckle" reason="Adjacent" />
         <disable_collisions link1="left_inner_knuckle" link2="left_outer_knuckle" reason="Never" />
-    
+
         <disable_collisions link1="left_finger" link2="right_finger" reason="Never" />
-    
-        <disable_collisions link1="onrobot_rg2_base_link" link2="right_outer_knuckle" reason="Adjacent" />
-        <disable_collisions link1="onrobot_rg2_base_link" link2="right_inner_knuckle" reason="Adjacent" />
-        <disable_collisions link1="onrobot_rg2_base_link" link2="left_outer_knuckle" reason="Adjacent" />
-        <disable_collisions link1="onrobot_rg2_base_link" link2="left_inner_knuckle" reason="Adjacent" />
+
+        <disable_collisions link1="onrobot_rg2_base_link" link2="right_outer_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="right_inner_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="left_outer_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="left_inner_knuckle"
+            reason="Adjacent" />
     </xacro:if>
+    <xacro:unless value="$(arg gripper)">
+        <group name="${ik_group}">
+            <chain base_link="$(arg prefix)base_link" tip_link="onrobot_quick_changer_tool_link"/>
+        </group>
+    </xacro:unless>
 
 </robot>

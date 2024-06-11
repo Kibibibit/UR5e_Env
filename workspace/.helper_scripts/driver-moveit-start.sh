@@ -38,4 +38,5 @@ done
 
 ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ low_poly:=true gripper:=$GRIPPER \
     description_file:="/home/rosuser/workspace/src/par_pkg/urdf/ur_assembly.urdf.xacro" \
+    moveit_config_package:=par_pkg \
     moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/ur_assembly.srdf.xacro"
