@@ -100,7 +100,7 @@ class GripperStatePublisherNode(Node):
         
         # This formula is based on a mathematical model that is very close to accurate but
         # not quite right. It should provide accurate enough information for RVIZ
-        angle = math.acos(gripper_width/115.0)+math.pi/2.0
+        angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
 
 
         joint_state: JointState = JointState()
