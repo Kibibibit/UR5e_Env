@@ -13,9 +13,9 @@
                     <xacro:if value="${low_poly}">
                         <mesh filename="package://par_pkg/meshes/visual/quick_changer_low_poly.dae" />
                     </xacro:if>
-                    <xacro:if value="${not low_poly}">
+                    <xacro:unless value="${low_poly}">
                         <mesh filename="package://par_pkg/meshes/visual/quick_changer.dae" />
-                    </xacro:if>
+                    </xacro:unless>
                 </geometry>
             </visual>
             <collision>
