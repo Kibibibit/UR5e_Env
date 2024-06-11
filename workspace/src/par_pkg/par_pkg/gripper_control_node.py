@@ -127,7 +127,7 @@ class GripperControlNode(Node):
             target_force:float = h.clamp(0, self._max_force, target_force)
         
         
-        self._gripper.move_gripper(target_width, target_force)
+        self._gripper.move_gripper_with_offset(target_width, target_force)
         self.state_update_timer_callback()
         while(self._is_gripper_busy):
             self.state_update_timer_callback()

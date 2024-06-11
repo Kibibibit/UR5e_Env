@@ -216,7 +216,7 @@ class RG2Client():
         self.set_target_width(target_width)
         self.set_control_mode(control_mode)
         self.__log(f"Setting gripper@{self.ip}:{self.port} to width of {target_width} with force {target_force}")
-    
+
     def move_gripper_with_offset(self, target_width, target_force=DEFAULT_FORCE) -> None:
         self.move_gripper(target_width, target_force, RG2ControlMode.CONTROL_MODE_GRIP_W_OFFSET)
     
