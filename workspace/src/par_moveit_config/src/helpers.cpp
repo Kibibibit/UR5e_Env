@@ -12,7 +12,7 @@ geometry_msgs::msg::Pose pose_from_waypoint_pose(par_interfaces::msg::WaypointPo
 
   pose.position = waypoint_pose.position;
   pose.orientation = quaternion_from_rpy(M_PI, 0.0, waypoint_pose.rotation - M_PI);
-  return round_pose_to_n_places(ROUNDING_PLACES, pose);
+  return pose;
 }
 
 par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Pose pose)
@@ -21,7 +21,7 @@ par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Po
 
   waypoint_pose.position = pose.position;
   waypoint_pose.rotation = wrap_value(-M_PI_2, M_PI_2, rpy_from_quaternion(pose.orientation).z + M_PI);
-  return round_waypoint_pose_to_n_places(ROUNDING_PLACES, waypoint_pose);
+  return waypoint_pose;
 }
 
 geometry_msgs::msg::Quaternion quaternion_from_rpy(double roll, double pitch, double yaw)

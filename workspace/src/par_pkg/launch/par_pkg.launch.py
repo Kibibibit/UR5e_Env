@@ -49,6 +49,13 @@ def generate_launch_description():
                 {'gripperStateTopic': LaunchConfiguration('gripperStateTopic')}
             ]
         ),
+        Node(
+            package='par_pkg',
+            executable='camera_calibration_node',
+            name='camera_calibration_node',
+            output='screen',
+            parameters=[]
+        )
         #Node(
          #   package='par_pkg',
           #  executable='move_to_pose_node',

@@ -31,7 +31,8 @@ setup(
         'console_scripts': [
             'gripper_control_node = par_pkg.gripper_control_node:main',
             'gripper_state_publisher_node = par_pkg.gripper_state_publisher_node:main',
-            'move_to_pose_node = par_pkg.move_to_pose_node:main'
+            'move_to_pose_node = par_pkg.move_to_pose_node:main',
+            'camera_calibration_node = par_pkg.camera_calibration_node:main'
         ],
     },
 )
