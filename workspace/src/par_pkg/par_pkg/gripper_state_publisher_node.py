@@ -94,7 +94,7 @@ class GripperStatePublisherNode(Node):
 
     def gripper_joint_publish_callback(self):
 
-        gripper_width = self._gripper.get_width_with_offset()
+        gripper_width = self._gripper.get_width()
         now = self.get_clock().now()
 
         if (gripper_width > 1):
