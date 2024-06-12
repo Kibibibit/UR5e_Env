@@ -262,8 +262,7 @@ def launch_setup(context, *args, **kwargs):
             moveit_controllers,
             planning_scene_monitor_parameters,
             {"use_sim_time": use_sim_time},
-            warehouse_ros_config,
-            move_plane_height
+            warehouse_ros_config
     ]
 
     moveit_action_server_node = Node(
