@@ -11,7 +11,7 @@ from rclpy.task import Future
 class PickAndPlaceActionServer(Node):
 
     def __init__(self):
-        super().__init__('move_to_pose_node')
+        super().__init__('pick_and_place_node')
 
         self.pick_and_place_action_server = ActionServer(self, PickAndPlace, "/par/pick_and_place", self.pick_and_place_callback)
 
