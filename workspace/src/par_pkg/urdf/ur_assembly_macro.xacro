@@ -133,7 +133,7 @@
 
         <joint name="mount_plate_joint" type="fixed">
             <origin xyz="0 0 ${mount_plate_depth}" rpy="0 0 ${mounting_angle}" />
-            <parent link="world" />
+            <parent link="${parent}" />
             <child link="mount_plate_link" />
         </joint>
 
