@@ -9,7 +9,7 @@
     "
     >
 
-
+        <xacro:property name="angle_max" value="3.2"/>
         <xacro:property name="knuckle_yaw" value="1.57079632679"/>
         <xacro:property name="knuckle_x_offset" value="0.01"/>
 
@@ -106,7 +106,6 @@
                 </geometry>
             </collision>
         </link>
-        <!-- <link name="grip_point"/> -->
 
 
         <joint name="rg2_parent_joint" type="fixed">
@@ -119,14 +118,14 @@
             <parent link="onrobot_rg2_base_link" />
             <child link="left_outer_knuckle" />
             <axis xyz="0 1 0" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
         </joint>
         <joint name="right_outer_knuckle_joint" type="revolute">
             <origin rpy="0 0 ${-knuckle_yaw}" xyz="${knuckle_x_offset} 0.01695 0.1207" />
             <parent link="onrobot_rg2_base_link" />
             <child link="right_outer_knuckle" />
             <axis xyz="0 1 0" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
             <mimic joint="finger_joint" multiplier="1" offset="0" />
         </joint>
         <joint name="left_inner_knuckle_joint" type="revolute">
@@ -134,7 +133,7 @@
             <parent link="onrobot_rg2_base_link" />
             <child link="left_inner_knuckle" />
             <axis xyz="0 1 0" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
             <mimic joint="finger_joint" multiplier="1" offset="0" />
         </joint>
         <joint name="right_inner_knuckle_joint" type="revolute">
@@ -142,7 +141,7 @@
             <parent link="onrobot_rg2_base_link" />
             <child link="right_inner_knuckle" />
             <axis xyz="0 1 0" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
             <mimic joint="finger_joint" multiplier="1" offset="0" />
         </joint>
 
@@ -151,7 +150,7 @@
             <parent link="left_outer_knuckle" />
             <child link="left_finger" />
             <axis xyz="0 0 -1" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
             <mimic joint="finger_joint" multiplier="-1" offset="0" />
         </joint>
 
@@ -160,7 +159,7 @@
             <parent link="right_outer_knuckle" />
             <child link="right_finger" />
             <axis xyz="0 0 1" />
-            <limit effort="1000" lower="1.87361095202" upper="3.18697121414" velocity="1.0" />
+            <limit effort="1000" lower="1.87361095202" upper="${angle_max}" velocity="1.0" />
             <mimic joint="finger_joint" multiplier="1" offset="0" />
         </joint>
 
