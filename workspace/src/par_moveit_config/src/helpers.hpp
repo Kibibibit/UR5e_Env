@@ -12,6 +12,6 @@ geometry_msgs::msg::Pose pose_from_waypoint_pose(par_interfaces::msg::WaypointPo
 par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Pose pose);
 bool equal_approx(double a, double b, double margin);
 bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin);
-
+double wrap_value(double min, double max, double value);
 
 #endif

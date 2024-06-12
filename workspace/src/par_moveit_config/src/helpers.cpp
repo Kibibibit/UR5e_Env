@@ -22,7 +22,7 @@ par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Po
   par_interfaces::msg::WaypointPose waypoint_pose;
 
   waypoint_pose.position = pose.position;
-  waypoint_pose.rotation = rpy_from_quaternion(pose.orientation).z+M_PI;
+  waypoint_pose.rotation = wrap_value(-M_PI_2, M_PI_2, rpy_from_quaternion(pose.orientation).z+M_PI);
   return waypoint_pose;
 }
 
@@ -75,4 +75,12 @@ bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::Wa
   bool y_move = !equal_approx(a.position.y, b.position.y, margin);
   bool rotation = !equal_approx(a.rotation, b.rotation, margin);
   return x_move || y_move || rotation;
+}
+
+double wrap_value(double min, double max, double value) {
+  if (value < min) {
+    return max - std::fmod((min-value),(max-min));
+  } else {
+    return min - std::fmod((value - min),(max-min));
+  }
 }
