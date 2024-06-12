@@ -37,7 +37,7 @@ class CalibrateCameraNode(Node):
             self.get_logger().error('Unable to find the transformation')
 
 
-            point_source = Point(x=0, y=0, z=0)
+            point_source = Point(x=0.0, y=0.0, z=0.0)
 
             point_target = do_transform_point(transformation, point_source)
 
