@@ -60,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
     launch_rviz = LaunchConfiguration("launch_rviz")
     launch_servo = LaunchConfiguration("launch_servo")
 
-    move_plane_height = LaunchConfiguration("move_plane_height", 0.45)
+    move_plane_height = LaunchConfiguration("move_plane_height", default=0.45)
 
     joint_limit_params = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
