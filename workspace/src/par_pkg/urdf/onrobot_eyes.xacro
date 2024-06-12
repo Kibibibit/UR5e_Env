@@ -18,11 +18,12 @@
             add_plug="false" use_mesh="false">
             <!-- 
             These measurements are not 100% accurate, they're the best
-            I could get based on manually aligning it in blender.
+            I could get based on manually aligning it in blender, and 
+            manual calibrations with transforms
             We need to preform camera extrinsics calibration manually to get these values.
             industrial_calibration seems like a good package for doing this.
         -->
-            <origin xyz="0 ${0.10485-d415_cam_depth_py/2} ${0.019792+0.009}" rpy="-${pi/2} -${pi/2} 0" />
+            <origin xyz="0 ${0.10485-d415_cam_depth_py/2} ${0.019792+0.00945}" rpy="-${pi/2} -${pi/2} 0" />
         </xacro:sensor_d415>
 
         <link name="onrobot_eyes_base_link"/>
