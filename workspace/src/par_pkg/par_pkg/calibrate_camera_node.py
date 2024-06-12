@@ -35,8 +35,10 @@ class CalibrateCameraNode(Node):
         try:
             transformation = self.__tf_buffer.lookup_transform("world",
                     "camera_depth_frame", rclpy.time.Time())
-        except tf2_ros.TransformException:
+        except tf2_ros.TransformException as e:
             self.get_logger().error('Unable to find the transformation')
+            self.get_logger().error(str(e))
+            return
 
 
         point_source = PointStamped()
