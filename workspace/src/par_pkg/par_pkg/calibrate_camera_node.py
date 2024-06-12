@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import PointStamped
 
 
 
@@ -37,11 +37,11 @@ class CalibrateCameraNode(Node):
             self.get_logger().error('Unable to find the transformation')
 
 
-            point_source = Point(x=0.0, y=0.0, z=0.0)
+        point_source = PointStamped(x=0.0, y=0.0, z=0.0)
 
-            point_target = do_transform_point(transformation, point_source)
+        point_target = do_transform_point(point_source,transformation)
 
-            self.get_logger().info(f"Camera depth frame height is: {point_target.point.z}")
+        self.get_logger().info(f"Camera depth frame height is: {point_target.point.z}")
 
 
 
