@@ -1,6 +1,7 @@
 import rclpy
 import rclpy.duration
 from rclpy.node import Node
+import rclpy.time
 from sensor_msgs.msg import Image
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
@@ -31,9 +32,8 @@ class CalibrateCameraNode(Node):
                 # get the transformation from source_frame to target_frame.
         try:
             transformation = self.__tf_buffer.lookup_transform("world",
-                    "camera_depth_frame", self.get_clock().now(), rclpy.duration.Duration(seconds=0.05))
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException,
-                tf2_ros.ExtrapolationException):
+                    "camera_depth_frame", rclpy.time.Time())
+        except tf2_ros.TransformException:
             self.get_logger().error('Unable to find the transformation')
 
 
