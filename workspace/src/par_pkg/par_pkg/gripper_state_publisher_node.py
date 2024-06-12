@@ -97,10 +97,12 @@ class GripperStatePublisherNode(Node):
         gripper_width = self._gripper.get_width()
         now = self.get_clock().now()
 
-        
-        # This formula is based on a mathematical model that is very close to accurate but
-        # not quite right. It should provide accurate enough information for RVIZ
-        angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
+        if (gripper_width > 1):
+            # This formula is based on a mathematical model that is very close to accurate but
+            # not quite right. It should provide accurate enough information for RVIZ
+            angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
+        else:
+            angle = UPPER_FINGER_JOINT
 
 
         joint_state: JointState = JointState()
