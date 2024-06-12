@@ -2,7 +2,7 @@ import rclpy
 import rclpy.duration
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-
+from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
 from geometry_msgs.msg import Point
@@ -21,7 +21,8 @@ class CalibrateCameraNode(Node):
         self.__depth_camera_subscriber = self.create_subscription(
             Image,
             "/camera/depth/image_rect_raw",
-            self.__depth_callback
+            self.__depth_callback,
+            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
         )
 
 
