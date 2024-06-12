@@ -51,8 +51,8 @@ def generate_launch_description():
         ),
         Node(
             package='par_pkg',
-            executable='camera_calibration_node',
-            name='camera_calibration_node',
+            executable='calibrate_camera_node',
+            name='calibrate_camera_node',
             output='screen',
             parameters=[]
         )
