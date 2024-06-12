@@ -168,7 +168,7 @@
         <link name="end_effector_link" />
 
         <joint name="end_effector_joint" type="fixed">
-            <origin xyz="0 0 0.2246"/>
+            <origin xyz="0 0 0.2311"/>
             <parent link="onrobot_rg2_base_link" />
             <child link="end_effector_link" />
         </joint>
