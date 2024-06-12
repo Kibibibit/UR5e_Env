@@ -21,9 +21,8 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions& option
       std::bind(&MoveitActionServerNode::handle_cancel, this, _1),
       std::bind(&MoveitActionServerNode::handle_accepted, this, _1));
 
-  this->declare_parameter("move_plane_height", "0.4");
 
-  move_plane_height = this->get_parameter("move_plane_height").as_double();
+  move_plane_height = 0.45;
 
   executing_move = false;
   this->move_group_interface =
