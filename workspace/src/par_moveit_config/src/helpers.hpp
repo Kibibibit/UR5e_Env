@@ -15,7 +15,7 @@ par_interfaces::msg::WaypointPose waypoint_pose_from_pose(geometry_msgs::msg::Po
 bool equal_approx(double a, double b, double margin);
 bool will_translate(par_interfaces::msg::WaypointPose a, par_interfaces::msg::WaypointPose b, double margin);
 double wrap_value(double min, double max, double value);
-double round_to_n_places(double n, double value);
+double round_to_n_places(int n, double value);
 geometry_msgs::msg::Pose round_pose_to_n_places(double n, geometry_msgs::msg::Pose pose);
 par_interfaces::msg::WaypointPose round_waypoint_pose_to_n_places(double n, par_interfaces::msg::WaypointPose pose);
 #endif
