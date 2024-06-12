@@ -9,6 +9,7 @@ from tf2_geometry_msgs import do_transform_point
 from geometry_msgs.msg import PointStamped
 import cv2 as cv
 from cv_bridge import CvBridge
+import numpy as np
 
 bridge = CvBridge()
 
@@ -20,6 +21,7 @@ class CalibrateCameraNode(Node):
         self.__tf_buffer = tf2_ros.Buffer()
         tf2_ros.TransformListener(self.__tf_buffer, self)
 
+        self.diffs = []
         
         self.__depth_camera_subscriber = self.create_subscription(
             Image,
@@ -53,13 +55,26 @@ class CalibrateCameraNode(Node):
         height = cv_image.shape[0]
         width = cv_image.shape[1]
 
-        pixel: float = cv_image[round(height/2)][round(width/2)]
+        pixels = []
+
+        for x in [-3, 3]:
+            for y in [-3, 3]:
+                x_c = round(width/2)+x
+                y_c = round(height/2)+y
+                pixel: float = cv_image[round(height/2)][round(width/2)]
+                pixel /= 1000
+                pixels.append(pixel)
+
+        avg_pixel = np.average(pixels)
+
+       
+
+        diff = point_target.point.z-avg_pixel
+        self.diffs.append(diff)
 
 
 
-
-        self.get_logger().info(f"Transform: {point_target.point.z}, Pixel: {pixel}")
-
+        self.get_logger().info(f"Transform: {point_target.point.z}, Pixel: {avg_pixel}, Diff: {diff}, Avg Diff: {np.average(self.diffs)}")
 
 
 def main(args=None):
