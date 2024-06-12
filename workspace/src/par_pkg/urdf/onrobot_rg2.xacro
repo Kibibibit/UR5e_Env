@@ -9,7 +9,7 @@
     "
     >
 
-        <xacro:property name="angle_max" value="3.2"/>
+        <xacro:property name="angle_max" value="3.3"/>
         <xacro:property name="knuckle_yaw" value="1.57079632679"/>
         <xacro:property name="knuckle_x_offset" value="0.01"/>
 
