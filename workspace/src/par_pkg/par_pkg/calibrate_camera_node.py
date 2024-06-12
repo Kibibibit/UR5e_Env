@@ -48,8 +48,7 @@ class CalibrateCameraNode(Node):
 
         cv_image = bridge.imgmsg_to_cv2(image)
 
-        
-        print(cv_image.size)
+        self.get_logger().log(f'{cv_image.shape[0]}x{cv_image.shape[1]}')
 
 
         self.get_logger().info(f"Camera depth frame height is: {point_target.point.z}")
