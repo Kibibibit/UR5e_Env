@@ -90,8 +90,8 @@ double wrap_value(double min, double max, double value)
 
 double round_to_n_places(int n, double value)
 {
-  double mult = std::pow(10.0, (double)n);
-  return std::ceil(value * mult) / mult;
+  double mult = std::pow(10.0, n);
+  return std::round(value * mult) / mult;
 }
 geometry_msgs::msg::Pose round_pose_to_n_places(double n, geometry_msgs::msg::Pose pose)
 {
