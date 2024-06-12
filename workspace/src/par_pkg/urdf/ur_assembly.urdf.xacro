@@ -104,8 +104,6 @@
         reverse_port="$(arg reverse_port)"
         script_sender_port="$(arg script_sender_port)"
         trajectory_port="$(arg trajectory_port)"
-    >
-
-    </xacro:ur_assembly>
+    />
 
 </robot>
