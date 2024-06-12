@@ -18,8 +18,8 @@ import math
 ### These come from blender, manually measuring things.
 ### Would have preferred to get real measurements from onrobot
 ### but could not find them and did not receive a reply asking on robot themselves
-UPPER_FINGER_JOINT = 1.87361095202
-LOWER_FINGER_JOINT = 3.3
+UPPER_FINGER_JOINT = 1.8
+LOWER_FINGER_JOINT = 3.18697121414
 
 class GripperStatePublisherNode(Node):
 
