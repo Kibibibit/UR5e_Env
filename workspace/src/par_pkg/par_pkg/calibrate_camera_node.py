@@ -46,12 +46,19 @@ class CalibrateCameraNode(Node):
         point_target = do_transform_point(point_source,transformation)
 
 
-        cv_image = bridge.imgmsg_to_cv2(image)
+        cv_image: cv.Mat = bridge.imgmsg_to_cv2(image)
 
-        self.get_logger().log(f'{cv_image.shape[0]}x{cv_image.shape[1]}')
+        self.get_logger().info(f'{cv_image.shape[0]}x{cv_image.shape[1]}')
+
+        height = cv_image.shape[0]
+        width = cv_image.shape[1]
+
+        pixel: float = cv_image[round(height/2)][round(width/2)]
 
 
-        self.get_logger().info(f"Camera depth frame height is: {point_target.point.z}")
+
+
+        self.get_logger().info(f"Transform: {point_target.point.z}, Pixel: {pixel}")
 
 
 
