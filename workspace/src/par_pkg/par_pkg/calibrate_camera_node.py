@@ -22,13 +22,13 @@ class CalibrateCameraNode(Node):
         tf2_ros.TransformListener(self.__tf_buffer, self)
 
         self.diffs = []
-        
-        self.__depth_camera_subscriber = self.create_subscription(
-            Image,
-            "/camera/camera/depth/image_rect_raw",
-            self.__depth_callback,
-            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
-        )
+        ## Commented out so it doesnt run
+        # self.__depth_camera_subscriber = self.create_subscription(
+        #     Image,
+        #     "/camera/camera/depth/image_rect_raw",
+        #     self.__depth_callback,
+        #     QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+        # )
 
 
     def __depth_callback(self, image: Image):
