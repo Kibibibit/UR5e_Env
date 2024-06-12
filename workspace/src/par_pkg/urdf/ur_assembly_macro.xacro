@@ -18,6 +18,7 @@
         mounting_angle:=0
         camera_angle:=0
         name
+        ur_type
     tf_prefix
     parent
     *origin
