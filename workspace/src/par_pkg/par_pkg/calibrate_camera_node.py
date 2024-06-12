@@ -49,32 +49,13 @@ class CalibrateCameraNode(Node):
 
 
         cv_image: cv.Mat = bridge.imgmsg_to_cv2(image)
-
-        self.get_logger().info(f'{cv_image.shape[0]}x{cv_image.shape[1]}')
-
         height = cv_image.shape[0]
         width = cv_image.shape[1]
 
         pixels = []
 
-        for x in [-3, 3]:
-            for y in [-3, 3]:
-                x_c = round(width/2)+x
-                y_c = round(height/2)+y
-                pixel: float = cv_image[round(height/2)][round(width/2)]
-                pixel /= 1000
-                pixels.append(pixel)
+        ### Next step is to calibrate X/Y position
 
-        avg_pixel = np.average(pixels)
-
-       
-
-        diff = point_target.point.z-avg_pixel
-        self.diffs.append(diff)
-
-
-
-        self.get_logger().info(f"Transform: {point_target.point.z}, Pixel: {avg_pixel}, Diff: {diff}, Avg Diff: {np.average(self.diffs)}")
 
 
 def main(args=None):
