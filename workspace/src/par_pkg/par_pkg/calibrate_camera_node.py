@@ -20,7 +20,7 @@ class CalibrateCameraNode(Node):
         
         self.__depth_camera_subscriber = self.create_subscription(
             Image,
-            "/camera/depth/image_rect_raw",
+            "/camera/camera/depth/image_rect_raw",
             self.__depth_callback,
             QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
         )
