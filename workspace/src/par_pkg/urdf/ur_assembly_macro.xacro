@@ -19,58 +19,56 @@
         camera_angle:=0
         name
         ur_type
-    tf_prefix
-    parent
-    joint_limits_parameters_file
-    kinematics_parameters_file
-    physical_parameters_file
-    visual_parameters_file
-    generate_ros2_control_tag:=true
-    transmission_hw_interface:=hardware_interface/PositionJointInterface
-    safety_limits:=false
-    safety_pos_margin:=0.15
-    safety_k_position:=20
-    use_fake_hardware:=false
-    fake_sensor_commands:=false
-    sim_gazebo:=false
-    sim_ignition:=false
-    headless_mode:=false
-    initial_positions:=${dict(shoulder_pan_joint=0.0,shoulder_lift_joint=-1.57,elbow_joint=0.0,wrist_1_joint=-1.57,wrist_2_joint=0.0,wrist_3_joint=0.0)}
-    use_tool_communication:=false
-    tool_voltage:=0
-    tool_parity:=0
-    tool_baud_rate:=115200
-    tool_stop_bits:=1
-    tool_rx_idle_chars:=1.5
-    tool_tx_idle_chars:=3.5
-    tool_device_name:=/tmp/ttyUR
-    tool_tcp_port:=54321
-    robot_ip:=0.0.0.0
-    script_filename:=to_be_filled_by_ur_robot_driver
-    output_recipe_filename:=to_be_filled_by_ur_robot_driver
-    input_recipe_filename:=to_be_filled_by_ur_robot_driver
-    reverse_port:=50001
-    script_sender_port:=50002
-    reverse_ip:=0.0.0.0
-    script_command_port:=50004
-    trajectory_port:=50003
-    non_blocking_read:=true
-    keep_alive_count:=2"
+        tf_prefix
+        parent
+        joint_limits_parameters_file
+        kinematics_parameters_file
+        physical_parameters_file
+        visual_parameters_file
+        generate_ros2_control_tag:=true
+        transmission_hw_interface:=hardware_interface/PositionJointInterface
+        safety_limits:=false
+        safety_pos_margin:=0.15
+        safety_k_position:=20
+        use_fake_hardware:=false
+        fake_sensor_commands:=false
+        sim_gazebo:=false
+        sim_ignition:=false
+        headless_mode:=false
+        initial_positions:=${dict(shoulder_pan_joint=0.0,shoulder_lift_joint=-1.57,elbow_joint=0.0,wrist_1_joint=-1.57,wrist_2_joint=0.0,wrist_3_joint=0.0)}
+        use_tool_communication:=false
+        tool_voltage:=0
+        tool_parity:=0
+        tool_baud_rate:=115200
+        tool_stop_bits:=1
+        tool_rx_idle_chars:=1.5
+        tool_tx_idle_chars:=3.5
+        tool_device_name:=/tmp/ttyUR
+        tool_tcp_port:=54321
+        robot_ip:=0.0.0.0
+        script_filename:=to_be_filled_by_ur_robot_driver
+        output_recipe_filename:=to_be_filled_by_ur_robot_driver
+        input_recipe_filename:=to_be_filled_by_ur_robot_driver
+        reverse_port:=50001
+        script_sender_port:=50002
+        reverse_ip:=0.0.0.0
+        script_command_port:=50004
+        trajectory_port:=50003
+        non_blocking_read:=true
+        keep_alive_count:=2"
     >
 
-        <link name="
-    mount_plate_link">
+        <link name="mount_plate_link">
             <visual>
-                <origin xyz="
-    0 0 -${mount_plate_depth/ 2}" />
+                <origin xyz="0 0 -${mount_plate_depth/ 2}" />
                 <geometry>
-                    <mesh filename=" package:// par_pkg/ meshes/ visual/ base_plate.dae" />
+                    <mesh filename="package://par_pkg/meshes/visual/base_plate.dae" />
                 </geometry>
             </visual>
             <collision>
-                <origin xyz=" 0 0 -${mount_plate_depth/ 2}" />
+                <origin xyz="0 0 -${mount_plate_depth/ 2}" />
                 <geometry>
-                    <box size=" ${mount_plate_size} ${mount_plate_size} ${mount_plate_depth}" />
+                    <box size="${mount_plate_size} ${mount_plate_size} ${mount_plate_depth}" />
                 </geometry>
             </collision>
         </link>
