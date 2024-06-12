@@ -18,7 +18,7 @@ import math
 ### These come from blender, manually measuring things.
 ### Would have preferred to get real measurements from onrobot
 ### but could not find them and did not receive a reply asking on robot themselves
-UPPER_FINGER_JOINT = 1.5
+UPPER_FINGER_JOINT = 1.87361095202
 LOWER_FINGER_JOINT = 3.18697121414
 
 class GripperStatePublisherNode(Node):
@@ -94,7 +94,7 @@ class GripperStatePublisherNode(Node):
 
     def gripper_joint_publish_callback(self):
 
-        gripper_width = self._gripper.get_width()
+        gripper_width = self._gripper.get_width_with_offset()
         now = self.get_clock().now()
 
         if (gripper_width > 1):
@@ -102,7 +102,7 @@ class GripperStatePublisherNode(Node):
             # not quite right. It should provide accurate enough information for RVIZ
             angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
         else:
-            angle = UPPER_FINGER_JOINT
+            angle = LOWER_FINGER_JOINT
 
 
         joint_state: JointState = JointState()
