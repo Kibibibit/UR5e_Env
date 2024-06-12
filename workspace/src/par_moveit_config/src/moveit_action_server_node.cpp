@@ -21,8 +21,11 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions& option
       std::bind(&MoveitActionServerNode::handle_cancel, this, _1),
       std::bind(&MoveitActionServerNode::handle_accepted, this, _1));
 
+  this->declare_parameter("move_plane_height", "0.4");
+
+  move_plane_height = this->get_parameter("move_plane_height").as_double();
+
   executing_move = false;
-  move_plane_height = 0.5;
   this->move_group_interface =
       std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator_end_effector");
   this->move_group_interface->setPlanningTime(5.0);
