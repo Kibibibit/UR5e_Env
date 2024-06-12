@@ -7,8 +7,10 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
 from geometry_msgs.msg import PointStamped
+import cv2 as cv
+from cv_bridge import CvBridge
 
-
+bridge = CvBridge()
 
 class CalibrateCameraNode(Node):
 
@@ -40,6 +42,13 @@ class CalibrateCameraNode(Node):
         point_source = PointStamped()
 
         point_target = do_transform_point(point_source,transformation)
+
+
+        cv_image = bridge.imgmsg_to_cv2(image)
+
+        
+        print(cv_image.size)
+
 
         self.get_logger().info(f"Camera depth frame height is: {point_target.point.z}")
 
