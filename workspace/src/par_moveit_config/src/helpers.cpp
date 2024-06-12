@@ -81,6 +81,6 @@ double wrap_value(double min, double max, double value) {
   if (value < min) {
     return max - std::fmod((min-value),(max-min));
   } else {
-    return min - std::fmod((value - min),(max-min));
+    return min + std::fmod((value - min),(max-min));
   }
 }
