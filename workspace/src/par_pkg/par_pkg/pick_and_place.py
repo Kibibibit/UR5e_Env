@@ -34,10 +34,7 @@ class PickAndPlaceActionServer(Node):
         self.end_point = self.goal_server.request.end_point
         self.gripper_width = self.goal_server.request.gripper_width
         
-        self.get_logger().info((f"Goal recieved with to move block from point
-                                ({self.start_point.position.x}, {self.start_point.position.y}, {self.start_point.position.z}, {self.start_point.rotation})
-                                    to ({self.end_point.position.x}, {self.end_point.position.y}, {self.end_point.position.z}, {self.end_point.rotation}) {self.gripper_width=}"))
-        
+        self.get_logger().info((f"Goal recieved with to move block from point {self.start_point.position.x}, {self.start_point.position.y}, {self.start_point.position.z}, {self.start_point.rotation}) to ({self.end_point.position.x}, {self.end_point.position.y}, {self.end_point.position.z}, {self.end_point.rotation}) {self.gripper_width=}"))
         
         # open gripper
         self.get_logger().info("Opening gripper...")
