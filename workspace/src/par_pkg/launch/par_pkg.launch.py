@@ -51,6 +51,13 @@ def generate_launch_description():
         ),
         Node(
             package='par_pkg',
+            executable='table_depth_image_node',
+            name='table_depth_image_node',
+            output='screen',
+            parameters=[]
+        ),
+        Node(
+            package='par_pkg',
             executable='calibrate_camera_node',
             name='calibrate_camera_node',
             output='screen',
