@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
-from par_interfaces.action import GripperSetWidth, GripperFullClose, GripperFullOpen
+from onrobot_rg2_msgs.action import GripperSetWidth, GripperFullClose, GripperFullOpen
 from rclpy.action.server import ServerGoalHandle
 from .utils import helpers as h
 import time
@@ -28,18 +28,18 @@ class GripperControlNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperIp', "10.234.6.47"),
-                ('gripperPort', 502),
-                ("gripperCheckRate", 50),
+                ('gripper_ip', "10.234.6.47"),
+                ('gripper_port', 502),
+                ("gripper_check_rate", 50),
             ]
         )
         
         # Look-up parameters values
-        self._gripper_ip = self.get_parameter('gripperIp').value
+        self._gripper_ip = self.get_parameter('gripper_ip').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
-        self._gripper_port = self.get_parameter('gripperPort').value
+        self._gripper_port = self.get_parameter('gripper_port').value
         """This is the port that the gripper, that modbus will use to communicate with the gripper"""
-        self._gripper_check_rate = self.get_parameter('gripperCheckRate').value
+        self._gripper_check_rate = self.get_parameter('gripper_check_rate').value
         """This is how often the node checks the current gripper state, in Hz"""
 
         self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
@@ -69,21 +69,21 @@ class GripperControlNode(Node):
         self._set_width_action_server = ActionServer(
             self,
             GripperSetWidth,
-            'gripper_set_width',
+            'rg2/set_width',
             self.execute_set_width_callback
         )
 
         self._close_action_server = ActionServer(
             self,
             GripperFullClose,
-            'gripper_full_close',
+            'rg2/full_close',
             self.execute_close_callback
         )
 
         self._open_action_server = ActionServer(
             self,
             GripperFullOpen,
-            'gripper_full_open',
+            'rg2/full_open',
             self.execute_open_callback
         )
         

@@ -3,17 +3,17 @@
 WIDTH=${1:-"110.0"}
 FORCE=${2:-"40.0"}
 
-ACTION="gripper_set_width par_interfaces/action/GripperSetWidth"
+ACTION="rg2/set_width onrobot_rg2_msgs/action/GripperSetWidth"
 
 WIDTH_FIELD="\"target_width\":$WIDTH,"
 
 if [ "$WIDTH" == "open" ]
 then
-    ACTION="gripper_full_open par_interfaces/action/GripperFullOpen"
+    ACTION="rg2/full_open onrobot_rg2_msgs/action/GripperFullOpen"
     WIDTH_FIELD=
 elif [ "$WIDTH" == "close" ]
 then
-    ACTION="gripper_full_close par_interfaces/action/GripperFullClose"
+    ACTION="rg2/full_close onrobot_rg2_msgs/action/GripperFullClose"
     WIDTH_FIELD=
 fi
 

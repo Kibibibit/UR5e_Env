@@ -4,7 +4,7 @@
     <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro" />
     <xacro:include filename="$(find par_pkg)/urdf/onrobot_eyes.xacro" />
     <xacro:include filename="$(find par_pkg)/urdf/onrobot_quick_changer.xacro" />
-    <xacro:include filename="$(find par_pkg)/urdf/onrobot_rg2.xacro" />
+    <xacro:include filename="$(find onrobot_rg2_description)/urdf/onrobot_rg2_macro.xacro" />
 
 
     <xacro:property name="mount_plate_size" value="0.194" />

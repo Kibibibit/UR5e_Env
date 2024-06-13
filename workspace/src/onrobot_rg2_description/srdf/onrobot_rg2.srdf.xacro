@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="onrobot_rg2_gripper">
+
+    <xacro:macro name="rg2_srdf" params="parent">
+
+        <disable_collisions link1="${parent}" link2="onrobot_rg2_base_link"
+            reason="Adjacent" />
+
+        <disable_collisions link1="right_finger" link2="right_inner_knuckle" reason="Adjacent" />
+        <disable_collisions link1="right_finger" link2="right_outer_knuckle" reason="Adjacent" />
+        <disable_collisions link1="right_inner_knuckle" link2="right_outer_knuckle" reason="Never" />
+
+        <disable_collisions link1="left_finger" link2="left_inner_knuckle" reason="Adjacent" />
+        <disable_collisions link1="left_finger" link2="left_outer_knuckle" reason="Adjacent" />
+        <disable_collisions link1="left_inner_knuckle" link2="left_outer_knuckle" reason="Never" />
+
+        <disable_collisions link1="left_finger" link2="right_finger" reason="Never" />
+
+        <disable_collisions link1="onrobot_rg2_base_link" link2="right_outer_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="right_inner_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="left_outer_knuckle"
+            reason="Adjacent" />
+        <disable_collisions link1="onrobot_rg2_base_link" link2="left_inner_knuckle"
+            reason="Adjacent" />
+
+    </xacro:macro>
+
+</robot>

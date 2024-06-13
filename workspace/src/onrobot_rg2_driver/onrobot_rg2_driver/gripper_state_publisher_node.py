@@ -4,7 +4,7 @@ import rclpy
 from rclpy.qos import QoSProfile
 from rclpy.node import Node, Publisher
 from sensor_msgs.msg import JointState
-from par_interfaces.msg import GripperInfo, GripperState
+from onrobot_rg2_msgs.msg import GripperInfo, GripperState
 from .utils.rg2_client import RG2Client
 import math
 
@@ -30,40 +30,34 @@ class GripperStatePublisherNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperIp', "10.234.6.47"),
-                ('gripperPort', 502),
-                ("gripperInfoPublishRate", 5),
-                ("gripperInfoTopic", "/par/gripper/info"),
-                ('gripperJointPublishRate', 100),
-                ("gripperCheckRate", 50),
-                ('gripperStateTopic',"/par/gripper")
+                ('gripper_ip', "10.234.6.47"),
+                ('gripper_port', 502),
+                ("gripper_info_publish_rate", 5),
+                ('gripper_joint_publish_rate', 100),
+                ("gripper_check_rate", 50)
             ]
         )
 
         # Look-up parameters values
-        self._gripper_ip = self.get_parameter('gripperIp').value
+        self._gripper_ip = self.get_parameter('gripper_ip').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
-        self._gripper_port = self.get_parameter('gripperPort').value
+        self._gripper_port = self.get_parameter('gripper_port').value
         """This is the port that the gripper, that modbus will use to communicate with the gripper"""
-        self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
+        self._gripper_joint_publish_rate = self.get_parameter("gripper_joint_publish_rate").value
         """The frequency in Hz that this node will update the joint state for RViz/Moveit"""
-        self._gripper_info_publish_rate = self.get_parameter("gripperInfoPublishRate").value
+        self._gripper_info_publish_rate = self.get_parameter("gripper_info_publish_rate").value
         """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
-        self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
-        """The topic that the gripper info will be published to."""
-        self._gripper_check_rate = self.get_parameter('gripperCheckRate').value
+        self._gripper_check_rate = self.get_parameter('gripper_check_rate').value
         """This is how often the node checks the current gripper state, in Hz"""
-        self._gripper_state_topic = self.get_parameter('gripperStateTopic').value
-        """The topic that the current gripper state will be published to"""
 
     
         self._qos_profile = QoSProfile(depth=10)
         self._joint_publisher: Publisher = self.create_publisher(JointState, 'joint_states', self._qos_profile)
-        self._state_publisher: Publisher = self.create_publisher(GripperState, self._gripper_state_topic, self._qos_profile)
+        self._state_publisher: Publisher = self.create_publisher(GripperState, "/rg2/state", self._qos_profile)
 
         self._info_publisher: Publisher = self.create_publisher(
             GripperInfo,
-            self._gripper_info_topic,
+            "/rg2/info",
             self._qos_profile
         )
         self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)

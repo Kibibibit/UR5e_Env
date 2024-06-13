@@ -33,13 +33,13 @@ To access the docker container, to run scripts, you can use `./docker-attach.sh`
 You can also access the workspace inside the docker container with the vscode exension [dev containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). Once the container is running, hit `ctrl+shift+P`, and type `attach`, and find the option: `Dev Containers: Attach to running container`. Select the container, and when asked what folder to use, select `/home/rosuser/workspace/`. You can now develop inside the container. All your changes will be saved into the workspace folder on your local machine.
 
 ### Running UR5e Drivers
-#### UR Controller
+#### UR Controller and Gripper Controller
 First, on the UR5e teach pendant, select: `Open>>Installation>>RemoteRos`. If asked to update the program, select `Update Program`.<br/>
 Then, go to the `Program` tab, and under `URCaps`, add `External Control`. Make sure the IP matches the PC IP, and that the port is 50002.<br/>
 Turn ON the arm, ensuring that the E-Stop is released.<br/>
 Attach to the container (`./docker-attach.sh`) and run:
 ```sh
-ur_driver
+arm_drivers
 ```
 An RViz display showing the current state of the robot should appear.<br/>
 If you want to disable RVIZ, you can add `--no-rviz` to the end of the command. If you're working without the gripper, you can add `--no-gripper` to disable it.<br/> 
