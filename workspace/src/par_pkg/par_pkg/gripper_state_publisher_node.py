@@ -3,15 +3,23 @@
 import rclpy
 from rclpy.qos import QoSProfile
 from rclpy.node import Node, Publisher
-from .onrobot.onrobot import RG
-from pymodbus.exceptions import ConnectionException 
-
-from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
-from tf2_ros import TransformBroadcaster, TransformStamped
+from par_interfaces.msg import GripperInfo, GripperState
+from .utils.rg2_client import RG2Client
+import math
 
-UPPER_FINGER_JOINT = 0.785398
-LOWER_FINGER_JOINT = -0.558505
+### gripper_state_publisher_node.py ###
+# Author: Daniel Mills (s3843035@student.rmit.edu.au)
+# Created: 2024-05-30
+# Updated: 2024-06-09
+
+
+
+### These come from blender, manually measuring things.
+### Would have preferred to get real measurements from onrobot
+### but could not find them and did not receive a reply asking on robot themselves
+UPPER_FINGER_JOINT = 1.87361095202
+LOWER_FINGER_JOINT = 3.18697121414
 
 class GripperStatePublisherNode(Node):
 
@@ -22,41 +30,63 @@ class GripperStatePublisherNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('gripperType', "rg2"),
                 ('gripperIp', "10.234.6.47"),
                 ('gripperPort', 502),
+                ("gripperInfoPublishRate", 5),
+                ("gripperInfoTopic", "/par/gripper/info"),
                 ('gripperJointPublishRate', 100),
+                ("gripperCheckRate", 50),
+                ('gripperStateTopic',"/par/gripper")
             ]
         )
 
         # Look-up parameters values
-        self._gripper_type = self.get_parameter('gripperType').value
-        """This is the type of gripper, and should be rg2 or rg6"""
         self._gripper_ip = self.get_parameter('gripperIp').value
         """This is the ip address of the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_port = self.get_parameter('gripperPort').value
         """This is the port that the gripper, that modbus will use to communicate with the gripper"""
         self._gripper_joint_publish_rate = self.get_parameter("gripperJointPublishRate").value
         """The frequency in Hz that this node will update the joint state for RViz/Moveit"""
+        self._gripper_info_publish_rate = self.get_parameter("gripperInfoPublishRate").value
+        """This is how often the gripper will publish its info to [gripper_info_topic], in Hz"""
+        self._gripper_info_topic = self.get_parameter("gripperInfoTopic").value
+        """The topic that the gripper info will be published to."""
+        self._gripper_check_rate = self.get_parameter('gripperCheckRate').value
+        """This is how often the node checks the current gripper state, in Hz"""
+        self._gripper_state_topic = self.get_parameter('gripperStateTopic').value
+        """The topic that the current gripper state will be published to"""
 
+    
         self._qos_profile = QoSProfile(depth=10)
         self._joint_publisher: Publisher = self.create_publisher(JointState, 'joint_states', self._qos_profile)
-        #self._joint_broadcaster: TransformBroadcaster = TransformBroadcaster(self, qos=self._qos_profile)
+        self._state_publisher: Publisher = self.create_publisher(GripperState, self._gripper_state_topic, self._qos_profile)
 
-        self._gripper: RG = RG(self._gripper_type, self._gripper_ip, self._gripper_port)
+        self._info_publisher: Publisher = self.create_publisher(
+            GripperInfo,
+            self._gripper_info_topic,
+            self._qos_profile
+        )
+        self._gripper: RG2Client = RG2Client(self._gripper_ip, self._gripper_port)
         """This is our actual gripper object, all commands are sent to this"""
-        try: 
-            # Weirdly, calling self._gripper.open_connection() doesn't trigger a connection error.
-            # Asking for any other method does though
-            self._gripper.get_status()
-        except ConnectionException: 
-            self.get_logger().error("\033[31mFailed to connect to the gripper!. Please check arguments and the device's network connection and try again.\033[0m") # Red error print 
+        if (not self._gripper.open_connection()):
             exit() 
         
-        self._gripper_max_width:float = (self._gripper.max_width-self._gripper.get_fingertip_offset())/10.0
+        self._gripper_max_width:float = self._gripper.max_width
+        self._gripper_fingertip_offset = self._gripper.get_fingertip_offset()
+        self._gripper_max_force: float = self._gripper.max_force
+        """This is the maximum force that the gripper can exert, in newtons. Trying to go higher than this will result in the value being clamped to this amount."""
+        
+        
 
         self._gripper_joint_publish_timer = self.create_timer(1.0/self._gripper_joint_publish_rate, self.gripper_joint_publish_callback)
         """This timer will publish the joint state to update rviz/moveit"""
+
+        self._gripper_info_timer = self.create_timer(1.0/self._gripper_info_publish_rate, self.gripper_info_callback)
+        """This timer will publish info about the gripper now and then for other nodes if needed"""
+
+        self._gripper_state_timer = self.create_timer(1.0/self._gripper_check_rate, self.gripper_state_publish_callback)
+
+        self.get_logger().info(f"Gripper State Publisher Node starting with gripper: {self._gripper_ip}:{self._gripper_port}.")
     
 
     def close_connection(self):
@@ -64,25 +94,39 @@ class GripperStatePublisherNode(Node):
 
     def gripper_joint_publish_callback(self):
 
-        gripper_width = self._gripper.get_width_with_offset()
+        gripper_width = self._gripper.get_width()
         now = self.get_clock().now()
 
-        
-        delta: float = 1.0-(float(gripper_width)/float(self._gripper_max_width))
+        if (gripper_width > 1):
+            # This formula is based on a mathematical model that is very close to accurate but
+            # not quite right. It should provide accurate enough information for RVIZ
+            angle = math.pi - math.asin((gripper_width+0.7315)/114.3403)+0.038
+        else:
+            angle = LOWER_FINGER_JOINT
 
-        
-        #TODO: Check this relationship is linear
-        rotation: float = (1.0 - delta)*LOWER_FINGER_JOINT + (delta*UPPER_FINGER_JOINT)
 
         joint_state: JointState = JointState()
         joint_state.header.stamp = now.to_msg()
         joint_state.name = ["finger_joint"]
-        joint_state.position= [rotation]
+        joint_state.position= [angle]
 
         self._joint_publisher.publish(joint_state)
 
+    def gripper_info_callback(self):
+        msg = GripperInfo()
+        msg.port = str(self._gripper_port)
+        msg.ip = self._gripper_ip
+        msg.max_force = self._gripper_max_force
+        msg.max_width = self._gripper_max_width
+        msg.fingertip_offset = self._gripper_fingertip_offset
+        self._info_publisher.publish(msg)
 
-        
+    def gripper_state_publish_callback(self):
+        msg = GripperState()
+        msg.width = self._gripper.get_width_with_offset()
+        msg.depth = self._gripper.get_actual_depth()
+        msg.busy = self._gripper.get_busy()
+        self._state_publisher.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)

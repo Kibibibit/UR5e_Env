@@ -6,7 +6,6 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 
 |Name|Function|
 |-|-|
-|[initial_setup.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/initial_setup.sh)| This script sets up the required xsock and xauth files for the docker containers to be able to run Rviz. Should be run first before anything else. |
 |[docker-build.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-build.sh)| Builds the docker container. It also completely deletes the previous image when run, so be aware of that. It will not delete anything you've placed in `/workspace/src` however, as that is stored in a volume. Adding the `-y` flag will skip asking for confirmation.|
 |[docker-start.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-start.sh)| Runs the docker container in headless mode. You can use `docker-attach.sh` to access it. |
 |[docker-stop.sh](https://github.com/Kibibibit/UR5e_Env/blob/main/docker-stop.sh)| Stops the docker container without destroying it, unlike `docker-kill.sh` |
@@ -20,32 +19,12 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 - [Docker Post-install](https://docs.docker.com/engine/install/linux-postinstall/) - If you don't follow this, it won't work!
 - `docker-compose` - sudo apt install docker-compose
 
-### Installing moveit
-Moveit has to be built from source manually after starting the docker. Run the following steps:
-First run this to create the required files for RVIZ to connect to the docker.
-```bash
-./initial_setup.sh
-``` 
-Then, run the following to build, start and connect to the docker.
-```bash
-./docker-build.sh
-./docker-start.sh
-./docker-attach.sh
-```
-Finally, run the following to start the moveit install. This takes about 30 minutes, but should only need to be run once.
-```bash
-cd ~/rosuser/.post-build
-./moveit_install.sh
-```
-You'll need to disconnect `CTRL+D` and reconnect with `docker-attach.sh` to source the new moveit repo. 
-
 
 ## Usage
 
 ### Starting Up
-1. In the the `UR5e_Env` folder, first run `./initial_setup.sh`. This script creates the necassary files for Rviz to be able to access your display outside of the docker container. Without this script, everything will still work, but RVIZ will not render.
-2. Run the script `./docker-build.sh`. This builds the docker container, and will take 5+ minutes to run on the first build. Future builds will be signifigantly faster.
-3. Run the script `./docker-start.sh`. This will start the docker container, and you are now ready to start working.
+1. Run the script `./docker-build.sh`. This builds the docker container, and will take 5+ minutes to run on the first build. Future builds will be signifigantly faster.
+2. Run the script `./docker-start.sh`. This will start the docker container, and you are now ready to start working.
 
 ### Attaching to the environment
 #### Bash

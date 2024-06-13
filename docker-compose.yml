@@ -20,7 +20,6 @@ services:
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev:/dev
       - ./workspace:/home/$USERNAME/workspace
-      - ./.moveit_workspace:/home/$USERNAME/.moveit_workspace
     environment:
       - DISPLAY=$DISPLAY
       - XAUTHORITY=/tmp/.docker.xauth

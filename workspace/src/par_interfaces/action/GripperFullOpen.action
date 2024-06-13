@@ -1,7 +1,9 @@
 # GripperFullOpen.action
 ## This action opens the gripper to its maximum width
 
-### Request Params:None
+### Request Params:
+#### The force in newtons that the gripper will exert
+float32 target_force
 ---
 ### Result Params:
 #### The final width the gripper ended the request at

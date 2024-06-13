@@ -1,0 +1,16 @@
+# PickAndPlace.action
+## This action will pick up and place a block into a new position,
+## utilising the moveit action server and the gripper node
+
+### Request Params:
+par_interfaces/WaypointPose start_point
+par_interfaces/WaypointPose end_point
+float32 gripper_width
+---
+### Result Params:
+par_interfaces/WaypointPose final_arm_pose
+float32 gripper_final_width
+---
+### Feedback Params:
+par_interfaces/WaypointPose current_pose
+float32 gripper_current_width
