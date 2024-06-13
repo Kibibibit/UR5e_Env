@@ -32,8 +32,8 @@ done
 
 
 
-ros2 launch ur_robot_driver ur_control.launch.py \
+ros2 launch par_pkg drivers.launch.py \
     robot_ip:=10.234.6.49 \
-    ur_type:=ur5e launch_rviz:=$RVIZ low_poly:=true gripper:=$GRIPPER \
+    ur_type:=ur5e launch_rviz:=$RVIZ low_poly:=true gripper:="$GRIPPER" \
     description_file:="/home/rosuser/workspace/src/par_pkg/urdf/ur_assembly.urdf.xacro" \
     moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/ur_assembly.srdf.xacro"

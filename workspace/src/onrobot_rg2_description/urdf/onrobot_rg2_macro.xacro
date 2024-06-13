@@ -25,12 +25,12 @@
         <link name="onrobot_rg2_base_link">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_base_link${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_base_link${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_base_link.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_base_link.stl" />
                 </geometry>
             </collision>
 
@@ -38,72 +38,72 @@
         <link name="left_outer_knuckle">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_outer_knuckle${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_outer_knuckle.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_outer_knuckle.stl" />
                 </geometry>
             </collision>
         </link>
         <link name="left_inner_knuckle">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_inner_knuckle${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_inner_knuckle${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_inner_knuckle.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_inner_knuckle.stl" />
                 </geometry>
             </collision>
         </link>
         <link name="left_finger">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_finger${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_finger${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_finger.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_finger.stl" />
                 </geometry>
             </collision>
         </link>
         <link name="right_outer_knuckle">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_outer_knuckle${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_outer_knuckle${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_outer_knuckle.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_outer_knuckle.stl" />
                 </geometry>
             </collision>
         </link>
         <link name="right_inner_knuckle">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_inner_knuckle${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_inner_knuckle${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_inner_knuckle.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_inner_knuckle.stl" />
                 </geometry>
             </collision>
         </link>
         <link name="right_finger">
             <visual>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/visual/rg2_finger${poly}.dae" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/visual/rg2_finger${poly}.dae" />
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <mesh filename="package://par_pkg/meshes/collision/rg2_finger.stl" />
+                    <mesh filename="package://onrobot_rg2_description/meshes/collision/rg2_finger.stl" />
                 </geometry>
             </collision>
         </link>
