@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RVIZ=true
-GRIPPER="-gripper"
+GRIPPER=true
 PAR_ACTION_SERVER="par_moveit_config par_moveit_config.launch.py"
 
 while test $# != 0
@@ -13,7 +13,7 @@ do
             break
             ;;
         --no-gripper )
-            GRIPPER=
+            GRIPPER=false
             shift
             break
             ;;
@@ -36,6 +36,7 @@ do
 done
 
 
-ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ \
-    description_file:="/home/rosuser/workspace/src/par_pkg/urdf/arm-with-camera$GRIPPER.urdf.xacro" \
-    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/arm-with-camera$GRIPPER.srdf.xacro"
+ros2 launch $PAR_ACTION_SERVER ur_type:=ur5e launch_rviz:=$RVIZ low_poly:=true gripper:=$GRIPPER \
+    description_file:="/home/rosuser/workspace/src/par_pkg/urdf/ur_assembly.urdf.xacro" \
+    moveit_config_package:=par_pkg \
+    moveit_config_file:="/home/rosuser/workspace/src/par_pkg/srdf/ur_assembly.srdf.xacro"

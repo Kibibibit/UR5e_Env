@@ -24,7 +24,7 @@ executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>()) {
     std::bind(&MoveitServiceNode::get_current_pose, this, _1, _2)
   );
 
-  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator");
+  this->move_group_interface = std::make_shared<MoveGroupInterface>(std::shared_ptr<rclcpp::Node>(node_), "ur_manipulator_end_effector");
   this->move_group_interface->setPlanningTime(5.0);
   this->move_group_interface->setNumPlanningAttempts(10);
   this->move_group_interface->setMaxVelocityScalingFactor(0.1);

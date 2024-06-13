@@ -15,6 +15,8 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*.launch.py'))),
         (os.path.join('share', package_name, "urdf"), glob('urdf/*')),
         (os.path.join('share', package_name, "srdf"), glob('srdf/*')),
+        (os.path.join('share', package_name, "config"), glob('config/*')),
+        (os.path.join('share', package_name, "rviz"), glob('rviz/*')),
         (os.path.join('share', package_name, "meshes/visual"), glob('meshes/visual/*')),
         (os.path.join('share', package_name, "meshes/collision"), glob('meshes/collision/*')),
     ],
@@ -29,8 +31,7 @@ setup(
         'console_scripts': [
             'gripper_control_node = par_pkg.gripper_control_node:main',
             'gripper_state_publisher_node = par_pkg.gripper_state_publisher_node:main',
-            'move_to_pose_node = par_pkg.move_to_pose_node:main',
-            'vision_node = par_pkg.vision_node:main',
+            'move_to_pose_node = par_pkg.move_to_pose_node:main'
         ],
     },
 )

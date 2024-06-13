@@ -12,7 +12,6 @@ def generate_launch_description():
         DeclareLaunchArgument('gripperJointPublishRate', default_value="100"),
         
         #### GRIPPER SETUP
-        DeclareLaunchArgument('gripperType', default_value="rg2"),
         DeclareLaunchArgument('gripperIp', default_value='10.234.6.47'),
         DeclareLaunchArgument('gripperPort', default_value="502"),
         
@@ -22,6 +21,7 @@ def generate_launch_description():
         
         #### GRIPPER TOPICS
         DeclareLaunchArgument("gripperInfoTopic", default_value="/par/gripper/info"),
+        DeclareLaunchArgument("gripperStateTopic",default_value="/par/gripper"),
         
         Node(
             package='par_pkg',
@@ -29,7 +29,6 @@ def generate_launch_description():
             name='gripper_control_node',
             output='screen',
             parameters=[
-                {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
                 {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
@@ -42,13 +41,21 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'gripperJointPublishRate': LaunchConfiguration("gripperJointPublishRate")},
-                {'gripperType': LaunchConfiguration('gripperType')},
                 {'gripperIp': LaunchConfiguration('gripperIp')},
                 {'gripperInfoTopic': LaunchConfiguration("gripperInfoTopic")},
                 {'gripperInfoPublishRate': LaunchConfiguration("gripperInfoPublishRate")},
                 {'gripperPort': LaunchConfiguration('gripperPort')},
+                {'gripperCheckRate': LaunchConfiguration('gripperCheckRate')},
+                {'gripperStateTopic': LaunchConfiguration('gripperStateTopic')}
             ]
         ),
+        Node(
+            package='par_pkg',
+            executable='calibrate_camera_node',
+            name='calibrate_camera_node',
+            output='screen',
+            parameters=[]
+        )
         #Node(
          #   package='par_pkg',
           #  executable='move_to_pose_node',
