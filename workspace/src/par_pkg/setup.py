@@ -29,6 +29,7 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
+        
         'console_scripts': [
             'pick_and_place_node= par_pkg.pick_and_place_node:main',
             'calibrate_camera_node = par_pkg.calibrate_camera_node:main',
