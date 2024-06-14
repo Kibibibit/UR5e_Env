@@ -63,7 +63,7 @@ class BoardTransformerNode(Node):
 
         world_pose = PoseStamped() 
         world_pose.header.frame_id = "world"
-        world_pose.header.stamp = rclpy.time.Time()
+        world_pose.header.stamp = rclpy.time.Time().to_msg()
         world_pose.pose.position = request.world_point
         board_pose = do_transform_pose_stamped(world_pose, transformation)
 
