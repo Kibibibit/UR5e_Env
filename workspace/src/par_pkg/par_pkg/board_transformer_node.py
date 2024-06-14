@@ -8,7 +8,7 @@ from geometry_msgs.msg import PoseStamped
 from par_interfaces.msg import IVector2
 from par_interfaces.srv import BoardToWorld, WorldToBoard
 import math
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float32MultiArray
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 ## This node updates the board transform,
@@ -34,10 +34,15 @@ class BoardTransformerNode(Node):
         self.__board_transform = None
 
 
+        self.__object_frame_id = ""
+
+
         self.__transform_timer = self.create_timer(1.0/10.0, self.__transform_callback)
 
         self.__world_to_board_service = self.create_service(WorldToBoard, 'par/world_to_board', self.__world_to_board_callback)
         self.__board_to_world_service = self.create_service(BoardToWorld, 'par/board_to_world', self.__board_to_world_callback)
+
+        self.__objects_subscription = self.create_subscription(Float32MultiArray, 'objects', self.__object_callback)
 
         self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
@@ -89,7 +94,7 @@ class BoardTransformerNode(Node):
 
     def __transform_callback(self):
         if (not self.__board_detected):
-            transformation = self.__get_transform("world", "object_0")
+            transformation = self.__get_transform("world", self.__object_frame_id)
             if (transformation == None):
                 return
             pose_source = PoseStamped()
@@ -120,7 +125,10 @@ class BoardTransformerNode(Node):
         bool_msg.data = self.__board_detected
         self.__board_found_publisher.publish(bool_msg)
 
-
+    def __object_callback(self, msg: Float32MultiArray):
+        if (len(msg.data) > 0):
+            self.__object_frame_id = f"object_{int(round(msg.data[0]))}"
+            self.__objects_subscription.destroy()
 
 def main(args=None):
     rclpy.init(args=args)

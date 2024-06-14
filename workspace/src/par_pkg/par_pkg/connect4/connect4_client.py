@@ -44,7 +44,7 @@ class Connect4Client():
         return self.__board_state[y][x]
     
     def has_player_won(self):
-        """Returns the id of the player who won the game, if someone has won"""
+        """Returns the id of the player who won the game, if someone has won. Or Empty otherwise"""
         return Player.EMPTY
     
     def get_best_robot_move(self) -> int:
