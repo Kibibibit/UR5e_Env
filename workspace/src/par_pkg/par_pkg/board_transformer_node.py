@@ -8,6 +8,12 @@ from geometry_msgs.msg import PoseStamped
 from par_interfaces.msg import IVector2
 from par_interfaces.srv import BoardToWorld, WorldToBoard
 import math
+from std_msgs.msg import Bool
+from rclpy.qos import ReliabilityPolicy, QoSProfile
+
+## This node updates the board transform,
+## And has services for transforming world positions into board positions
+## and back.
 
 # Grid cells are 2cm across
 GRID_SIZE = 0.02
@@ -22,11 +28,18 @@ class BoardTransformerNode(Node):
 
         self.__broadcaster = tf2_ros.StaticTransformBroadcaster()
 
+        self.__board_detected = False
+        self.__board_ticks = 0
+
+        self.__board_transform = None
+
+
         self.__transform_timer = self.create_timer(1.0/10.0, self.__transform_callback)
 
         self.__world_to_board_service = self.create_service(WorldToBoard, 'par/world_to_board', self.__world_to_board_callback)
         self.__board_to_world_service = self.create_service(BoardToWorld, 'par/board_to_world', self.__board_to_world_callback)
 
+        self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
     def __get_transform(self, target_frame, source_frame):
         try:
@@ -75,27 +88,37 @@ class BoardTransformerNode(Node):
 
 
     def __transform_callback(self):
-        transformation = self.__get_transform("world", "object_0")
-        if (transformation == None):
-            return
-        pose_source = PoseStamped()
-        pose_source.pose.position.x = -((277.04/2) - 15.04)/1000.0
-        pose_source.pose.position.y = -((190.40/2) - 25.00)/1000.0
+        if (not self.__board_detected):
+            transformation = self.__get_transform("world", "object_0")
+            if (transformation == None):
+                return
+            pose_source = PoseStamped()
+            pose_source.pose.position.x = -((277.04/2) - 15.04)/1000.0
+            pose_source.pose.position.y = -((190.40/2) - 25.00)/1000.0
 
 
-        ### Transform to the world frame
-        board_cell_pose = do_transform_pose_stamped(pose_source,transformation)
+            ### Transform to the world frame
+            board_cell_pose = do_transform_pose_stamped(pose_source,transformation)
 
-        board_transform = TransformStamped()
-        board_transform.header.stamp = board_cell_pose.header.stamp
-        board_transform.header.frame_id = "world"
-        board_transform.child_frame_id = "board_frame"
-        board_transform.transform.translation.x = board_cell_pose.pose.position.x
-        board_transform.transform.translation.y = board_cell_pose.pose.position.y
-        board_transform.transform.translation.z = board_cell_pose.pose.position.z
-        board_transform.transform.rotation = board_cell_pose.pose.orientation
+            self.__board_transform = TransformStamped()
+            self.__board_transform.header.stamp = board_cell_pose.header.stamp
+            self.__board_transform.header.frame_id = "world"
+            self.__board_transform.child_frame_id = "board_frame"
+            self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
+            self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
+            self.__board_transform.transform.translation.z = board_cell_pose.pose.position.z
+            self.__board_transform.transform.rotation = board_cell_pose.pose.orientation
 
-        self.__broadcaster.sendTransform(board_transform)
+            ## Wait until we've seen the board a few times before finalising the transform
+            self.__board_ticks += 1
+            if (self.__board_ticks > 3):
+                self.__board_detected = True
+
+        self.__broadcaster.sendTransform(self.__board_transform)
+
+        bool_msg = Bool()
+        bool_msg.data = self.__board_detected
+        self.__board_found_publisher.publish(bool_msg)
 
 
 
@@ -108,7 +131,7 @@ def main(args=None):
 
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
+        pass                                                                                                                                                                                                    
 
 
 if __name__ == '__main__':
