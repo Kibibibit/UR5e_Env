@@ -30,7 +30,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pick_and_place_node= par_pkg.pick_and_place_node:main',
+            'pick_and_place_node= par_pkg.pick_and_place:main',
             'table_depth_image_node=par_pkg.table_depth_image_node:main',
             'main_controller_node=par_pkg.main_controller_node:main',
             'board_transformer_node=par_pkg.board_transformer_node:main',

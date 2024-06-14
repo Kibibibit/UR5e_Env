@@ -7,7 +7,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='par_pkg',
-            executable='move_to_pose_node',
+            executable='pick_and_place_node',
             name="pick_and_place_node",
             output="screen",
             parameters=[]
