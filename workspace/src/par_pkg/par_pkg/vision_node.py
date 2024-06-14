@@ -7,8 +7,8 @@ import numpy as np
 
 class CubeDetectionNode(Node):
     def __init__(self):
-        super().__init__('cube_detection_node')
-        self.publisher_ = self.create_publisher(Image, 'detected_cubes', 10)
+        super().__init__('vision_node')
+        self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
         self.subscription = self.create_subscription(Image,'/camera/depth/table_image_raw',self.depth_image_callback,10)
         self.bridge = CvBridge()
 
@@ -37,14 +37,14 @@ class CubeDetectionNode(Node):
         detected_cubes = []
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 500 or area > 50000:
+            if area < 100 or area > 10000:
                 continue
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             if len(approx) == 4 and cv2.isContourConvex(approx):
                 (x, y, w, h) = cv2.boundingRect(approx)
                 aspect_ratio = w / float(h)
-                if 0.9 <= aspect_ratio <= 1.1:
+                if 0.8 <= aspect_ratio <= 1.2:
                     depth = np.mean(depth_image[y:y+h, x:x+w])
                     if np.isnan(depth) or depth <= 0:
                         self.get_logger().info("Contour filtered out by depth validation")
