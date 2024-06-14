@@ -3,7 +3,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import Pose
 from .connect4.connect4_client import Connect4Client
 from enum import Enum
-from par_interfaces.action import PickAndPlace
+# from par_interfaces.action import PickAndPlace
 from std_msgs.msg import Bool
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
@@ -43,10 +43,10 @@ class MainControllerNode(Node):
         super().__init__('main_controller_node')
 
 
-        self.__pick_and_place_client = self.create_client(
-            PickAndPlace,
-            "/par/pick_and_place"
-        )
+        # self.__pick_and_place_client = self.create_client(
+        #     PickAndPlace,
+        #     "/par/pick_and_place"
+        # )
         
         self.__board_detected_subscriber = self.create_subscription(
             Bool,

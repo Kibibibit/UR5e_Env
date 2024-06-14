@@ -26,7 +26,7 @@ class BoardTransformerNode(Node):
         self.__tf_buffer = tf2_ros.Buffer()
         tf2_ros.TransformListener(self.__tf_buffer, self)
 
-        self.__broadcaster = tf2_ros.StaticTransformBroadcaster()
+        self.__broadcaster = tf2_ros.StaticTransformBroadcaster(self)
 
         self.__board_detected = False
         self.__board_ticks = 0
