@@ -35,7 +35,7 @@ class TableDepthImageNode(Node):
         )
 
         self.__camera_height: float = 0.0
-        self.__offset: float = 0.0
+        self.__offset: float = 0.005
 
         # We don't need to get the camera trasnform as often as we pass frames in,
         # as usually when we're looking at the camera, it wont be moving
