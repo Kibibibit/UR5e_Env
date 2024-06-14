@@ -42,7 +42,7 @@ class BoardTransformerNode(Node):
         self.__world_to_board_service = self.create_service(WorldToBoard, 'par/world_to_board', self.__world_to_board_callback)
         self.__board_to_world_service = self.create_service(BoardToWorld, 'par/board_to_world', self.__board_to_world_callback)
 
-        self.__objects_subscription = self.create_subscription(Float32MultiArray, 'objects', self.__object_callback)
+        self.__objects_subscription = self.create_subscription(Float32MultiArray, 'objects', self.__object_callback,  qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
         self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
