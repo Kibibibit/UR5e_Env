@@ -16,14 +16,11 @@ find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/WaypointPose.msg"
-  "msg/GripperInfo.msg"
-  "msg/GripperState.msg"
-  "action/GripperSetWidth.action"
-  "action/GripperFullClose.action"
-  "action/GripperFullOpen.action"
+  "msg/GamePiece.msg"
+  "msg/GamePieces.msg"
+  "msg/IVector2.msg"
   "action/WaypointMove.action"
   "action/PickAndPlace.action"
-  
   "srv/CurrentWaypointPose.srv"
   "srv/CurrentPose.srv"
   DEPENDENCIES geometry_msgs
