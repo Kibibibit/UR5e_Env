@@ -118,7 +118,7 @@ class BoardTransformerNode(Node):
             self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
             self.__board_transform.transform.translation.z = 0.0
-            #self.__board_transform.transform.rotation = self.__euler_to_quat(board_cell_rotation)
+            self.__board_transform.transform.rotation = self.__euler_to_quat(board_cell_rotation)
 
             ## Wait until we've seen the board a few times before finalising the transform
             self.__board_ticks += 1
