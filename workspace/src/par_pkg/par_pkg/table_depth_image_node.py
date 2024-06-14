@@ -25,17 +25,23 @@ class TableDepthImageNode(Node):
             Image,
             "/camera/camera/depth/image_rect_raw",
             self.__depth_callback,
-            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+            QoSProfile(depth=5, reliability=ReliabilityPolicy.RELIABLE)
         )
 
         self.__depth_camera_publisher = self.create_publisher(
             Image,
             "/camera/depth/table_image_raw",
-            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
+            QoSProfile(depth=5, reliability=ReliabilityPolicy.RELIABLE)
         )
 
-    def __depth_callback(self, image: Image):
+        self.__camera_height: float = 0.0
+        self.__offset: float = 0.0
 
+        # We don't need to get the camera trasnform as often as we pass frames in,
+        # as usually when we're looking at the camera, it wont be moving
+        self.__transform_timer = self.create_timer(1.0/10.0, self.__transform_callback)
+
+    def __transform_callback(self):
         # get the transformation from source_frame to target_frame.
         try:
             transformation = self.__tf_buffer.lookup_transform("world",
@@ -52,18 +58,16 @@ class TableDepthImageNode(Node):
         ### Transform to the world frame
         camera_point = do_transform_point(point_source,transformation)
 
+        self.__camera_height = camera_point.point.z
 
+
+    def __depth_callback(self, image: Image):
         cv_image: cv.Mat = bridge.imgmsg_to_cv2(image)
-        height = cv_image.shape[0]
-        width = cv_image.shape[1]
 
-        for x in range(width):
-            for y in range(height):
-                pixel = cv_image[y][x] / 1000.0
-                ## Camera height can be read from here
-                if (pixel > camera_point.point.z):
-                    cv_image[y][x] = float('inf')
-        
+        height_as_int = round((self.__camera_height+self.__offset) * 1000.0)
+        # Convert any pixels that are greater than the camera height to
+        # the 16 bit integer limit. I hope
+        cv_image[cv_image > height_as_int] = 65535
         out = bridge.cv2_to_imgmsg(cv_image)
 
         self.__depth_camera_publisher.publish(out)
