@@ -4,6 +4,7 @@ from geometry_msgs.msg import Pose
 from .connect4.connect4_client import Connect4Client
 from enum import Enum
 from par_interfaces.action import PickAndPlace
+from find_object_2d.msg import ObjectsStamped
 
 
 class States(Enum):
@@ -33,6 +34,8 @@ class States(Enum):
     It's currently the robot's turn
     """
 
+BOARD_FRAME_ID = "object_board"
+
 class MainControllerNode(Node):
 
     def __init__(self):
@@ -44,6 +47,11 @@ class MainControllerNode(Node):
             "/par/pick_and_place"
         )
         
+        self.__board_client = self.create_subscription(
+            ObjectsStamped,
+            "/objects/stamped"
+        )
+
         self.__connect4client = Connect4Client()
         self.__state = States.FINDING_GRID
 
