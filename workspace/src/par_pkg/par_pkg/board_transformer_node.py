@@ -111,10 +111,9 @@ class BoardTransformerNode(Node):
             self.__board_transform.child_frame_id = "board_frame"
 
             board_cell_rotation = self.__quat_to_euler(board_cell_pose.pose.orientation)
-
-            board_cell_rotation.x -= math.pi/2.0
-            board_cell_rotation.y -= math.pi/2.0
-            board_cell_rotation.z += math.pi
+            board_cell_rotation.z = board_cell_rotation.x
+            board_cell_rotation.y = 0
+            board_cell_rotation.x = 0
 
             self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
