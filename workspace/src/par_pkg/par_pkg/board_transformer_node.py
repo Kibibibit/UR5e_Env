@@ -128,7 +128,6 @@ class BoardTransformerNode(Node):
     def __object_callback(self, msg: Float32MultiArray):
         if (len(msg.data) > 0):
             self.__object_frame_id = f"object_{int(round(msg.data[0]))}"
-            self.__objects_subscription.destroy()
 
 def main(args=None):
     rclpy.init(args=args)

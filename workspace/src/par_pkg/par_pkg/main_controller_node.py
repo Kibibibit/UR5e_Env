@@ -141,7 +141,6 @@ class MainControllerNode(Node):
     def __board_detected_callback(self, msg: Bool):
         if (msg.data):
             self.__board_detected = True
-            self.__board_detected_subscriber.destroy()
 
 def main(args=None):
     rclpy.init(args=args)
