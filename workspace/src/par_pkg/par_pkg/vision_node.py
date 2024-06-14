@@ -5,49 +5,39 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 
-class OnRobotEyesCameraNode(Node):
+class CubeDetectionNode(Node):
     def __init__(self):
-        super().__init__('vision_node')
-        self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
-        # self.subscription = self.create_subscription(Image,'/camera/color/image_raw',self.colour_image_callback,10)
-        self.depth_subscription = self.create_subscription(Image,'/camera/depth/image_rect_raw',self.depth_image_callback,10)
+        super().__init__('cube_detection_node')
+        self.publisher_ = self.create_publisher(Image, 'detected_cubes', 10)
+        self.subscription = self.create_subscription(Image,'/camera/depth/table_image_raw',self.depth_image_callback,10)
         self.bridge = CvBridge()
-        self.depth_image = None
-
-    # def color_image_callback(self, msg):
-    #     try:
-    #         self.get_logger().info("Color image received")
-    #         color_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
-    #         if self.depth_image is not None:
-    #             processed_image = self.detect_cubes(color_image, self.depth_image)
-    #             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-    #             self.publisher_.publish(processed_msg)
-    #         else:
-    #             self.get_logger().info("Depth image not yet received")
-    #     except Exception as e:
-    #         self.get_logger().error(f"Error processing image: {e}")
 
     def depth_image_callback(self, msg):
         try:
-            self.depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
             self.get_logger().info("Depth image received")
-            processed_image = self.detect_cubes(self.depth_image)
+            depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
+            processed_image = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
             self.publisher_.publish(processed_msg)
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, depth_image):
+        self.get_logger().info("Starting cube detection")
+
+        # Normalize depth image to 8-bit
         depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
         depth_normalized = np.uint8(depth_normalized)
+
+        depth_colored = cv2.cvtColor(depth_normalized, cv2.COLOR_GRAY2BGR)
         blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        visualization_image = cv2.cvtColor(depth_normalized, cv2.COLOR_GRAY2BGR)
+
         detected_cubes = []
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 100 or area > 10000:
+            if area < 500 or area > 50000:
                 continue
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
@@ -59,20 +49,21 @@ class OnRobotEyesCameraNode(Node):
                     if np.isnan(depth) or depth <= 0:
                         self.get_logger().info("Contour filtered out by depth validation")
                         continue
+
                     shape = "Cube"
                     detected_cubes.append((approx, depth))
                     color = (255, 0, 0)
-                    cv2.drawContours(visualization_image, [approx], -1, color, 2)
+                    cv2.drawContours(depth_colored, [approx], -1, color, 2)
                     x, y = approx[0][0]
-                    cv2.putText(visualization_image, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    cv2.putText(depth_colored, f"{shape}, Depth: {depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
                     self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {depth:.2f}mm")
-        
+
         self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
-        return visualization_image
+        return depth_colored
 
 def main(args=None):
     rclpy.init(args=args)
-    node = OnRobotEyesCameraNode()
+    node = CubeDetectionNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
