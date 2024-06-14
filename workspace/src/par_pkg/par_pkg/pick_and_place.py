@@ -133,7 +133,7 @@ class PickAndPlaceActionServer(Node):
             self.current_state = ActionStates['DONE']
 
     def move_gripper(self, width):
-        move_gripper_goal = GripperSetWidth().Goal()
+        move_gripper_goal = GripperSetWidth.Goal()
 
         move_gripper_goal.target_force = FORCE
         move_gripper_goal.target_width = width
