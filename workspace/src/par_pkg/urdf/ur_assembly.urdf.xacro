@@ -70,7 +70,7 @@
 
     <joint name="map_joint" type="fixed">
       <parent link="world"/>
-      <child name="map"/>
+      <child link="map"/>
     </joint>
 
     <xacro:ur_assembly
