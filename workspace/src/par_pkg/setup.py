@@ -17,6 +17,7 @@ setup(
         (os.path.join('share', package_name, "srdf"), glob('srdf/*')),
         (os.path.join('share', package_name, "config"), glob('config/*')),
         (os.path.join('share', package_name, "rviz"), glob('rviz/*')),
+        (os.path.join('share', package_name, "objects"), glob('objects/*')),
         (os.path.join('share', package_name, "meshes/visual"), glob('meshes/visual/*')),
         (os.path.join('share', package_name, "meshes/collision"), glob('meshes/collision/*')),
     ],
