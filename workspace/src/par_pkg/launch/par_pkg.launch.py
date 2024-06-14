@@ -14,13 +14,6 @@ def generate_launch_description():
         ),
         Node(
             package='par_pkg',
-            executable='calibrate_camera_node',
-            name='calibrate_camera_node',
-            output='screen',
-            parameters=[]
-        ),
-        Node(
-            package='par_pkg',
             executable='main_controller_node',
             name='main_controller_node',
             output='screen',
