@@ -49,7 +49,7 @@ class MainControllerNode(Node):
         
         self.__board_client = self.create_subscription(
             ObjectsStamped,
-            "/objects/stamped"
+            "/objectsStamped"
         )
 
         self.__connect4client = Connect4Client()

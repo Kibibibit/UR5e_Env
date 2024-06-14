@@ -2,7 +2,6 @@
 ## This represents a piece with its size, depth and position,
 ## in both world space and board space
 
-float64 height
 float64 width
 float64 depth
 float64 rotation
