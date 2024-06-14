@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-ros2 launch find_object_2d ros2/find_object_3d.launch.py \
+ros2 launch find_object_2d find_object_3d.launch.py \
     gui:=true \
     objects_path:="/home/rosuser/workspace/src/par_pkg/objects/" \
     rgb_topic:=/camera/camera/color/image_raw \
