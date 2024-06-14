@@ -78,7 +78,7 @@ class BoardTransformerNode(Node):
     def __board_to_world_callback(self, request: BoardToWorld.Request, response: BoardToWorld.Response):
         
         pose = PoseStamped()
-        pose.header.stamp = rclpy.time.Time()
+        pose.header.stamp = rclpy.time.Time().to_msg()
         pose.pose.position.x = request.board_pos.x*GRID_SIZE
         pose.pose.position.y = request.board_pos.y*GRID_SIZE
 
