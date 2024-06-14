@@ -112,8 +112,8 @@ class BoardTransformerNode(Node):
 
             board_cell_rotation = self.__quat_to_euler(board_cell_pose.pose.orientation)
             board_cell_rotation.z = board_cell_rotation.x
-            board_cell_rotation.y = 0
-            board_cell_rotation.x = 0
+            board_cell_rotation.y = 0.0
+            board_cell_rotation.x = 0.0
 
             self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
