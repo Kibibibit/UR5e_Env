@@ -35,7 +35,7 @@ class CalibrateCameraNode(Node):
 
                 # get the transformation from source_frame to target_frame.
         try:
-            transformation = self.__tf_buffer.lookup_transform("world",
+            transformation = self.__tf_buffer.lookup_transform("map",
                     "camera_depth_frame", rclpy.time.Time())
         except tf2_ros.TransformException as e:
             self.get_logger().error('Unable to find the transformation')

@@ -65,9 +65,9 @@
    <xacro:property name="initial_positions_file" default="$(arg initial_positions_file)"/>
 
     <xacro:include filename="$(find par_pkg)/urdf/ur_assembly_macro.xacro" />
-    <link name="world" />
+    <link name="map" />
     <xacro:ur_assembly
-        parent="world"
+        parent="map"
         ur_type="$(arg ur_type)"
         gripper="$(arg gripper)"
         name="$(arg name)"
