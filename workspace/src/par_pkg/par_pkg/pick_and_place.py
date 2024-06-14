@@ -20,7 +20,7 @@ class ActionStates(Enum):
     GRAB_ITEM:int = 3
     MOVE_ITEM_TO_NEW_POS:int = 4
     RELEASE_ITEM = 5
-    DONE:int = 6
+    WAIT:int = 6
 
 FORCE:float = 20.0
 FULL_OPEN_WIDTH:float = 110.0
@@ -42,9 +42,9 @@ class PickAndPlaceActionServer(Node):
         self.create_subscription(GripperState, "/rg2/state", self.get_gripper_state,  QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
         self.feedback = PickAndPlace.Feedback()
-        self.current_state = ActionStates["OPEN_GRIPPER"]
+        self.current_state = ActionStates["WAIT"]
 
-        self.__action_in_progress:bool = False
+        self.__action_in_progress:bool = True
 
         self.create_timer(2.0, self.check_current_state)
     
@@ -58,6 +58,9 @@ class PickAndPlaceActionServer(Node):
         self.start_point = goal_handle.request.start_point 
         self.end_point = goal_handle.request.end_point
         self.gripper_width = goal_handle.request.gripper_width
+
+        self.__action_in_progress = False
+        self.current_state = ActionStates['OPEN_GRIPPER']
         
         self.get_logger().info((f"Goal recieved with to move block from point {self.start_point.position.x}, {self.start_point.position.y}, {self.start_point.position.z}, {self.start_point.rotation}) to ({self.end_point.position.x}, {self.end_point.position.y}, {self.end_point.position.z}, {self.end_point.rotation}) {self.gripper_width=}"))
 
@@ -80,7 +83,6 @@ class PickAndPlaceActionServer(Node):
                 self.get_logger().info(f"completing action {self.current_state.name}...")
             else:
                 self.__action_in_progress = True
-
                 if (self.current_state == ActionStates.OPEN_GRIPPER):
                     self.open_gripper()
                 elif (self.current_state == ActionStates.MOVE_TO_ITEM):
