@@ -4,7 +4,7 @@
 
 float64 height
 float64 width
-float64 height
+float64 depth
 float64 rotation
 geometry_msgs/Point world_position
 par_interfaces/IVector2 board_position
