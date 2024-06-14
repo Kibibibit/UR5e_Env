@@ -114,6 +114,7 @@ class BoardTransformerNode(Node):
 
             board_cell_rotation.x -= math.pi/2.0
             board_cell_rotation.y -= math.pi/2.0
+            board_cell_rotation.z += math.pi
 
             self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
