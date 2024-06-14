@@ -4,6 +4,8 @@ from geometry_msgs.msg import Pose
 from .connect4.connect4_client import Connect4Client
 from enum import Enum
 from par_interfaces.action import PickAndPlace
+from std_msgs.msg import Bool
+from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 
 class States(Enum):
@@ -46,10 +48,14 @@ class MainControllerNode(Node):
             "/par/pick_and_place"
         )
         
-        self.__board_client = self.create_subscription(
-            Pose,
-            "/par/board_pose"
+        self.__board_detected_subscriber = self.create_subscription(
+            Bool,
+            "/par/board_found",
+            self.__board_detected_callback,
+            QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
         )
+
+        self.__board_detected = False
 
         self.__connect4client = Connect4Client()
         self.__state = States.FINDING_GRID
@@ -85,6 +91,9 @@ class MainControllerNode(Node):
     
     def __finding_grid(self):
         self.get_logger().info("Looking for grid!")
+        if (self.__board_detected):
+            self.get_logger().info("Found grid! Proceeding to next stage")
+            self.__state = States.WAITING_FOR_HUMAN
 
     def __waiting_for_human(self):
         self.get_logger().info("Waiting for human")
@@ -98,11 +107,11 @@ class MainControllerNode(Node):
 
         ## If the human made a valid move, we want to then simulate gravity for the piece
         if (self.__connect4client.valid_move(self.__human_column)):
-            self.__state == States.SIMULATING_GRAVITY
+            self.__state = States.SIMULATING_GRAVITY
             return
         ## Otherwise, we go to the invalid move
         else:
-            self.__state == States.HUMAN_MADE_INVALID_MOVE
+            self.__state = States.HUMAN_MADE_INVALID_MOVE
             return
 
 
@@ -127,6 +136,12 @@ class MainControllerNode(Node):
         self.get_logger().info("Human made invalid move!")
 
         ## Grab their piece, move it out of the way, then return to waiting for human
+
+
+    def __board_detected_callback(self, msg: Bool):
+        if (msg.data):
+            self.__board_detected = True
+            self.__board_detected_subscriber.destroy()
 
 def main(args=None):
     rclpy.init(args=args)
