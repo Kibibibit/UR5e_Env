@@ -1,0 +1,3 @@
+geometry_msgs/Point world_point
+---
+par_interfaces/IVector2 board_pos

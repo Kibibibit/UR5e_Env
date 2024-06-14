@@ -25,6 +25,13 @@ def generate_launch_description():
             name='main_controller_node',
             output='screen',
             parameters=[]
+        ),
+        Node(
+            package="par_pkg",
+            executable="board_transformer_node",
+            name="board_transformer_node",
+            output="screen",
+            parameters=[]
         )
         #Node(
          #   package='par_pkg',

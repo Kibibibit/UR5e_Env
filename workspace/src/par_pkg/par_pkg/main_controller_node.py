@@ -4,7 +4,6 @@ from geometry_msgs.msg import Pose
 from .connect4.connect4_client import Connect4Client
 from enum import Enum
 from par_interfaces.action import PickAndPlace
-from find_object_2d.msg import ObjectsStamped
 
 
 class States(Enum):
@@ -48,8 +47,8 @@ class MainControllerNode(Node):
         )
         
         self.__board_client = self.create_subscription(
-            ObjectsStamped,
-            "/objectsStamped"
+            Pose,
+            "/par/board_pose"
         )
 
         self.__connect4client = Connect4Client()
