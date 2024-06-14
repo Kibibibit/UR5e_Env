@@ -17,6 +17,7 @@ setup(
         (os.path.join('share', package_name, "srdf"), glob('srdf/*')),
         (os.path.join('share', package_name, "config"), glob('config/*')),
         (os.path.join('share', package_name, "rviz"), glob('rviz/*')),
+        (os.path.join('share', package_name, "objects"), glob('objects/*')),
         (os.path.join('share', package_name, "meshes/visual"), glob('meshes/visual/*')),
         (os.path.join('share', package_name, "meshes/collision"), glob('meshes/collision/*')),
     ],
@@ -29,10 +30,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'gripper_control_node = par_pkg.gripper_control_node:main',
-            'gripper_state_publisher_node = par_pkg.gripper_state_publisher_node:main',
             'pick_and_place_node= par_pkg.pick_and_place_node:main',
-            'calibrate_camera_node = par_pkg.calibrate_camera_node:main'
+            'calibrate_camera_node = par_pkg.calibrate_camera_node:main',
+            'table_depth_image_node=par_pkg.table_depth_image_node:main',
+            'main_controller_node=par_pkg.main_controller_node:main'
         ],
     },
 )
