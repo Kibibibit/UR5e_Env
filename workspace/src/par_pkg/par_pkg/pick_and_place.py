@@ -10,6 +10,7 @@ from rclpy.action.client import ClientGoalHandle
 from par_interfaces.srv import CurrentWaypointPose
 from rclpy.task import Future
 from par_interfaces.msg import WaypointPose
+from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 from enum import Enum
 
@@ -38,7 +39,7 @@ class PickAndPlaceActionServer(Node):
 
         self.gripper_state = GripperState()
 
-        self.create_subscription(GripperState, "/rg2/state", self.get_gripper_state)
+        self.create_subscription(GripperState, "/rg2/state", self.get_gripper_state,  QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
         
         self.feedback = PickAndPlace.Feedback()
         self.current_state = ActionStates["OPEN_GRIPPER"]
