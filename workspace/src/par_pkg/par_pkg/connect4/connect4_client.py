@@ -41,6 +41,7 @@ class Connect4Client():
     def valid_move(self, column:int) -> bool:
         return column >= 0 and column < BOARD_WIDTH and self.next_column_empty(column) != COLUMN_FULL
     
+    
     def get_piece(self, x:int, y:int) -> Player:
         return self.__board_state[y][x]
     
@@ -83,14 +84,39 @@ class Connect4Client():
         
         
         
-        
-        
-        
-        
-        return Player.EMPTY
+    
     
     
     
     def get_best_robot_move(self) -> int:
         """Returns the column that the robot should place their next piece in"""
-        return 0
+                # Check if the robot can win in the next move
+        for column in range(BOARD_WIDTH):
+            if self.valid_move(column):
+                row = self.next_column_empty(column)
+                self.__board_state[row][column] = Player.ROBOT
+                if self.has_player_won() == Player.ROBOT:
+                    self.__board_state[row][column] = Player.EMPTY
+                    print(f"Robot can win by placing in column {column}")
+                    return column
+                self.__board_state[row][column] = Player.EMPTY
+        
+        # Check if the human can win in the next move and block them
+        for column in range(BOARD_WIDTH):
+            if self.valid_move(column):
+                row = self.next_column_empty(column)
+                self.__board_state[row][column] = Player.HUMAN
+                if self.has_player_won() == Player.HUMAN:
+                    self.__board_state[row][column] = Player.EMPTY
+                    print(f"Robot blocks human by placing in column {column}")
+                    return column
+                self.__board_state[row][column] = Player.EMPTY
+
+        # Otherwise, pick the first available column
+        for column in range(BOARD_WIDTH):
+            if self.valid_move(column):
+                print(f"Robot places in first available column {column}")
+                return column
+
+        return -1
+        
