@@ -5,6 +5,7 @@ class Player(Enum):
     ROBOT = -1
     HUMAN = 1
     EMPTY = 0
+    TIE = 2
 
 COLUMN_FULL = 10
 
@@ -16,7 +17,7 @@ class Connect4Client():
     def __init__(self):
 
         ## Set the initial board state
-        self.__board_state: np.ndarray = np.zeros((BOARD_WIDTH, BOARD_HEIGHT))
+        self.__board_state: np.ndarray = np.full(shape=(BOARD_HEIGHT, BOARD_WIDTH),fill_value=Player.EMPTY, dtype=Player)
 
 
     def next_column_empty(self, column:int) -> int:
@@ -24,7 +25,7 @@ class Connect4Client():
         y = BOARD_HEIGHT-1
         for _y in range(0, BOARD_HEIGHT):
             y = BOARD_HEIGHT-_y-1
-            if (self.get_piece(column, y) != Player.EMPTY):
+            if (self.get_piece(column, y) == Player.EMPTY):
                 return y
         return COLUMN_FULL
     
@@ -40,11 +41,11 @@ class Connect4Client():
     def valid_move(self, column:int) -> bool:
         return column >= 0 and column < BOARD_WIDTH and self.next_column_empty(column) != COLUMN_FULL
     
-    def get_piece(self, x:int, y:int) -> int:
+    def get_piece(self, x:int, y:int) -> Player:
         return self.__board_state[y][x]
     
-    def has_player_won(self):
-        """Returns the id of the player who won the game, if someone has won. Or Empty otherwise"""
+    def has_player_won(self) -> Player:
+        """Returns the id of the player who won the game. If no one has won, return Player.EMPTY. If the game is a tie, return Player.TIE"""
         return Player.EMPTY
     
     def get_best_robot_move(self) -> int:
