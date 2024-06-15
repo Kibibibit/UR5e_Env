@@ -30,10 +30,19 @@ class CubeDetectionNode(Node):
         depth_normalized = np.uint8(depth_normalized)
 
         depth_colored = cv2.cvtColor(depth_normalized, cv2.COLOR_GRAY2BGR)
-        blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 1.5)
-        cv2.imshow("Blurred Image", blurred)
-        # adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-        # cv2.imshow("Adaptive Threshold Image", adaptive_thresh)
+        # Apply median blur
+        blurred = cv2.medianBlur(depth_normalized, 5)
+        cv2.imshow("Blurred Image", blurred)  
+
+        # Adaptive thresholding
+        adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
+
+        # Morphological operation
+        kernel = np.ones((3, 3), np.uint8)
+        morphed = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        morphed = cv2.morphologyEx(morphed, cv2.MORPH_OPEN, kernel, iterations=1)
+        cv2.imshow("Morphed Image", morphed)
         edges = cv2.Canny(blurred, 50, 150)
         cv2.imshow("Edges", edges) 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
