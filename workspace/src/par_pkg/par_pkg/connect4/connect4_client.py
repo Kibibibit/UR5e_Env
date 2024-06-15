@@ -46,7 +46,50 @@ class Connect4Client():
     
     def has_player_won(self) -> Player:
         """Returns the id of the player who won the game. If no one has won, return Player.EMPTY. If the game is a tie, return Player.TIE"""
+        
+        for y in range(BOARD_HEIGHT):
+            for x in range(BOARD_WIDTH):
+                player = self.__board_state[y][x]
+                if player != Player.EMPTY:
+                    # Check horizontal
+                    if x <= BOARD_WIDTH - 4:
+                        if (self.__board_state[y][x] == self.__board_state[y][x + 1] ==
+                            self.__board_state[y][x + 2] == self.__board_state[y][x + 3]):
+                            return player
+                    
+                    # Check vertical
+                    if y <= BOARD_HEIGHT - 4:
+                        if (self.__board_state[y][x] == self.__board_state[y + 1][x] ==
+                            self.__board_state[y + 2][x] == self.__board_state[y + 3][x]):
+                            return player
+                    
+                    # Check diagonal down-right
+                    if x <= BOARD_WIDTH - 4 and y <= BOARD_HEIGHT - 4:
+                        if (self.__board_state[y][x] == self.__board_state[y + 1][x + 1] ==
+                            self.__board_state[y + 2][x + 2] == self.__board_state[y + 3][x + 3]):
+                            return player
+                    
+                    # Check diagonal up-right
+                    if x <= BOARD_WIDTH - 4 and y >= 3:
+                        if (self.__board_state[y][x] == self.__board_state[y - 1][x + 1] ==
+                            self.__board_state[y - 2][x + 2] == self.__board_state[y - 3][x + 3]):
+                            return player
+        
+        # Check for a tie
+        if all(self.next_column_empty(c) == COLUMN_FULL for c in range(BOARD_WIDTH)):
+            return Player.TIE
+        
         return Player.EMPTY
+        
+        
+        
+        
+        
+        
+        
+        return Player.EMPTY
+    
+    
     
     def get_best_robot_move(self) -> int:
         """Returns the column that the robot should place their next piece in"""
