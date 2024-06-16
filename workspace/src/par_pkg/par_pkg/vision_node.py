@@ -4,13 +4,21 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
+from visualization_msgs.msg import Marker, MarkerArray
+from geometry_msgs.msg import PointStamped
+import tf2_ros
+from tf2_geometry_msgs import do_transform_point
+from geometry_msgs.msg import Point
 
 class CubeDetectionNode(Node):
     def __init__(self):
         super().__init__('cube_detection_node')
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
+        self.marker_publisher_ = self.create_publisher(MarkerArray, 'cube_markers', 10)
         self.subscription = self.create_subscription(Image,'/camera/depth/table_image_raw',self.depth_image_callback,10)
         self.bridge = CvBridge()
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
     def depth_image_callback(self, msg):
         try:
@@ -19,12 +27,11 @@ class CubeDetectionNode(Node):
             processed_image, cube_centers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
             self.publisher_.publish(processed_msg)
-            self.publish_markers(cube_centers)
+            self.publish_markers(cube_centers, depth_image)
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, depth_image):
-        self.get_logger().info("Starting cube detection")
 
         # Normalize depth image to 8-bit
         depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
@@ -54,18 +61,17 @@ class CubeDetectionNode(Node):
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
             if len(approx) >= 4 and cv2.isContourConvex(approx):
-                (x, y, w, h) = cv2.boundingRect(approx)
+                (x,y,w,h) = cv2.boundingRect(approx)
                 aspect_ratio = w / float(h)
-                if 0.8 <= aspect_ratio <= 1.2:
+                if 0.8 <= aspect_ratio <=1.2:
                     depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
                     mean_depth = np.mean(depth_values)
                     if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 1000: 
                         self.get_logger().info("Contour filtered out by depth validation")
                         continue
 
-                    # Assume the cube is a perfect square and calculate its center
-                    center_x = x + w // 2
-                    center_y = y + h // 2
+                    center_x = int(np.mean(contour[:, 0, 0]))
+                    center_y = int(np.mean(contour[:, 0, 1]))
                     center_depth = depth_image[center_y, center_x]
 
                     if center_depth <= 0 or center_depth > 1000: 
@@ -83,7 +89,48 @@ class CubeDetectionNode(Node):
         cv2.imshow("Detected Cubes", depth_colored)  
         cv2.waitKey(1)
         return depth_colored, detected_cubes
-    
+
+    def publish_markers(self, cube_centers, depth_image):
+        marker_array = MarkerArray()
+        for i, (center_x, center_y, center_depth) in enumerate(cube_centers):
+            try:
+                # Create a PointStamped message for the cube center
+                point_stamped = PointStamped()
+                point_stamped.header.frame_id = "camera_depth_frame"
+                point_stamped.header.stamp = self.get_clock().now().to_msg()
+                point_stamped.point.x = center_x
+                point_stamped.point.y = center_y
+                point_stamped.point.z = center_depth
+
+                # Transform the point to the world frame
+                transform = self.tf_buffer.lookup_transform("world", "camera_depth_frame", rclpy.time.Time())
+                point_world = do_transform_point(point_stamped, transform)
+
+                # Create a marker for the cube
+                marker = Marker()
+                marker.header.frame_id = "world"
+                marker.header.stamp = self.get_clock().now().to_msg()
+                marker.ns = "cubes"
+                marker.id = i
+                marker.type = Marker.CUBE
+                marker.action = Marker.ADD
+                marker.pose.position.x = point_world.point.x / 1000.0
+                marker.pose.position.y = point_world.point.y / 1000.0
+                marker.pose.position.z = point_world.point.z / 1000.0
+                marker.pose.orientation.w = 1.0
+                marker.scale.x = 0.015
+                marker.scale.y = 0.015
+                marker.scale.z = 0.015
+                marker.color.a = 1.0
+                marker.color.r = 0.0
+                marker.color.g = 1.0
+                marker.color.b = 0.0
+                marker_array.markers.append(marker)
+            except Exception as e:
+                self.get_logger().error(f"Error transforming point: {e}")
+        
+        self.marker_publisher_.publish(marker_array)
+
 def main(args=None):
     rclpy.init(args=args)
     node = CubeDetectionNode()
