@@ -16,13 +16,14 @@ class CubeDetectionNode(Node):
         try:
             self.get_logger().info("Depth image received")
             depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
-            processed_image = self.detect_cubes(depth_image)
+            processed_image, cube_centers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
             self.publisher_.publish(processed_msg)
+            self.publish_markers(cube_centers)
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
-def detect_cubes(self, depth_image):
+    def detect_cubes(self, depth_image):
         self.get_logger().info("Starting cube detection")
 
         # Normalize depth image to 8-bit
@@ -35,15 +36,11 @@ def detect_cubes(self, depth_image):
         cv2.imshow("Blurred Image", blurred)  
 
         # Adaptive thresholding
-        # adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-        # cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
+        adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
 
-        # # Morphological operation
-        # kernel = np.ones((3, 3), np.uint8)
-        # morphed = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-        # morphed = cv2.morphologyEx(morphed, cv2.MORPH_OPEN, kernel, iterations=1)
-        # cv2.imshow("Morphed Image", morphed)
-        edges = cv2.Canny(blurred, 50, 150)
+        # Perform Canny edge detection
+        edges = cv2.Canny(adaptive_thresh, 50, 150)
         cv2.imshow("Edges", edges) 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -51,42 +48,42 @@ def detect_cubes(self, depth_image):
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 300 or area > 2000:
+            if area < 100 or area > 1000:
                 continue
             epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
             if len(approx) >= 4 and cv2.isContourConvex(approx):
-                (x,y,w,h) = cv2.boundingRect(approx)
+                (x, y, w, h) = cv2.boundingRect(approx)
                 aspect_ratio = w / float(h)
-                if 0.8 <= aspect_ratio <=1.2:
+                if 0.8 <= aspect_ratio <= 1.2:
                     depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
                     mean_depth = np.mean(depth_values)
                     if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 1000: 
                         self.get_logger().info("Contour filtered out by depth validation")
                         continue
 
-                center_x = int(np.mean(contour[:, 0, 0]))
-                center_y = int(np.mean(contour[:, 0, 1]))
-                center_depth = depth_image[center_y, center_x]
+                    # Assume the cube is a perfect square and calculate its center
+                    center_x = x + w // 2
+                    center_y = y + h // 2
+                    center_depth = depth_image[center_y, center_x]
 
-                if center_depth <= 0 or center_depth > 1000: 
-                    self.get_logger().info("Center depth filtered out")
-                    continue
+                    if center_depth <= 0 or center_depth > 1000: 
+                        self.get_logger().info("Center depth filtered out")
+                        continue
 
-                shape = "Cube"
-                detected_cubes.append((approx, center_depth))
-                color = (255, 0, 0)
-                cv2.drawContours(depth_colored, [approx], -1, color, 2)
-                x, y = approx[0][0]
-                cv2.putText(depth_colored, f"{shape}, Depth: {center_depth:.2f}mm", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                self.get_logger().info(f"Detected cube at ({x}, {y}), depth: {center_depth:.2f}mm")
+                    shape = "Cube"
+                    detected_cubes.append((center_x, center_y, center_depth))
+                    color = (255, 0, 0)
+                    cv2.drawContours(depth_colored, [approx], -1, color, 2)
+                    cv2.putText(depth_colored, f"{shape}, Depth: {center_depth:.2f}mm", (center_x, center_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    self.get_logger().info(f"Detected cube at ({center_x}, {center_y}), depth: {center_depth:.2f}mm")
 
         self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
         cv2.imshow("Detected Cubes", depth_colored)  
         cv2.waitKey(1)
-        return depth_colored
-
+        return depth_colored, detected_cubes
+    
 def main(args=None):
     rclpy.init(args=args)
     node = CubeDetectionNode()
