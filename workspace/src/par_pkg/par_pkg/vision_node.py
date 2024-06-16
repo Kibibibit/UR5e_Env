@@ -7,8 +7,7 @@ import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import PointStamped
 import tf2_ros
-from tf2_geometry_msgs import do_transform_point
-from geometry_msgs.msg import Point
+from tf2_geometry_msgs.tf2_geometry_msgs import do_transform_point
 
 class CubeDetectionNode(Node):
     def __init__(self):
@@ -27,11 +26,12 @@ class CubeDetectionNode(Node):
             processed_image, cube_centers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
             self.publisher_.publish(processed_msg)
-            self.publish_markers(cube_centers, depth_image)
+            self.publish_markers(cube_centers)
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
     def detect_cubes(self, depth_image):
+        self.get_logger().info("Starting cube detection")
 
         # Normalize depth image to 8-bit
         depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
@@ -42,12 +42,8 @@ class CubeDetectionNode(Node):
         blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         cv2.imshow("Blurred Image", blurred)  
 
-        # Adaptive thresholding
-        adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-        cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
-
         # Perform Canny edge detection
-        edges = cv2.Canny(adaptive_thresh, 50, 150)
+        edges = cv2.Canny(blurred, 30, 100)
         cv2.imshow("Edges", edges) 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -55,9 +51,9 @@ class CubeDetectionNode(Node):
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 100 or area > 1000:
+            if area < 300 or area > 2000:
                 continue
-            epsilon = 0.02 * cv2.arcLength(contour, True)
+            epsilon = 0.05 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
             if len(approx) >= 4 and cv2.isContourConvex(approx):
@@ -90,7 +86,7 @@ class CubeDetectionNode(Node):
         cv2.waitKey(1)
         return depth_colored, detected_cubes
 
-    def publish_markers(self, cube_centers, depth_image):
+    def publish_markers(self, cube_centers):
         marker_array = MarkerArray()
         for i, (center_x, center_y, center_depth) in enumerate(cube_centers):
             try:
