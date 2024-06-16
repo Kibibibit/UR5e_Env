@@ -22,7 +22,7 @@ class CubeDetectionNode(Node):
         except Exception as e:
             self.get_logger().error(f"Error processing depth image: {e}")
 
-    def detect_cubes(self, depth_image):
+def detect_cubes(self, depth_image):
         self.get_logger().info("Starting cube detection")
 
         # Normalize depth image to 8-bit
@@ -30,19 +30,19 @@ class CubeDetectionNode(Node):
         depth_normalized = np.uint8(depth_normalized)
 
         depth_colored = cv2.cvtColor(depth_normalized, cv2.COLOR_GRAY2BGR)
-        # Apply median blur
-        blurred = cv2.medianBlur(depth_normalized, 5)
+        # Apply Gaussian blur
+        blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         cv2.imshow("Blurred Image", blurred)  
 
         # Adaptive thresholding
-        adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-        cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
+        # adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        # cv2.imshow("Adaptive Threshold Image", adaptive_thresh)  
 
-        # Morphological operation
-        kernel = np.ones((3, 3), np.uint8)
-        morphed = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-        morphed = cv2.morphologyEx(morphed, cv2.MORPH_OPEN, kernel, iterations=1)
-        cv2.imshow("Morphed Image", morphed)
+        # # Morphological operation
+        # kernel = np.ones((3, 3), np.uint8)
+        # morphed = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        # morphed = cv2.morphologyEx(morphed, cv2.MORPH_OPEN, kernel, iterations=1)
+        # cv2.imshow("Morphed Image", morphed)
         edges = cv2.Canny(blurred, 50, 150)
         cv2.imshow("Edges", edges) 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -51,17 +51,20 @@ class CubeDetectionNode(Node):
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 50 or area > 1000:
+            if area < 300 or area > 2000:
                 continue
-            epsilon = 0.05 * cv2.arcLength(contour, True)
+            epsilon = 0.02 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
-            if len(approx) == 4 and cv2.isContourConvex(approx):
-                depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
-                mean_depth = np.mean(depth_values)
-                if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 1000: 
-                    self.get_logger().info("Contour filtered out by depth validation")
-                    continue
+            if len(approx) >= 4 and cv2.isContourConvex(approx):
+                (x,y,w,h) = cv2.boundingRect(approx)
+                aspect_ratio = w / float(h)
+                if 0.8 <= aspect_ratio <=1.2:
+                    depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
+                    mean_depth = np.mean(depth_values)
+                    if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 1000: 
+                        self.get_logger().info("Contour filtered out by depth validation")
+                        continue
 
                 center_x = int(np.mean(contour[:, 0, 0]))
                 center_y = int(np.mean(contour[:, 0, 1]))
