@@ -1,5 +1,6 @@
 import time
 import rclpy
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.node import Node
 from rclpy.action import ActionClient, ActionServer
 from par_interfaces.action import WaypointMove, PickAndPlace
@@ -10,6 +11,7 @@ from rclpy.action.client import ClientGoalHandle
 from par_interfaces.srv import CurrentWaypointPose
 from rclpy.task import Future
 from par_interfaces.msg import WaypointPose
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 from enum import Enum
@@ -23,17 +25,17 @@ class ActionStates(Enum):
     WAIT = 0
     DONE = 99
 
-FORCE:float = 20.0
+FORCE:float = 10.0
 FULL_OPEN_WIDTH:float = 110.0
 
 class PickAndPlaceActionServer(Node):
 
-    def __init__(self):
+    def __init__(self, action_callback_group, timer_callback_group):
         super().__init__('pick_and_place_node')
 
-        self.pick_and_place_action_server = ActionServer(self, PickAndPlace, "/par/pick_and_place", self.pick_and_place_callback)
+        self.pick_and_place_action_server = ActionServer(self, PickAndPlace, "/par/pick_and_place", self.pick_and_place_callback, callback_group=action_callback_group)
 
-        self.current_pose_client = self.create_client(CurrentWaypointPose, "par_moveit/get_current_waypoint_pose")
+        self.current_pose_client = self.create_client(CurrentWaypointPose, "/par_moveit/get_current_waypoint_pose")
 
         self.gripper_action_client = ActionClient(self, GripperSetWidth, "/rg2/set_width")
         self.moveit_action_client = ActionClient(self, WaypointMove, "/par_moveit/waypoint_move")
@@ -47,29 +49,28 @@ class PickAndPlaceActionServer(Node):
         self.current_state = ActionStates.WAIT
         self.__action_in_progress:bool = True
 
-        self.create_timer(2.0, self.check_current_state)
+        self.create_timer(0.25, self.check_current_state, callback_group=timer_callback_group)
     
     def get_gripper_state(self, gp:GripperState ):
         self.gripper_state = gp
 
     def pick_and_place_callback(self, goal_handle:ServerGoalHandle):
         # Defining goals
-        # goal_server = goal_handle
         self.start_point = goal_handle.request.start_point 
         self.end_point = goal_handle.request.end_point
         self.gripper_width = goal_handle.request.gripper_width
 
         self.__action_in_progress = False
-        self.current_state = ActionStates.OPEN_GRIPPER
         
         self.get_logger().info((f"Goal recieved with to move block from point {self.start_point.position.x}, {self.start_point.position.y}, {self.start_point.position.z}, {self.start_point.rotation}) to ({self.end_point.position.x}, {self.end_point.position.y}, {self.end_point.position.z}, {self.end_point.rotation}) {self.gripper_width=}"))
 
         while (self.current_state != ActionStates.DONE):
+            self.get_logger().info(f"Publishing Feedback")
             feedback = PickAndPlace.Feedback()
             feedback.current_pose = self.get_current_pose()
             feedback.gripper_current_width = self.gripper_state.width
             goal_handle.publish_feedback(feedback)
-            time.sleep(1.0)
+            time.sleep(0.25)
         
         self.current_state = ActionStates.WAIT
         self.__action_in_progress:bool = True
@@ -82,42 +83,46 @@ class PickAndPlaceActionServer(Node):
 
 
     def check_current_state(self):
-            if(self.__action_in_progress):
-                self.get_logger().info(f"completing action {self.current_state.name}...")
-            else:
-                self.__action_in_progress = True
-                if (self.current_state == ActionStates.OPEN_GRIPPER):
-                    self.open_gripper()
-                elif (self.current_state == ActionStates.MOVE_TO_ITEM):
-                    self.move_to_item()
-                elif (self.current_state == ActionStates.GRAB_ITEM):
-                    self.close_gripper()
-                elif (self.current_state == ActionStates.MOVE_ITEM_TO_NEW_POS):
-                    self.move_to_new_pose()
-                elif (self.current_state == ActionStates.RELEASE_ITEM):
-                    self.release_item()
+        if(self.__action_in_progress):
+            self.get_logger().info(f"completing action {self.current_state.name}...")
+        else:
+            self.__action_in_progress = True
+            self.get_logger().info(f"Changing state {self.current_state.name}...")
+
+            if (self.current_state == ActionStates.WAIT):
+                self.open_gripper()
+            elif (self.current_state == ActionStates.OPEN_GRIPPER):
+                self.move_to_item()
+            elif (self.current_state == ActionStates.MOVE_TO_ITEM):
+                self.close_gripper()
+            elif (self.current_state == ActionStates.GRAB_ITEM):
+                self.move_to_new_pose()
+            elif (self.current_state == ActionStates.MOVE_ITEM_TO_NEW_POS):
+                self.release_item()
+            elif (self.current_state == ActionStates.RELEASE_ITEM):
+                self.current_state = ActionStates.DONE
                 
 
     def open_gripper(self):
+        self.current_state = ActionStates.OPEN_GRIPPER
         self.move_gripper(FULL_OPEN_WIDTH)
-        self.current_state = ActionStates.MOVE_TO_ITEM
 
     def move_to_item(self):
+        self.current_state = ActionStates.MOVE_TO_ITEM
         self.move_to_pose(self.start_point)
-        self.current_state = ActionStates.GRAB_ITEM
-
 
     def close_gripper(self):
+        self.current_state = ActionStates.GRAB_ITEM
         self.move_gripper(self.gripper_width)
-        self.current_state = ActionStates.MOVE_ITEM_TO_NEW_POS
 
     def move_to_new_pose(self):
+        self.current_state = ActionStates.MOVE_ITEM_TO_NEW_POS
+
         self.move_to_pose(self.end_point)
-        self.current_state = ActionStates.RELEASE_ITEM
 
     def release_item(self):
+        self.current_state = ActionStates.RELEASE_ITEM
         self.move_gripper(FULL_OPEN_WIDTH)
-        self.current_state = ActionStates.DONE
 
     def move_gripper(self, width):
         move_gripper_goal = GripperSetWidth.Goal()
@@ -147,8 +152,8 @@ class PickAndPlaceActionServer(Node):
 
         self.__action_in_progress = False
     
-    def gripper_feedback(self, gripper_feedback:GripperSetWidth.Feedback):
-        self.get_logger().info("current gripper width: {0}", gripper_feedback.current_width) 
+    def gripper_feedback(self, gripper_feedback):
+        self.get_logger().info(f"current gripper width: {gripper_feedback.feedback.current_width}") 
         
     def move_to_pose(self, pose:WaypointPose):
         goal_pose = WaypointMove.Goal()
@@ -178,34 +183,42 @@ class PickAndPlaceActionServer(Node):
 
         self.__action_in_progress = False
 
-    def moveit_feedback(self, moveit_feedback:WaypointMove.Feedback):
-        self.get_logger().info("current pose: {0}", moveit_feedback.current_pose) 
-        
+    def moveit_feedback(self, moveit_feedback):
+        self.get_logger().info(f"current pose: {moveit_feedback.feedback.current_pose}")
+       
     def get_current_pose(self):
         current_pose_future = self.current_pose_client.call_async(CurrentWaypointPose.Request())
 
-        if current_pose_future.done():
-            try:
-                current_pose = current_pose_future.result().pose
-                return current_pose
+        while not current_pose_future.done():
+            pass
 
-            except Exception as e:
-                self.get_logger().info(
-                    'Service call failed %r' % (e,))
-               
+        current_pose:CurrentWaypointPose.Response = current_pose_future.result()
+        return current_pose.pose
+              
 def main(args=None):
-   rclpy.init(args=args)
+    rclpy.init(args=args)
 
-   node = PickAndPlaceActionServer()
 
-   try:
-       rclpy.spin(node)
-   except KeyboardInterrupt:
-       pass
+    action_callback_group = MutuallyExclusiveCallbackGroup()
 
-   node.destroy_node()
-   rclpy.shutdown()
+    node = PickAndPlaceActionServer(
+        action_callback_group=action_callback_group,
+        timer_callback_group=None
+    )
+
+    executor = MultiThreadedExecutor()
+
+    executor.add_node(node)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+
+    node.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
-   main()    
+  main()    
+
