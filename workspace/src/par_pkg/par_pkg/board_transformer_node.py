@@ -68,8 +68,8 @@ class BoardTransformerNode(Node):
         board_pose = do_transform_pose_stamped(world_pose, transformation)
 
         board_vector = IVector2()
-        board_vector.x = math.floor(board_pose.pose.position.x / GRID_SIZE)
-        board_vector.y = math.floor(board_pose.pose.position.y / GRID_SIZE)
+        board_vector.x = math.floor(board_pose.pose.position.y / GRID_SIZE)
+        board_vector.y = math.floor(board_pose.pose.position.z / GRID_SIZE)
 
         response.board_pos = board_vector
         return response
@@ -79,8 +79,8 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.x = request.board_pos.x*GRID_SIZE
-        pose.pose.position.y = request.board_pos.y*GRID_SIZE
+        pose.pose.position.y = request.board_pos.x*GRID_SIZE
+        pose.pose.position.z = request.board_pos.y*GRID_SIZE
 
         transformation = self.__get_transform("world", "board_frame")
         if (transformation == None):
@@ -110,15 +110,14 @@ class BoardTransformerNode(Node):
             self.__board_transform.header.frame_id = "world"
             self.__board_transform.child_frame_id = "board_frame"
 
-            board_cell_rotation = self.__quat_to_euler(board_cell_pose.pose.orientation)
-            board_cell_rotation.z = board_cell_rotation.x
-            board_cell_rotation.y = 0.0
-            board_cell_rotation.x = 0.0
+            
 
             self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
-            self.__board_transform.transform.translation.z = 0.0
-            self.__board_transform.transform.rotation = self.__euler_to_quat(board_cell_rotation)
+
+            # We want to use this to set the table height for the table depth image
+            self.__board_transform.transform.translation.z = board_cell_pose.pose.position.z
+            self.__board_transform.transform.rotation = board_cell_pose.pose.orientation
 
             ## Wait until we've seen the board a few times before finalising the transform
             self.__board_ticks += 1
@@ -131,39 +130,6 @@ class BoardTransformerNode(Node):
         bool_msg.data = self.__board_detected
         self.__board_found_publisher.publish(bool_msg)
 
-    def __euler_to_quat(self, euler: Vector3):
-
-        cr = math.cos(euler.x * 0.5)
-        sr = math.sin(euler.x * 0.5)
-        cp = math.cos(euler.y * 0.5)
-        sp = math.sin(euler.y * 0.5)
-        cy = math.cos(euler.z * 0.5)
-        sy = math.sin(euler.z * 0.5)
-
-        q = Quaternion()
-        q.w = cr * cp * cy + sr * sp * sy
-        q.x = sr * cp * cy - cr * sp * sy
-        q.y = cr * sp * cy + sr * cp * sy
-        q.z = cr * cp * sy - sr * sp * cy
-
-        return q
-
-    def __quat_to_euler(self, q: Quaternion):
-        angles = Vector3()
-
-        sinr_cosp = 2 * (q.w * q.x + q.y * q.z)
-        cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y)
-        angles.x = math.atan2(sinr_cosp, cosr_cosp)
-
-        sinp = math.sqrt(1 + 2 * (q.w * q.y - q.x * q.z))
-        cosp = math.sqrt(1 - 2 * (q.w * q.y - q.x * q.z))
-        angles.y = 2 * math.atan2(sinp, cosp) - math.pi / 2
-
-        siny_cosp = 2 * (q.w * q.z + q.x * q.y)
-        cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
-        angles.z = math.atan2(siny_cosp, cosy_cosp)
-
-        return angles
 
     def __object_callback(self, msg: Float32MultiArray):
         if (len(msg.data) > 0):
