@@ -21,7 +21,7 @@ GRID_SIZE = 0.019
 ## Set this based on if the grid is a4 (1) a3 (2)
 PAPER_SCALE = 1.0
 
-CELL_SIZE = GRID_SIZE*PAPER_SCALE
+CELL_SIZE: float = GRID_SIZE*PAPER_SCALE
 
 class BoardTransformerNode(Node):
     def __init__(self):
@@ -83,8 +83,8 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.y = (request.board_pos.x+CELL_SIZE/2)*CELL_SIZE
-        pose.pose.position.z = (request.board_pos.y+CELL_SIZE/2)*CELL_SIZE
+        pose.pose.position.y = (float(request.board_pos.x)+(CELL_SIZE/2.0))*CELL_SIZE
+        pose.pose.position.z = (float(request.board_pos.y)+(CELL_SIZE/2.0))*CELL_SIZE
 
         transformation = self.__get_transform("world", "board_frame")
         if (transformation == None):
