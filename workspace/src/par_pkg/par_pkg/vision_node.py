@@ -13,7 +13,7 @@ class CubeDetectionNode(Node):
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
         self.marker_publisher_ = self.create_publisher(MarkerArray, 'detected_cubes_markers', 10)
         self.subscription = self.create_subscription(Image, '/camera/depth/table_image_raw', self.depth_image_callback, 10)
-        self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/camera_info', self.camera_info_callback, 10)
+        self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/depth/camera_info', self.camera_info_callback, 10)
         self.bridge = CvBridge()
         self.marker_id = 0
         self.camera_model = None
