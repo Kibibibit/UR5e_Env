@@ -6,7 +6,7 @@ R=${3:-"0"}
 
 
 
-STRING=`ros2 service call par/board_to_pose par_interfaces/srv/BoardToPose "{"board_pos":{"x":$X, "y":$Y}}"`
+STRING=`ros2 service call par/board_to_world par_interfaces/srv/BoardToWorld "{\"board_pos\":{\"x\":$X, \"y\":$Y}}"`
 
 
 X_REGEX="x=[0-9\.]*"
@@ -24,11 +24,10 @@ X_P=${BASH_REMATCH#"$X_PREFIX"}
 Y_P=${BASH_REMATCH#"$Y_PREFIX"}
 [[ "$STRING" =~ $Z_REGEX ]]
 Z_P=${BASH_REMATCH#"$Z_PREFIX"}
-echo "x=$X_P" 
-echo "y=$Y_P" 
-echo "z=$Z_P"
+
     
 # SET Z to 0 till we can trust table height
 Z_P=0
 
+./waypoint_move.sh $X_P $Y_P $Z_P $R
 
