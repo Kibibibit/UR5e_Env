@@ -122,7 +122,7 @@ class Connect4Client():
     #     return -1
     # -------------------------------------------------------------------- 
     
-     # Minimax algorithm Approach:
+    #  # Minimax algorithm Approach:
 
     def evaluate_board(self) -> int:
         """Evaluates the board and returns a score"""
@@ -134,62 +134,109 @@ class Connect4Client():
         else:
             return 0
 
-    def minimax(self, depth: int, is_maximizing: bool) -> int:
-        """Minimax algorithm with depth limiting"""
+    # def minimax(self, depth: int, is_maximizing: bool) -> int:
+    #     """Minimax algorithm with depth limiting"""
+    #     score = self.evaluate_board()
+    #       # If game is over(win or tie) or depth is 3, return score
+    #     if score == 1 or score == -1 or depth == 3:
+    #         return score
+
+    #     if is_maximizing:   # Robot's turn to play (maximizing player), initialize the best score to negative infinity
+    #         best_score = -float('inf')
+
+    #         for column in range(BOARD_WIDTH):
+    #             if self.valid_move(column):
+    #                 row = self.next_column_empty(column)
+    #                 self.__board_state[row][column] = Player.ROBOT
+    #                  # Recursively call minimax for the minimizing player's turn (human)
+    #                 best_score = max(best_score, self.minimax(depth + 1, False))
+    #                 self.__board_state[row][column] = Player.EMPTY
+    #         return best_score
+        
+
+    #     else:
+    #     # Human's turn to play (minimizing player)
+
+    #         best_score = float('inf')
+    #         for column in range(BOARD_WIDTH):
+    #             if self.valid_move(column):
+    #                 row = self.next_column_empty(column)
+    #                 self.__board_state[row][column] = Player.HUMAN
+    #                 best_score = min(best_score, self.minimax(depth + 1, True))
+    #                 self.__board_state[row][column] = Player.EMPTY
+    #         return best_score
+        
+
+
+
+    # def get_best_robot_move(self) -> int:
+    #     """Returns the column that the robot should place their next piece in"""
+    #     # Find the best column for the robot to play
+    #     best_score = -float('inf')
+
+    #     best_move = -1   # Initialize the best move to -1 (no valid move found yet)
+
+    #     for column in range(BOARD_WIDTH):
+    #         if self.valid_move(column):
+    #             row = self.next_column_empty(column)
+    #             self.__board_state[row][column] = Player.ROBOT
+
+    #             # Evaluate the move using the minimax algorithm
+    #             score = self.minimax(0, False)
+    #             self.__board_state[row][column] = Player.EMPTY
+
+    #             # If the score of this move is better than the best score, update the best score and move
+    #             if score > best_score:
+    #                 best_score = score
+    #                 best_move = column
+    #     return best_move
+#--------------------------------------------------------------------------------------------------------------
+
+    def alpha_beta(self, depth: int, alpha: int, beta: int, is_maximizing: bool) -> int:
+        """Minimax algorithm with alpha-beta pruning"""
         score = self.evaluate_board()
-          # If game is over(win or tie) or depth is 3, return score
+        # If game is over (win or tie) or depth is 3, return score
         if score == 1 or score == -1 or depth == 3:
             return score
 
-        if is_maximizing:   # Robot's turn to play (maximizing player), initialize the best score to negative infinity
-            best_score = -float('inf')
-
+        if is_maximizing:  # Robot's turn to play (maximizing player)
+            max_eval = -float('inf')
             for column in range(BOARD_WIDTH):
                 if self.valid_move(column):
                     row = self.next_column_empty(column)
                     self.__board_state[row][column] = Player.ROBOT
-                     # Recursively call minimax for the minimizing player's turn (human)
-                    best_score = max(best_score, self.minimax(depth + 1, False))
+                    eval = self.alpha_beta(depth + 1, alpha, beta, False)
                     self.__board_state[row][column] = Player.EMPTY
-            return best_score
-        
-
-        else:
-        # Human's turn to play (minimizing player)
-
-            best_score = float('inf')
+                    max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+            return max_eval
+        else:  # Human's turn to play (minimizing player)
+            min_eval = float('inf')
             for column in range(BOARD_WIDTH):
                 if self.valid_move(column):
                     row = self.next_column_empty(column)
                     self.__board_state[row][column] = Player.HUMAN
-                    best_score = min(best_score, self.minimax(depth + 1, True))
+                    eval = self.alpha_beta(depth + 1, alpha, beta, True)
                     self.__board_state[row][column] = Player.EMPTY
-            return best_score
-        
-
-
+                    min_eval = min(min_eval, eval)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+            return min_eval
 
     def get_best_robot_move(self) -> int:
         """Returns the column that the robot should place their next piece in"""
-        # Find the best column for the robot to play
         best_score = -float('inf')
-
-        best_move = -1   # Initialize the best move to -1 (no valid move found yet)
-
+        best_move = -1
         for column in range(BOARD_WIDTH):
             if self.valid_move(column):
                 row = self.next_column_empty(column)
                 self.__board_state[row][column] = Player.ROBOT
-
-                # Evaluate the move using the minimax algorithm
-                score = self.minimax(0, False)
+                score = self.alpha_beta(0, -float('inf'), float('inf'), False)
                 self.__board_state[row][column] = Player.EMPTY
-
-                # If the score of this move is better than the best score, update the best score and move
                 if score > best_score:
                     best_score = score
                     best_move = column
         return best_move
-#--------------------------------------------------------------------------------------------------------------
-
- 
