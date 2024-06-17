@@ -1,3 +1,5 @@
+
+### COPYRIGHT FROM ORIGINAL UR_DRIVER LAUNCH FILE
 # Copyright (c) 2021 PickNik, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,7 +27,6 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 #
 # Author: Denis Stogl
 
@@ -105,6 +106,16 @@ def launch_setup(context, *args, **kwargs):
     gripper_check_rate = LaunchConfiguration('gripper_check_rate')
     gripper_joint_publish_rate = LaunchConfiguration("gripper_joint_publish_rate")
     gripper_info_publish_rate = LaunchConfiguration("gripper_info_publish_rate")
+
+    ## Check if we're enabling the camera or not
+    enable_camera = LaunchConfiguration("enable_camera")
+
+    # Find object2d configuration
+    gui = LaunchConfiguration("gui")
+    objects_path = LaunchConfiguration("objects_path")
+    rgb_topic = LaunchConfiguration("rgb_topic")
+    depth_topic = LaunchConfiguration("depth_topic")
+    camera_info_topic = LaunchConfiguration("camera_info_topic")
 
     joint_limit_params = PathJoinSubstitution(
         [FindPackageShare(description_package), "config", ur_type, "joint_limits.yaml"]
@@ -427,7 +438,25 @@ def launch_setup(context, *args, **kwargs):
             gripper_info_publish_rate,
             gripper_joint_publish_rate
         ],
-        condition=IfCondition(LaunchConfiguration('gripper'))
+        condition=IfCondition(gripper)
+        ),
+        include_other_launch_file(
+            "realsense2_camera",
+            "rs_launch.py",
+            launch_arguments=[],
+            condition=IfCondition(enable_camera)
+        ),
+        include_other_launch_file(
+            "find_object_2d",
+            "find_object_3d.launch.py",
+            launch_arguments=[
+                gui,
+                objects_path,
+                camera_info_topic,
+                rgb_topic,
+                depth_topic
+            ],
+            condition=IfCondition(enable_camera)
         )
     ]
 
@@ -686,6 +715,16 @@ def generate_launch_description():
         )
     )
 
+    ## Enable camera value
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "enable_camera",
+            default_value="True",
+            description="Whether or not to boot the camera and its drivers + findobject2d"
+        )
+    )
+
+
     ## Gripper values
 
     declared_arguments.append(
@@ -723,6 +762,44 @@ def generate_launch_description():
             'gripper_joint_publish_rate', 
             default_value="100"
         ),
+    )
+
+    ## Find object launch arguments
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'gui', 
+            default_value="true"
+        ),
+    )
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'objects_path', 
+            default_value="/home/rosuser/workspace/src/par_pkg/objects/"
+        ),
+    )
+
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'rgb_topic'
+            '/camera/camera/color/image_raw'
+        )
+    )
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'depth_topic'
+            '/camera/camera/depth/image_rect_raw'
+        )
+    )
+
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            'camera_info_topic'
+            '/camera/camera/color/camera_info'
+        )
     )
 
     return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
