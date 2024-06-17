@@ -6,7 +6,7 @@ R=${3:-"0"}
 
 
 
-STRING=`ros2 service call par/board_to_world par_interfaces/srv/BoardToWorld \"{\"board_pos\":{\"x\":$X, \"y\":$Y}}\"`
+STRING=`ros2 service call par/board_to_world par_interfaces/srv/BoardToWorld "{\"board_pos\":{\"x\":$X, \"y\":$Y}}"`
 
 
 X_REGEX="x=[-0-9]*\.[0-9]*"
