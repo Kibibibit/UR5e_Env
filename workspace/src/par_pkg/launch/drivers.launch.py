@@ -784,21 +784,21 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             'rgb_topic',
-            '/camera/camera/color/image_raw'
+            default_value='/camera/camera/color/image_raw'
         )
     )
 
     declared_arguments.append(
         DeclareLaunchArgument(
             'depth_topic',
-            '/camera/camera/depth/image_rect_raw'
+            default_value='/camera/camera/depth/image_rect_raw'
         )
     )
 
     declared_arguments.append(
         DeclareLaunchArgument(
             'camera_info_topic',
-            '/camera/camera/color/camera_info'
+            default_value='/camera/camera/color/camera_info'
         )
     )
 
