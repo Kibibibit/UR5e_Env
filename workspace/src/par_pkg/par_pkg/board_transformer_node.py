@@ -18,6 +18,8 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 # Grid cells are 2cm across (19mm due to margins)
 GRID_SIZE = 0.019
 
+## Set this based on if the grid is a4 (1) a3 (2)
+PAPER_SCALE = 1.0
 
 class BoardTransformerNode(Node):
     def __init__(self):
@@ -68,8 +70,8 @@ class BoardTransformerNode(Node):
         board_pose = do_transform_pose_stamped(world_pose, transformation)
 
         board_vector = IVector2()
-        board_vector.x = math.floor(board_pose.pose.position.y / GRID_SIZE)
-        board_vector.y = math.floor(board_pose.pose.position.z / GRID_SIZE)
+        board_vector.x = math.floor(board_pose.pose.position.y / (GRID_SIZE*PAPER_SCALE))
+        board_vector.y = math.floor(board_pose.pose.position.z / (GRID_SIZE*PAPER_SCALE))
 
         response.board_pos = board_vector
         return response
@@ -79,8 +81,8 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.y = request.board_pos.x*GRID_SIZE
-        pose.pose.position.z = request.board_pos.y*GRID_SIZE
+        pose.pose.position.y = request.board_pos.x*GRID_SIZE*PAPER_SCALE
+        pose.pose.position.z = request.board_pos.y*GRID_SIZE*PAPER_SCALE
 
         transformation = self.__get_transform("world", "board_frame")
         if (transformation == None):
@@ -99,8 +101,8 @@ class BoardTransformerNode(Node):
                 return
             pose_source = PoseStamped()
             # Commented these out until we get the transform correct
-            pose_source.pose.position.y = -((277.04/2) - 15.04)/1000.0
-            pose_source.pose.position.z = -((190.40/2) - 25.00)/1000.0
+            pose_source.pose.position.y = -(((277.04/2) - 15.04)/1000.0)*PAPER_SCALE
+            pose_source.pose.position.z = -(((190.40/2) - 25.00)/1000.0)*PAPER_SCALE
 
 
             ### Transform to the world frame
