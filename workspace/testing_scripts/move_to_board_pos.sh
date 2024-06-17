@@ -6,7 +6,7 @@ R=${3:-"0"}
 
 
 
-STRING=`ros2 service call par/board_to_world par_interfaces/srv/BoardToWorld "{\"board_pos\":{\"x\":$X, \"y\":$Y}}"`
+STRING=`ros2 service call par/board_to_world par_interfaces/srv/BoardToWorld \"{\"board_pos\":{\"x\":$X, \"y\":$Y}}\"`
 
 
 X_REGEX="x=[0-9\.]*"
@@ -29,5 +29,9 @@ Z_P=${BASH_REMATCH#"$Z_PREFIX"}
 # SET Z to 0 till we can trust table height
 Z_P=0
 
-./waypoint_move.sh $X_P $Y_P $Z_P $R
+echo "$X_P"
+echo "$Y_P"
+echo "$Z_P"
+
+#./waypoint_move.sh $X_P $Y_P $Z_P $R
 
