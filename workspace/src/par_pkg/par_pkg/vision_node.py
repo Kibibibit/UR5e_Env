@@ -1,10 +1,11 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
+from image_geometry import PinholeCameraModel
 
 class CubeDetectionNode(Node):
     def __init__(self):
@@ -12,8 +13,25 @@ class CubeDetectionNode(Node):
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
         self.marker_publisher_ = self.create_publisher(MarkerArray, 'detected_cubes_markers', 10)
         self.subscription = self.create_subscription(Image, '/camera/depth/table_image_raw', self.depth_image_callback, 10)
+        self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/camera_info', self.camera_info_callback, 10)
         self.bridge = CvBridge()
         self.marker_id = 0
+        self.camera_model = None
+
+    def uv_to_angle(self, uv):
+        
+        if self.camera_model is not None:
+            return np.array(self.camera_model.projectPixelTo3dRay(uv))
+        else:
+            self.get_logger().error("Tried to use camera model before getting camera info!")
+            return None
+
+    def camera_info_callback(self, msg: CameraInfo):
+        
+        if self.camera_model is None:
+            self.camera_model = PinholeCameraModel()
+            self.camera_model.fromCameraInfo(msg)
+            self.get_logger().info(f"Got the camera info!")
 
     def depth_image_callback(self, msg):
         try:
@@ -37,7 +55,7 @@ class CubeDetectionNode(Node):
         blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         cv2.imshow("Blurred Image", blurred)
 
-        edges = cv2.Canny(blurred, 20, 80)  # Adjusted thresholds
+        edges = cv2.Canny(blurred, 20, 80)  
         cv2.imshow("Edges", edges)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -47,7 +65,7 @@ class CubeDetectionNode(Node):
         for contour in contours:
             area = cv2.contourArea(contour)
             self.get_logger().info(f"Contour area: {area}")
-            if area < 100 or area > 3000:  # Adjusted thresholds
+            if area < 100 or area > 3000: 
                 continue
 
             epsilon = 0.05 * cv2.arcLength(contour, True)
@@ -62,7 +80,7 @@ class CubeDetectionNode(Node):
                     depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
                     mean_depth = np.mean(depth_values)
                     self.get_logger().info(f"Mean depth: {mean_depth}")
-                    if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 40000:  # Adjusted depth threshold
+                    if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 40000: 
                         self.get_logger().info("Contour filtered out by depth validation")
                         continue
 
@@ -79,34 +97,41 @@ class CubeDetectionNode(Node):
                     center_depth = depth_image[center_y, center_x]
                     self.get_logger().info(f"Center depth: {center_depth}")
 
-                    if center_depth <= 0 or center_depth > 1000:  # Adjusted depth threshold
+                    if center_depth <= 0 or center_depth > 1000: 
                         self.get_logger().info("Center depth filtered out")
                         continue
 
-                    shape = "Cube"
-                    detected_cubes.append((approx, center_depth))
-                    color = (255, 0, 0)
-                    cv2.drawContours(depth_colored, [approx], -1, color, 2)
-                    cv2.putText(depth_colored, f"{shape}, Depth: {center_depth:.2f}mm", (center_x, center_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                    self.get_logger().info(f"Detected cube at ({center_x}, {center_y}), depth: {center_depth:.2f}mm")
+                    # Get the 3D coordinates of the center point
+                    uv = (center_x, center_y)
+                    direction_vector = self.uv_to_angle(uv)
+                    if direction_vector is not None:
+                        center_3d = direction_vector * center_depth / 1000.0 
+                        self.get_logger().info(f"3D coordinates: {center_3d}")
 
-                    marker = Marker()
-                    marker.header.frame_id = "camera_depth_frame"  # Ensure this matches your RViz fixed frame
-                    marker.header.stamp = self.get_clock().now().to_msg()
-                    marker.type = Marker.CUBE
-                    marker.id = self.marker_id
-                    self.marker_id += 1
-                    marker.pose.position.x = (center_x - depth_image.shape[1] / 2) * center_depth / 1000.0
-                    marker.pose.position.y = (center_y - depth_image.shape[0] / 2) * center_depth / 1000.0
-                    marker.pose.position.z = center_depth / 1000.0
-                    marker.scale.x = 0.015
-                    marker.scale.y = 0.015
-                    marker.scale.z = 0.015
-                    marker.color.r = 0.0
-                    marker.color.g = 1.0
-                    marker.color.b = 0.0
-                    marker.color.a = 1.0
-                    markers.markers.append(marker)
+                        shape = "Cube"
+                        detected_cubes.append((approx, center_depth))
+                        color = (255, 0, 0)
+                        cv2.drawContours(depth_colored, [approx], -1, color, 2)
+                        cv2.putText(depth_colored, f"{shape}, Depth: {center_depth:.2f}mm", (center_x, center_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                        self.get_logger().info(f"Detected cube at ({center_x}, {center_y}), depth: {center_depth:.2f}mm")
+
+                        marker = Marker()
+                        marker.header.frame_id = "camera_depth_frame" 
+                        marker.header.stamp = self.get_clock().now().to_msg()
+                        marker.type = Marker.CUBE
+                        marker.id = self.marker_id
+                        self.marker_id += 1
+                        marker.pose.position.x = center_3d[0]
+                        marker.pose.position.y = center_3d[1]
+                        marker.pose.position.z = center_3d[2]
+                        marker.scale.x = 0.015
+                        marker.scale.y = 0.015
+                        marker.scale.z = 0.015
+                        marker.color.r = 0.0
+                        marker.color.g = 1.0
+                        marker.color.b = 0.0
+                        marker.color.a = 1.0
+                        markers.markers.append(marker)
 
         self.get_logger().info(f"Detected {len(detected_cubes)} cubes.")
         cv2.imshow("Detected Cubes", depth_colored)
