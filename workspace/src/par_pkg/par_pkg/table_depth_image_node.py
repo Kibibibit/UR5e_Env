@@ -3,6 +3,7 @@ import rclpy.duration
 from rclpy.node import Node
 import rclpy.time
 from sensor_msgs.msg import Image
+from std_msgs.msg import Float64
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
@@ -28,6 +29,13 @@ class TableDepthImageNode(Node):
             QoSProfile(depth=5, reliability=ReliabilityPolicy.RELIABLE)
         )
 
+        self.__table_height_subscriber = self.create_subscription(
+            Float64,
+            "/par/table_height",
+            self.__table_height_callback,
+             QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
+        )
+
         self.__depth_camera_publisher = self.create_publisher(
             Image,
             "/camera/depth/table_image_raw",
@@ -35,6 +43,7 @@ class TableDepthImageNode(Node):
         )
 
         self.__camera_height: float = 0.0
+        self.__table_height: float = 0.0
         self.__offset: float = -0.01
 
         # We don't need to get the camera trasnform as often as we pass frames in,
@@ -64,7 +73,7 @@ class TableDepthImageNode(Node):
     def __depth_callback(self, image: Image):
         cv_image: cv.Mat = bridge.imgmsg_to_cv2(image)
 
-        height_as_int = round((self.__camera_height+self.__offset) * 1000.0)
+        height_as_int = round(((self.__camera_height+self.__offset) * 1000.0) + self.__table_height)
         # Convert any pixels that are greater than the camera height to
         # the 16 bit integer limit. I hope
         cv_image[cv_image > height_as_int] = 65535
@@ -72,6 +81,8 @@ class TableDepthImageNode(Node):
 
         self.__depth_camera_publisher.publish(out)
 
+    def __table_height_callback(self, msg: Float64):
+        self.__table_height = msg.data
 
 def main(args=None):
     rclpy.init(args=args)

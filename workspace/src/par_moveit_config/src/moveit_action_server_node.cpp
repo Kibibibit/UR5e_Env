@@ -162,6 +162,7 @@ void MoveitActionServerNode::execute(const std::shared_ptr<GoalHandle> goal_hand
 
   if (rclcpp::ok())
   {
+    current_waypoint_pose = waypoint_pose_from_pose(this->move_group_interface->getCurrentPose().pose);
     result->final_pose = current_waypoint_pose;
     goal_handle->succeed(result);
     RCLCPP_INFO(this->get_logger(), "Goal succeeded");
