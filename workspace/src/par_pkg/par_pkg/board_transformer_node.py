@@ -135,7 +135,7 @@ class BoardTransformerNode(Node):
 
         table_height_msg = Float64()
         table_height_msg.data = self.__board_transform.transform.translation.z
-        self.__table_height_publisher.publish(table_height_msg.data)
+        self.__table_height_publisher.publish(table_height_msg)
 
         bool_msg = Bool()
         bool_msg.data = self.__board_detected
