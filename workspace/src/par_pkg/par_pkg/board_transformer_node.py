@@ -4,11 +4,11 @@ from rclpy.node import Node
 import rclpy.time
 import tf2_ros
 from tf2_geometry_msgs import do_transform_pose_stamped, TransformStamped
-from geometry_msgs.msg import PoseStamped, Vector3, Quaternion
+from geometry_msgs.msg import PoseStamped
 from par_interfaces.msg import IVector2
 from par_interfaces.srv import BoardToWorld, WorldToBoard
 import math
-from std_msgs.msg import Bool, Float32MultiArray
+from std_msgs.msg import Bool, Float32MultiArray, Float32
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 ## This node updates the board transform,
@@ -47,6 +47,8 @@ class BoardTransformerNode(Node):
         self.__board_to_world_service = self.create_service(BoardToWorld, 'par/board_to_world', self.__board_to_world_callback)
 
         self.__objects_subscription = self.create_subscription(Float32MultiArray, 'objects', self.__object_callback,  qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
+
+        self.__table_height_publisher = self.create_publisher(Float32, '/par/table_height',qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
         self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
@@ -128,8 +130,12 @@ class BoardTransformerNode(Node):
             self.__board_ticks += 1
             if (self.__board_ticks > 3):
                 self.__board_detected = True
-
+        
         self.__broadcaster.sendTransform(self.__board_transform)
+
+        table_height_msg = Float32()
+        table_height_msg.data = self.__board_transform.transform.translation.z
+        self.__table_height_publisher.publish(table_height_msg.data)
 
         bool_msg = Bool()
         bool_msg.data = self.__board_detected

@@ -25,13 +25,10 @@ Y_P=${BASH_REMATCH#"$Y_PREFIX"}
 [[ "$STRING" =~ $Z_REGEX ]]
 Z_P=${BASH_REMATCH#"$Z_PREFIX"}
 
-    
-# SET Z to 0 till we can trust table height
-Z_P=0
 
-echo "$X_P"
-echo "$Y_P"
-echo "$Z_P"
+echo "x=$X_P"
+echo "y=$Y_P"
+echo "z=$Z_P"
 
 ./waypoint_move.sh $X_P $Y_P $Z_P $R
 
