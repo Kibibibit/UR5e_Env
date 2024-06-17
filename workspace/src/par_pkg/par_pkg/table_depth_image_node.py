@@ -3,7 +3,7 @@ import rclpy.duration
 from rclpy.node import Node
 import rclpy.time
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float32
+from std_msgs.msg import Float64
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import tf2_ros
 from tf2_geometry_msgs import do_transform_point
@@ -30,7 +30,7 @@ class TableDepthImageNode(Node):
         )
 
         self.__table_height_subscriber = self.create_subscription(
-            Float32,
+            Float64,
             "/par/table_height",
             self.__table_height_callback,
              QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
@@ -81,7 +81,7 @@ class TableDepthImageNode(Node):
 
         self.__depth_camera_publisher.publish(out)
 
-    def __table_height_callback(self, msg: Float32):
+    def __table_height_callback(self, msg: Float64):
         self.__table_height = msg.data
 
 def main(args=None):
