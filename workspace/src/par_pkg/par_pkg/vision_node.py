@@ -21,7 +21,7 @@ class CubeDetectionNode(Node):
             depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
             processed_image, markers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-            processed_msg.header.frame_id = "camera_depth_frame"  # Ensure frame ID is set
+            # processed_msg.header.frame_id = "camera_depth_frame" 
             self.publisher_.publish(processed_msg)
             self.marker_publisher_.publish(markers)
         except Exception as e:
