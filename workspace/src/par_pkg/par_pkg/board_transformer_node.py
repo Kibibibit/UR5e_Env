@@ -83,8 +83,8 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.y = (float(request.board_pos.x)+(CELL_SIZE/2.0))*CELL_SIZE
-        pose.pose.position.z = (float(request.board_pos.y)+(CELL_SIZE/2.0))*CELL_SIZE
+        pose.pose.position.y = (float(request.board_pos.x)+0.5)*CELL_SIZE
+        pose.pose.position.z = (float(request.board_pos.y)+0.5)*CELL_SIZE
 
         transformation = self.__get_transform("world", "board_frame")
         if (transformation == None):
