@@ -15,8 +15,8 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 ## And has services for transforming world positions into board positions
 ## and back.
 
-# Grid cells are 2cm across
-GRID_SIZE = 0.02
+# Grid cells are 2cm across (19mm due to margins)
+GRID_SIZE = 0.019
 
 
 class BoardTransformerNode(Node):
