@@ -122,7 +122,7 @@ class BoardTransformerNode(Node):
 
             ## Wait until we've seen the board a few times before finalising the transform
             self.__board_ticks += 1
-            if (self.__board_ticks > 100):
+            if (self.__board_ticks > 3):
                 self.__board_detected = True
 
         self.__broadcaster.sendTransform(self.__board_transform)
