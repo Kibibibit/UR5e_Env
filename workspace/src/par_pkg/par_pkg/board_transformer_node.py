@@ -2,163 +2,85 @@ import rclpy
 import rclpy.duration
 from rclpy.node import Node
 import rclpy.time
-import tf2_ros
-from tf2_geometry_msgs import do_transform_pose_stamped, TransformStamped
-from geometry_msgs.msg import PoseStamped
-from par_interfaces.msg import IVector2
-from par_interfaces.srv import BoardToWorld, WorldToBoard
-import math
-from std_msgs.msg import Bool, Float32MultiArray, Float64
+from sensor_msgs.msg import Image
 from rclpy.qos import ReliabilityPolicy, QoSProfile
+import tf2_ros
+from tf2_geometry_msgs import do_transform_point
+from geometry_msgs.msg import PointStamped
+import cv2 as cv
+from cv_bridge import CvBridge
 
-## This node updates the board transform,
-## And has services for transforming world positions into board positions
-## and back.
+bridge = CvBridge()
 
-# Grid cells are 2cm across (19mm due to margins)
-GRID_SIZE = 0.019
-
-## Set this based on if the grid is a4 (1) a3 (2)
-PAPER_SCALE = 1.0
-
-CELL_SIZE: float = GRID_SIZE*PAPER_SCALE
-
-class BoardTransformerNode(Node):
+class TableDepthImageNode(Node):
     def __init__(self):
-        super().__init__('board_transformer_node')
+        super().__init__('table_depth_image_node')
         
         self.__tf_buffer = tf2_ros.Buffer()
         tf2_ros.TransformListener(self.__tf_buffer, self)
 
-        self.__broadcaster = tf2_ros.StaticTransformBroadcaster(self)
+        self.__depth_camera_subscriber = self.create_subscription(
+            Image,
+            "/camera/depth/image_rect_raw",
+            self.__depth_callback,
+            QoSProfile(depth=5, reliability=ReliabilityPolicy.RELIABLE)
+        )
 
-        self.__board_detected = False
-        self.__board_ticks = 0
+        self.__depth_camera_publisher = self.create_publisher(
+            Image,
+            "/camera/depth/table_image_raw",
+            QoSProfile(depth=5, reliability=ReliabilityPolicy.RELIABLE)
+        )
 
-        self.__board_transform = None
+        self.__camera_height: float = 0.0
+        self.__offset: float = -0.01
 
+        # We don't need to get the camera transform as often as we pass frames in,
+        # as usually when we're looking at the camera, it won't be moving
+        self._transform_timer = self.create_timer(1.0/10.0, self.__transform_callback)
 
-        self.__object_frame_id = ""
-
-
-        self.__transform_timer = self.create_timer(1.0/10.0, self.__transform_callback)
-
-        self.__world_to_board_service = self.create_service(WorldToBoard, 'par/world_to_board', self.__world_to_board_callback)
-        self.__board_to_world_service = self.create_service(BoardToWorld, 'par/board_to_world', self.__board_to_world_callback)
-
-        self.__objects_subscription = self.create_subscription(Float32MultiArray, 'objects', self.__object_callback,  qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
-
-        self.__table_height_publisher = self.create_publisher(Float64, '/par/table_height',qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
-
-        self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
-
-    def __get_transform(self, target_frame, source_frame):
+    def __transform_callback(self):
+        # get the transformation from source_frame to target_frame.
         try:
-            return self.__tf_buffer.lookup_transform(target_frame,
-                    source_frame, rclpy.time.Time())
+            transformation = self.__tf_buffer.lookup_transform("world",
+                    "camera_depth_frame", rclpy.time.Time())
         except tf2_ros.TransformException as e:
             self.get_logger().error('Unable to find the transformation')
             self.get_logger().error(str(e))
-            return None
+            return
 
-    def __world_to_board_callback(self, request: WorldToBoard.Request, response: WorldToBoard.Response):
-        
-        transformation = self.__get_transform("board_frame", "world")
-        if (transformation == None):
-            return response
+        # Create a point at 0,0,0 in the camera frame
+        point_source = PointStamped()
 
-        world_pose = PoseStamped() 
-        world_pose.header.frame_id = "world"
-        world_pose.header.stamp = rclpy.time.Time().to_msg()
-        world_pose.pose.position = request.world_point
-        board_pose = do_transform_pose_stamped(world_pose, transformation)
+        # Transform to the world frame
+        camera_point = do_transform_point(point_source, transformation)
 
-        board_vector = IVector2()
-        board_vector.x = math.floor(board_pose.pose.position.y / (CELL_SIZE))
-        board_vector.y = math.floor(board_pose.pose.position.z / (CELL_SIZE))
+        self.__camera_height = camera_point.point.z
 
-        response.board_pos = board_vector
-        return response
+    def __depth_callback(self, image: Image):
+        cv_image: cv.Mat = bridge.imgmsg_to_cv2(image)
 
+        height_as_int = round((self.__camera_height + self.__offset) * 1000.0)
+        # Convert any pixels that are greater than the camera height to
+        # the 16 bit integer limit. I hope
+        cv_image[cv_image > height_as_int] = 65535
+        out = bridge.cv2_to_imgmsg(cv_image)
 
-    def __board_to_world_callback(self, request: BoardToWorld.Request, response: BoardToWorld.Response):
-        
-        pose = PoseStamped()
-        pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.y = (float(request.board_pos.x)+0.5)*CELL_SIZE
-        pose.pose.position.z = (float(request.board_pos.y)+0.5)*CELL_SIZE
+        # Set the frame ID for the output image message
+        out.header.frame_id = "camera_depth_frame"
 
-        transformation = self.__get_transform("world", "board_frame")
-        if (transformation == None):
-            return response
-        
-        output_pose = do_transform_pose_stamped(pose, transformation)
-        response.world_point = output_pose.pose.position
-        
-        return response
-
-
-    def __transform_callback(self):
-        if (not self.__board_detected):
-            transformation = self.__get_transform("world", self.__object_frame_id)
-            if (transformation == None):
-                return
-            pose_source = PoseStamped()
-            # Commented these out until we get the transform correct
-            pose_source.pose.position.y = -(((277.04/2) - 5.04)/1000.0)*PAPER_SCALE
-            pose_source.pose.position.z = -(((190.40/2) - 15.00)/1000.0)*PAPER_SCALE
-
-
-            ### Transform to the world frame
-            board_cell_pose = do_transform_pose_stamped(pose_source,transformation)
-
-            self.__board_transform = TransformStamped()
-            self.__board_transform.header.stamp = board_cell_pose.header.stamp
-            self.__board_transform.header.frame_id = "world"
-            self.__board_transform.child_frame_id = "board_frame"
-
-            
-
-            self.__board_transform.transform.translation.x = board_cell_pose.pose.position.x
-            self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
-
-            # We want to use this to set the table height for the table depth image
-            self.__board_transform.transform.translation.z = board_cell_pose.pose.position.z
-            self.__board_transform.transform.rotation = board_cell_pose.pose.orientation
-
-            ## Wait until we've seen the board a few times before finalising the transform
-            self.__board_ticks += 1
-            if (self.__board_ticks > 3):
-                self.__board_detected = True
-        
-        self.__broadcaster.sendTransform(self.__board_transform)
-
-        table_height_msg = Float64()
-        table_height_msg.data = self.__board_transform.transform.translation.z
-        self.__table_height_publisher.publish(table_height_msg)
-
-        bool_msg = Bool()
-        bool_msg.data = self.__board_detected
-        self.__board_found_publisher.publish(bool_msg)
-
-
-    def __object_callback(self, msg: Float32MultiArray):
-        if (len(msg.data) > 0):
-            self.__object_frame_id = f"object_{int(round(msg.data[0]))}"
+        self.__depth_camera_publisher.publish(out)
 
 def main(args=None):
     rclpy.init(args=args)
 
-    node = None
+    table_depth_image_node = None
     try:
-        node = BoardTransformerNode()
+        table_depth_image_node = TableDepthImageNode()
 
-        rclpy.spin(node)
+        rclpy.spin(table_depth_image_node)
     except KeyboardInterrupt:
-        pass                                                                                                                                                                                                    
-
+        pass
 
 if __name__ == '__main__':
     main()
-
-        

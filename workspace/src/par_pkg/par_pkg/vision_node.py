@@ -21,7 +21,6 @@ class CubeDetectionNode(Node):
             depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
             processed_image, markers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
-            # processed_msg.header.frame_id = "camera_depth_frame" 
             self.publisher_.publish(processed_msg)
             self.marker_publisher_.publish(markers)
         except Exception as e:
@@ -38,7 +37,7 @@ class CubeDetectionNode(Node):
         blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
         cv2.imshow("Blurred Image", blurred)
 
-        edges = cv2.Canny(blurred, 30, 100)
+        edges = cv2.Canny(blurred, 20, 80)  # Adjusted thresholds
         cv2.imshow("Edges", edges)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -47,32 +46,40 @@ class CubeDetectionNode(Node):
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area < 300 or area > 2000:
+            self.get_logger().info(f"Contour area: {area}")
+            if area < 100 or area > 3000:  # Adjusted thresholds
                 continue
+
             epsilon = 0.05 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
 
             if len(approx) >= 4 and cv2.isContourConvex(approx):
                 (x, y, w, h) = cv2.boundingRect(approx)
+                self.get_logger().info(f"BoundingRect: x={x}, y={y}, w={w}, h={h}")
                 aspect_ratio = w / float(h)
+                self.get_logger().info(f"Aspect ratio: {aspect_ratio}")
                 if 0.8 <= aspect_ratio <= 1.2:
                     depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
                     mean_depth = np.mean(depth_values)
-                    if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 1000:
+                    self.get_logger().info(f"Mean depth: {mean_depth}")
+                    if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 40000:  # Adjusted depth threshold
                         self.get_logger().info("Contour filtered out by depth validation")
                         continue
 
                     # Calculate center of the contour
                     M = cv2.moments(contour)
+                    self.get_logger().info(f"Moments: {M}")
                     if M["m00"] != 0:
                         center_x = int(M["m10"] / M["m00"])
                         center_y = int(M["m01"] / M["m00"])
                     else:
                         center_x, center_y = 0, 0
+                    self.get_logger().info(f"Center: ({center_x}, {center_y})")
 
                     center_depth = depth_image[center_y, center_x]
+                    self.get_logger().info(f"Center depth: {center_depth}")
 
-                    if center_depth <= 0 or center_depth > 1000:
+                    if center_depth <= 0 or center_depth > 1000:  # Adjusted depth threshold
                         self.get_logger().info("Center depth filtered out")
                         continue
 
