@@ -98,8 +98,9 @@ class BoardTransformerNode(Node):
             if (transformation == None):
                 return
             pose_source = PoseStamped()
-            pose_source.pose.position.x = -((277.04/2) - 15.04)/1000.0
-            pose_source.pose.position.y = -((190.40/2) - 25.00)/1000.0
+            # Commented these out until we get the transform correct
+            pose_source.pose.position.y = -(277.04/2)/1000 #-((277.04/2) - 15.04)/1000.0
+            pose_source.pose.position.z = -(190.40/2)/1000 #-((190.40/2) - 25.00)/1000.0
 
 
             ### Transform to the world frame
