@@ -4,7 +4,8 @@ from geometry_msgs.msg import Pose, Point
 from .connect4.connect4_client import Connect4Client, Player
 from enum import Enum
 from par_interfaces.action import PickAndPlace, WaypointMove
-from par_interfaces.msg import GamePieces, GamePiece, IVector2
+from par_interfaces.srv import CurrentWaypointPose
+from par_interfaces.msg import GamePieces, GamePiece, IVector2, WaypointPose
 from std_msgs.msg import Bool
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 from rclpy.action import ActionClient
@@ -99,6 +100,8 @@ class MainControllerNode(Node):
             QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
         )
 
+        self.__current_pose_client = self.create_client(CurrentWaypointPose, "/par_moveit/get_current_waypoint_pose")
+
         self.__board_detected = False
 
         self.__connect4client = Connect4Client()
@@ -120,12 +123,13 @@ class MainControllerNode(Node):
         self.__next_piece_position: tuple = None
         self.__robot_move: int = -1
 
-        self.__home_pose: WaypointMove = None
+        self.__home_pose: WaypointPose = None
     
     def __update_state_callback(self):
         if (self.__executing_action):
             self.get_logger().info("Waiting for action to finish")
             return
+        self.__update_pieces()
         match self.__state:
             case State.FINDING_GRID:
                 self.__finding_grid()
@@ -153,7 +157,13 @@ class MainControllerNode(Node):
             self.__state = State.WAITING_FOR_HUMAN
 
     def __get_current_pose(self):
-        pass
+        current_pose_future = self.__current_pose_client.call_async(CurrentWaypointPose.Request())
+
+        while not current_pose_future.done():
+            pass
+
+        current_pose:CurrentWaypointPose.Response = current_pose_future.result()
+        return current_pose.pose
 
     def __waiting_for_human(self):
         self.get_logger().info("Waiting for human")
@@ -306,6 +316,9 @@ class MainControllerNode(Node):
 
         return None
 
+    def __update_pieces(self):
+        for key in self.__detected_pieces.keys():
+            self.__detected_pieces[key].update()
 
 def main(args=None):
     rclpy.init(args=args)
