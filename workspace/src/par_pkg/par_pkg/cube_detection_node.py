@@ -144,8 +144,7 @@ class CubeDetectionNode(Node):
         edges = cv2.Canny(blurred, 20, 80)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        markers = MarkerArray()
-        marker_id = 0
+        
 
         for contour in contours:
             area = cv2.contourArea(contour)
@@ -196,21 +195,7 @@ class CubeDetectionNode(Node):
                     cube_pose = self.transform_cube(cube_point, rclpy.time.Time().to_msg())
 
 
-                    marker = Marker()
-                    marker.header.frame_id = "world" 
-                    marker.header.stamp = self.get_clock().now().to_msg()
-                    marker.type = Marker.CUBE
-                    marker.id = marker_id
-                    marker_id += 1
-                    marker.pose = cube_pose
-                    marker.scale.x = 0.015
-                    marker.scale.y = 0.015
-                    marker.scale.z = 0.015
-                    marker.color.r = 0.0
-                    marker.color.g = 1.0
-                    marker.color.b = 0.0
-                    marker.color.a = 1.0
-                    markers.markers.append(marker)
+                    
 
                     board_pos = self.world_to_board_pos(cube_pose.position)
 
@@ -227,12 +212,27 @@ class CubeDetectionNode(Node):
                     self.detected_pieces[board_loc_id] = container
 
         pieces = GamePieces()
-
+        markers = MarkerArray()
         for key in self.detected_pieces.keys():
             self.detected_pieces[key].update()
             piece = self.detected_pieces[key]
             if (piece.ttl >= TTL_PER_DETECTION):
                 pieces.pieces.append(piece)
+
+                marker = Marker()
+                marker.header.frame_id = "world" 
+                marker.header.stamp = self.get_clock().now().to_msg()
+                marker.type = Marker.CUBE
+                marker.id = key
+                marker.pose = cube_pose
+                marker.scale.x = 0.015
+                marker.scale.y = 0.015
+                marker.scale.z = 0.015
+                marker.color.r = 0.0
+                marker.color.g = 1.0
+                marker.color.b = 0.0
+                marker.color.a = 1.0
+                markers.markers.append(marker)
         
         return depth_colored, markers, pieces
     
