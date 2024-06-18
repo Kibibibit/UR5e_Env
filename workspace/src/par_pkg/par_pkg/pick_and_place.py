@@ -25,8 +25,9 @@ class ActionStates(Enum):
     WAIT = 0
     DONE = 99
 
-FORCE:float = 10.0
-FULL_OPEN_WIDTH:float = 110.0
+FORCE:float = 1.0
+FULL_OPEN_WIDTH:float = 20.0
+
 
 class PickAndPlaceActionServer(Node):
 
