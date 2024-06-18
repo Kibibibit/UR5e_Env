@@ -29,6 +29,7 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
+        
         'console_scripts': [
             'pick_and_place_node= par_pkg.pick_and_place:main',
             'table_depth_image_node=par_pkg.table_depth_image_node:main',
