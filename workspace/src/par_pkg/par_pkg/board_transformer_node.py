@@ -21,6 +21,10 @@ GRID_SIZE = 0.019
 ## Set this based on if the grid is a4 (1) a3 (2)
 PAPER_SCALE = 1.0
 
+## We want the robot to round up a bit so it doesn't hit the table,
+## We'll round to this increment
+TABLE_HEIGHT_INCREMENT = 0.005
+
 CELL_SIZE: float = GRID_SIZE*PAPER_SCALE
 
 class BoardTransformerNode(Node):
@@ -123,7 +127,10 @@ class BoardTransformerNode(Node):
             self.__board_transform.transform.translation.y = board_cell_pose.pose.position.y
 
             # We want to use this to set the table height for the table depth image
-            self.__board_transform.transform.translation.z = board_cell_pose.pose.position.z
+            # but we want to round it up in increments to prevent the fingers hitting hte table if possible
+            z = math.ceil(board_cell_pose.pose.position.z/TABLE_HEIGHT_INCREMENT)*TABLE_HEIGHT_INCREMENT
+
+            self.__board_transform.transform.translation.z = z
             self.__board_transform.transform.rotation = board_cell_pose.pose.orientation
 
             ## Wait until we've seen the board a few times before finalising the transform
