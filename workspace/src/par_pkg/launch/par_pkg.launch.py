@@ -1,7 +1,5 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     return LaunchDescription([
@@ -25,12 +23,20 @@ def generate_launch_description():
             name="board_transformer_node",
             output="screen",
             parameters=[]
-        )
-        #Node(
-         #   package='par_pkg',
-          #  executable='move_to_pose_node',
-           # name="move_to_pose_node",
-            #output="screen",
-            #parameters=[]
-        #)
+        ),
+        Node(
+           package='par_pkg',
+           executable='pick_and_place_node',
+           name="pick_and_place_node",
+            output="screen",
+            parameters=[]
+        ),
+        Node(
+            package='par_pkg',
+            executable='cube_detection_node',
+            name='cube_detection_node',
+            output='screen',
+            parameters=[]
+        ),
+        
     ])
