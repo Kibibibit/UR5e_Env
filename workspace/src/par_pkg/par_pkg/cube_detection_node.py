@@ -106,7 +106,7 @@ class CubeDetectionNode(Node):
                         # if not any(np.allclose(point_3d, existing_cube) for existing_cube in self.detected_cubes):
                         #     self.detected_cubes.append(point_3d)
                         marker = Marker()
-                        marker.header.frame_id = "camera_depth_frame" 
+                        marker.header.frame_id = "camera_depth_optical_frame" 
                         marker.header.stamp = self.get_clock().now().to_msg()
                         marker.type = Marker.CUBE
                         marker.id = marker_id
