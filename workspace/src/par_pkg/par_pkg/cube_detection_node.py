@@ -5,7 +5,7 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
-from image_geometry import PinholeCameraModel
+from image_geometry import StereoCameraModel
 
 class CubeDetectionNode(Node):
     def __init__(self):
@@ -17,27 +17,24 @@ class CubeDetectionNode(Node):
         self.bridge = CvBridge()
         self.camera_model = None
         self.detected_cubes = [] 
-        self.marker_id = 0
 
-    def uv_to_angle(self, uv):
-        if self.camera_model is not None:
-            return np.array(self.camera_model.projectPixelTo3dRay(uv))
+    
+    def uv_to_point(self, uv):
+        if not self.camera_model is None:
+            return np.array(self.camera_model.project3dToPixel(uv))
         else:
             self.get_logger().error("Tried to use camera model before getting camera info!")
             return None
 
     def camera_info_callback(self, msg):
         if self.camera_model is None:
-            self.camera_model = PinholeCameraModel()
+            self.camera_model = StereoCameraModel()
             self.camera_model.fromCameraInfo(msg)
             self.get_logger().info("Got the camera info!")
-        else:
-            self.get_logger().info("Camera info already received")
 
     def depth_image_callback(self, msg):
         try:
-            self.get_logger().info("Depth image received")
-            depth_image = self.bridge.imgmsg_to_cv2(msg, '16UC1')
+            depth_image = self.bridge.imgmsg_to_cv2(msg)
             processed_image, markers = self.detect_cubes(depth_image)
             processed_msg = self.bridge.cv2_to_imgmsg(processed_image, 'bgr8')
             self.publisher_.publish(processed_msg)
@@ -59,6 +56,8 @@ class CubeDetectionNode(Node):
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         markers = MarkerArray()
+
+        marker_id = 0
 
         for contour in contours:
             area = cv2.contourArea(contour)
@@ -107,9 +106,9 @@ class CubeDetectionNode(Node):
 
                     # Convert (center_x, center_y) to 3D coordinates
                     uv = np.array([center_x, center_y], dtype=np.float32)
-                    ray = self.uv_to_angle(uv)
-                    if ray is not None:
-                        point_3d = ray * (center_depth / 1000.0)
+                    point = self.uv_to_point(uv)
+                    if not point is None:
+                        point_3d = point
                         self.get_logger().info(f"3D coordinates: {point_3d}")
 
                         # # Check for duplicate markers
@@ -119,8 +118,8 @@ class CubeDetectionNode(Node):
                         # marker.header.frame_id = "camera_depth_frame" 
                         marker.header.stamp = self.get_clock().now().to_msg()
                         marker.type = Marker.CUBE
-                        marker.id = self.marker_id
-                        self.marker_id += 1
+                        marker.id = marker_id
+                        marker_id += 1
                         marker.pose.position.x = point_3d[0]
                         marker.pose.position.y = point_3d[1]
                         marker.pose.position.z = point_3d[2]
@@ -135,14 +134,18 @@ class CubeDetectionNode(Node):
                         self.get_logger().info(f"Added marker for cube at {point_3d}")
 
         self.get_logger().info(f"Detected {len(self.detected_cubes)} unique cubes.")
-        cv2.imshow("Detected Cubes", depth_colored)
-        cv2.waitKey(1)
         return depth_colored, markers
 
 def main(args=None):
     rclpy.init(args=args)
+
     node = CubeDetectionNode()
-    rclpy.spin(node)
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+
     node.destroy_node()
     rclpy.shutdown()
 
