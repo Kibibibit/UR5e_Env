@@ -4,7 +4,7 @@ from geometry_msgs.msg import Pose, Point
 from .connect4.connect4_client import Connect4Client, Player
 from enum import Enum
 from par_interfaces.action import PickAndPlace, WaypointMove
-from par_interfaces.srv import CurrentWaypointPose
+from par_interfaces.srv import CurrentWaypointPose, BoardToWorld
 from par_interfaces.msg import GamePieces, GamePiece, IVector2, WaypointPose
 from std_msgs.msg import Bool
 from rclpy.qos import ReliabilityPolicy, QoSProfile
@@ -35,19 +35,15 @@ class State(Enum):
     """
     The human has placed their block, and gravity now needs to affect it
     """
-    HUMAN_MADE_INVALID_MOVE = 3
-    """
-    The human tried to place their block in an invalid position, and it needs to be removed
-    """
-    ROBOT_FINDING_PIECE = 4
+    ROBOT_FINDING_PIECE = 3
     """
     The robot is looking for a new piece to grab
     """
-    ROBOT_TURN = 5
+    ROBOT_TURN = 4
     """
     It's currently the robot's turn
     """
-    HOMING = 6
+    HOMING = 5
     """
     The robot is going back to look at the board
     """
@@ -67,6 +63,8 @@ FULL_BOARD_HEIGHT = 8
 
 TTL_PER_DETECTION = 2
 
+ROBOT_TIMER = 3
+
 
 class MainControllerNode(Node):
 
@@ -84,6 +82,11 @@ class MainControllerNode(Node):
             self,
             WaypointMove,
             "/par_moveit/waypoint_move"
+        )
+
+        self.__world_from_board_client = self.create_client(
+            BoardToWorld,
+            "/par/board_to_world"
         )
         
         self.__board_detected_subscriber = self.create_subscription(
@@ -137,8 +140,10 @@ class MainControllerNode(Node):
                 self.__waiting_for_human()
             case State.SIMULATING_GRAVITY:
                 self.__simulating_gravity()
-            case State.HUMAN_MADE_INVALID_MOVE:
-                self.__human_made_invalid_move()
+            case State.ROBOT_FINDING_PIECE:
+                self.__robot_finding_piece()
+            case State.ROBOT_TURN:
+                self.__robot_turn()
             case State.HOMING:
                 self.__homing_state()
             case State.DONE:
@@ -166,6 +171,7 @@ class MainControllerNode(Node):
         return current_pose.pose
 
     def __waiting_for_human(self):
+        
         self.get_logger().info("Waiting for human")
 
         # This should just return until a piece is detected in the dropzone
@@ -175,6 +181,8 @@ class MainControllerNode(Node):
         if (piece == None):
             self.get_logger().info("No human piece found yet!")
             return
+        
+        self.__countdown("Moving Human Piece")
 
         self.__human_column = piece.board_position.x # This should be the column detected
 
@@ -184,8 +192,7 @@ class MainControllerNode(Node):
             return
         ## Otherwise, we go to the invalid move
         else:
-            self.__state = State.HUMAN_MADE_INVALID_MOVE
-            return
+            self.get_logger().error("Human piece is in invalid spot!")
 
 
     def __simulating_gravity(self):
@@ -195,21 +202,45 @@ class MainControllerNode(Node):
         self.__executing_action = True
 
         piece_x, piece_y = self.__connect4client.add_piece(Player.HUMAN, self.__human_column)
-
-        board_loc_id = self.__get_board_loc_id(piece_x, piece_y)
+        
+       
         new_pos = IVector2()
         new_pos.x = piece_x
         new_pos.y = piece_y
 
+        board_loc_id = self.__get_board_loc_id(self.__human_column, DROP_ZONE_Y)
         self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
 
-        return
-        
-    
-    def __human_made_invalid_move(self):
-        self.get_logger().info("Human made invalid move!")
 
-        ## Grab their piece, move it out of the way, then return to waiting for human
+    def __robot_finding_piece(self):
+        self.get_logger().info("Waiting for piece in robot zone")
+
+        piece = self.__piece_in_zone(ROBOT_ZONE_X)
+
+        if (piece == None):
+            self.get_logger().info("No robot piece found yet!")
+            return
+
+        self.__state = State.ROBOT_TURN
+    
+    def __robot_turn(self):
+        self.get_logger().info("Robot taking turn!")
+
+        best_move = self.__connect4client.get_best_robot_move()
+
+        piece_x, piece_y = self.__connect4client.add_piece(Player.ROBOT, best_move)
+
+        new_pos = IVector2()
+        new_pos.x = piece_x
+        new_pos.y = piece_y
+
+        board_loc_id = self.__get_board_loc_id(ROBOT_ZONE_X[0], DROP_ZONE_Y)
+
+        self.__countdown("Moving robot piece")
+
+        self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
+
+        
 
     def __homing_state(self):
         self.__executing_action = True
@@ -236,8 +267,14 @@ class MainControllerNode(Node):
 
         self.__executing_action = False
 
-        if (self.__connect4client.has_player_won() != Player.EMPTY):
+        winning_player = self.__connect4client.has_player_won()
+
+        if (winning_player != Player.EMPTY):
             self.__state = State.DONE
+            if (winning_player == Player.TIE):
+                self.get_logger().info("The game ended in a tie!")
+            else:
+                self.get_logger().info(f"{winning_player.name} player won the game!")
         else:
 
             if (self.__current_player == Player.HUMAN):
@@ -266,7 +303,15 @@ class MainControllerNode(Node):
         pick_and_place_future.add_done_callback(self.__move_piece_done_callback)
 
     def __get_world_pos_from_board(self, point: IVector2) -> Point:
-        return Point()
+        request = BoardToWorld.Request()
+        request.board_pos = point
+        board_to_world_future = self.__world_from_board_client.call_async(request)
+
+        while not board_to_world_future.done():
+            pass
+
+        response:BoardToWorld.Response = board_to_world_future.result()
+        return response.world_point
 
     def __get_board_pos_from_world(self, point: Point) -> IVector2:
         return IVector2()
@@ -319,6 +364,14 @@ class MainControllerNode(Node):
     def __update_pieces(self):
         for key in self.__detected_pieces.keys():
             self.__detected_pieces[key].update()
+
+    def __countdown(self, task: str):
+        self.get_logger().info(f"Executing: {task} in {ROBOT_TIMER}s")
+        v = ROBOT_TIMER-1
+        while (v > 0):
+            self.get_logger().info(f"{v}")
+            v-=1
+        self.get_logger().info(f"Executing: {task}")
 
 def main(args=None):
     rclpy.init(args=args)
