@@ -13,7 +13,7 @@ class CubeDetectionNode(Node):
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
         self.marker_publisher_ = self.create_publisher(MarkerArray, 'detected_cubes_markers', 10)
         self.subscription = self.create_subscription(Image, '/camera/depth/table_image_raw', self.depth_image_callback, 10)
-        self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/depth/camera_info', self.camera_info_callback, 10)
+        self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/camera/depth/camera_info', self.camera_info_callback, 10)
         self.bridge = CvBridge()
         self.camera_model = None
         self.detected_cubes = [] 
@@ -45,7 +45,6 @@ class CubeDetectionNode(Node):
 
 
     def detect_cubes(self, depth_image):
-        self.get_logger().info("Starting cube detection")
 
         # Normalize depth image to 8-bit
         depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
@@ -76,13 +75,11 @@ class CubeDetectionNode(Node):
                 if 0.8 <= aspect_ratio <= 1.2:
                     depth_values = depth_image[contour[:, 0, 1], contour[:, 0, 0]]
                     mean_depth = np.mean(depth_values)
-                    self.get_logger().info(f"Mean depth: {mean_depth}")
                     if np.isnan(mean_depth) or mean_depth <= 0 or mean_depth > 50000:
                         continue
 
                     # Calculate center of the contour
                     M = cv2.moments(contour)
-                    self.get_logger().info(f"Moments: {M}")
                     if M["m00"] != 0:
                         center_x = int(M["m10"] / M["m00"])
                         center_y = int(M["m01"] / M["m00"])
