@@ -15,17 +15,21 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 ## And has services for transforming world positions into board positions
 ## and back.
 
-# Grid cells are 2cm across (19mm due to margins)
-GRID_SIZE = 0.019
+# Grid cells are 4cm across
+GRID_SIZE_X = 0.04
+# and 3cm tall
+GRID_SIZE_Y = 0.03
 
-## Set this based on if the grid is a4 (1) a3 (2)
-PAPER_SCALE = 1.0
 
 ## We want the robot to round up a bit so it doesn't hit the table,
 ## We'll round to this increment
 TABLE_HEIGHT_INCREMENT = 0.005
 
-CELL_SIZE: float = GRID_SIZE*PAPER_SCALE
+PAPER_SIZE_X = 420.0
+PAPER_SIZE_Y = 297.0
+
+CELL_OFFSET_X = 15.0
+CELL_OFFSET_Y = 43.0
 
 class BoardTransformerNode(Node):
     def __init__(self):
@@ -78,8 +82,8 @@ class BoardTransformerNode(Node):
         board_pose = do_transform_pose_stamped(world_pose, transformation)
 
         board_vector = IVector2()
-        board_vector.x = math.floor(board_pose.pose.position.y / (CELL_SIZE))
-        board_vector.y = math.floor(board_pose.pose.position.z / (CELL_SIZE))
+        board_vector.x = math.floor(board_pose.pose.position.y / (GRID_SIZE_X))
+        board_vector.y = math.floor(board_pose.pose.position.z / (GRID_SIZE_Y))
 
         response.board_pos = board_vector
         return response
@@ -89,8 +93,8 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
-        pose.pose.position.y = (float(request.board_pos.x)+0.5)*CELL_SIZE
-        pose.pose.position.z = (float(request.board_pos.y)+0.5)*CELL_SIZE
+        pose.pose.position.y = (float(request.board_pos.x)+0.5)*GRID_SIZE_X
+        pose.pose.position.z = (float(request.board_pos.y)+0.5)*GRID_SIZE_Y
 
         transformation = self.__get_transform("world", "board_frame")
         if (transformation == None):
@@ -108,10 +112,13 @@ class BoardTransformerNode(Node):
             if (transformation == None):
                 return
             pose_source = PoseStamped()
-            # Commented these out until we get the transform correct
-            pose_source.pose.position.y = -(((277.04/2) - 5.04)/1000.0)*PAPER_SCALE
-            pose_source.pose.position.z = -(((190.40/2) - 15.00)/1000.0)*PAPER_SCALE
 
+
+            pose_source.pose.position.y = -((PAPER_SIZE_X/2.0)-CELL_OFFSET_X)
+            pose_source.pose.position.z = -((PAPER_SIZE_Y/2.0)-CELL_OFFSET_Y)
+
+            pose_source.pose.position.y /= 1000.0
+            pose_source.pose.position.z /= 1000.0
 
             ### Transform to the world frame
             board_cell_pose = do_transform_pose_stamped(pose_source,transformation)
