@@ -1,15 +1,24 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Pose, Point
-from .connect4.connect4_client import Connect4Client
+from .connect4.connect4_client import Connect4Client, Player
 from enum import Enum
-from par_interfaces.action import PickAndPlace
+from par_interfaces.action import PickAndPlace, WaypointMove
 from par_interfaces.msg import GamePieces, GamePiece, IVector2
 from std_msgs.msg import Bool
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 from rclpy.action import ActionClient
 from rclpy.task import Future
 from rclpy.action.client import ClientGoalHandle
+
+class GamePieceContainer():
+
+    def __init__(self, piece: GamePiece, ttl: int):
+        self.piece = piece
+        self.ttl = ttl
+
+    def update(self):
+        self.ttl -= 1
 
 class State(Enum):
     FINDING_GRID = 0
@@ -37,8 +46,26 @@ class State(Enum):
     """
     It's currently the robot's turn
     """
+    HOMING = 6
+    """
+    The robot is going back to look at the board
+    """
+    DONE = 99
+    """The game is over"""
+    ERROR = 100
+    """Something has gone wrong, and the robot needs to stop immediatly"""
 
 GRIPPER_WIDTH = 16.0
+
+HUMAN_ZONE_X = [0,1,2,3,4,5,6]
+ROBOT_ZONE_X = [8]
+DROP_ZONE_Y = 7
+
+FULL_BOARD_WIDTH = 9
+FULL_BOARD_HEIGHT = 8
+
+TTL_PER_DETECTION = 2
+
 
 class MainControllerNode(Node):
 
@@ -50,6 +77,12 @@ class MainControllerNode(Node):
             self,
             PickAndPlace,
             "/par/pick_and_place"
+        )
+
+        self.__waypoint_move_client = ActionClient(
+            self,
+            WaypointMove,
+            "/par_moveit/waypoint_move"
         )
         
         self.__board_detected_subscriber = self.create_subscription(
@@ -71,6 +104,7 @@ class MainControllerNode(Node):
         self.__connect4client = Connect4Client()
         self.__state = State.FINDING_GRID
 
+        self.__detected_pieces: dict[int, GamePieceContainer] = {}
 
         self.__grid_pose: Pose = None
         self.__game_timer = self.create_timer(0.5, self.__update_state_callback)
@@ -80,10 +114,13 @@ class MainControllerNode(Node):
         machine
         """
 
+        self.__current_player: Player = Player.HUMAN
         self.__human_column: int = -1
 
         self.__next_piece_position: tuple = None
         self.__robot_move: int = -1
+
+        self.__home_pose: WaypointMove = None
     
     def __update_state_callback(self):
         if (self.__executing_action):
@@ -98,23 +135,38 @@ class MainControllerNode(Node):
                 self.__simulating_gravity()
             case State.HUMAN_MADE_INVALID_MOVE:
                 self.__human_made_invalid_move()
+            case State.HOMING:
+                self.__homing_state()
+            case State.DONE:
+                self.get_logger().info("Game over!")
+                exit(0)
+            case State.ERROR:
+                self.get_logger().error("Something died!")
+                exit(1)
 
     
     def __finding_grid(self):
         self.get_logger().info("Looking for grid!")
+        self.__home_pose = self.__get_current_pose()
         if (self.__board_detected):
             self.get_logger().info("Found grid! Proceeding to next stage")
             self.__state = State.WAITING_FOR_HUMAN
+
+    def __get_current_pose(self):
+        pass
 
     def __waiting_for_human(self):
         self.get_logger().info("Waiting for human")
 
         # This should just return until a piece is detected in the dropzone
 
-        # if !piece detected:
-        ### return
+        piece = self.__piece_in_zone(HUMAN_ZONE_X)
 
-        self.__human_column = 0 # This should be the column detected
+        if (piece == None):
+            self.get_logger().info("No human piece found yet!")
+            return
+
+        self.__human_column = piece.board_position.x # This should be the column detected
 
         ## If the human made a valid move, we want to then simulate gravity for the piece
         if (self.__connect4client.valid_move(self.__human_column)):
@@ -127,18 +179,19 @@ class MainControllerNode(Node):
 
 
     def __simulating_gravity(self):
-        
-
 
         ## Find the location of the piece, and send to the pick and place node
         self.get_logger().info("Simulating Gravity!")
         self.__executing_action = True
 
-        # execute the action, make sure the done callback sets
-        # self.__executing_action = False,
-        # And then evaluates if the human has won or not.
-        # If the human has won, end.
-        # Otherwise, go to find_robot_piece
+        piece_x, piece_y = self.__connect4client.add_piece(Player.HUMAN, self.__human_column)
+
+        board_loc_id = self.__get_board_loc_id(piece_x, piece_y)
+        new_pos = IVector2()
+        new_pos.x = piece_x
+        new_pos.y = piece_y
+
+        self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
 
         return
         
@@ -148,12 +201,46 @@ class MainControllerNode(Node):
 
         ## Grab their piece, move it out of the way, then return to waiting for human
 
+    def __homing_state(self):
+        self.__executing_action = True
+        self.get_logger().info("Waiting for moveit action server...")
+        self.__waypoint_move_client.wait_for_server()
+        self.get_logger().info("Found moveit action server! Homing!")
+
+        goal = WaypointMove.Goal()
+
+        goal.target_pose = self.__home_pose
+
+        future = self.__waypoint_move_client.send_goal_async(goal)
+        future.add_done_callback(self.__homing_done_callback)
+
+    def __homing_done_callback(self, future:Future):
+        homing_goal:ClientGoalHandle = future.result()
+
+        if not homing_goal.accepted:
+            self.get_logger().info("MoveIt server rejected goal!")
+            self.__state = State.ERROR
+            return
+        
+        self.get_logger().info(f"MoveIt server accepted goal!")
+
+        self.__executing_action = False
+
+        if (self.__connect4client.has_player_won() != Player.EMPTY):
+            self.__state = State.DONE
+        else:
+
+            if (self.__current_player == Player.HUMAN):
+                self.__state = State.ROBOT_FINDING_PIECE
+            else:
+                self.__state = State.WAITING_FOR_HUMAN
+
 
     def __board_detected_callback(self, msg: Bool):
         if (msg.data):
             self.__board_detected = True
     
-    def __move_piece(self, piece: GamePiece, position: IVector2, next_state:State):
+    def __move_piece(self, piece: GamePiece, position: IVector2):
         self.get_logger().info("Waiting for pick and place action server...")
         self.__pick_and_place_client.wait_for_server()
         self.get_logger().info(f"Found server! Moving piece at {piece.board_position.x},{piece.board_position.y} to {position.x}, {position.y}")
@@ -166,7 +253,7 @@ class MainControllerNode(Node):
         goal.end_point = self.__get_world_pos_from_board(position)
 
         pick_and_place_future = self.__pick_and_place_client.send_goal_async(goal)
-        pick_and_place_future.add_done_callback(lambda future: self.__move_piece_done_callback(future, next_state))
+        pick_and_place_future.add_done_callback(self.__move_piece_done_callback)
 
     def __get_world_pos_from_board(self, point: IVector2) -> Point:
         return Point()
@@ -174,22 +261,51 @@ class MainControllerNode(Node):
     def __get_board_pos_from_world(self, point: Point) -> IVector2:
         return IVector2()
 
-    def __move_piece_done_callback(self, future:Future, next_state: State):
+    def __move_piece_done_callback(self, future:Future):
 
         move_goal:ClientGoalHandle = future.result()
 
         if not move_goal.accepted:
-            self.get_logger().info("Pick and Place server rejected goal!") 
+            self.get_logger().info("Pick and Place server rejected goal!")
+            self.__state = State.ERROR
             return
         
         self.get_logger().info(f"Pick and Place server accepted goal!")
 
-        self.__state = next_state
+        self.__executing_action = False
+
+        self.__state = State.HOMING
 
 
 
     def __game_pieces_callback(self, msg: GamePieces):
-        pass
+        for item in msg.pieces:
+            try:
+                piece: GamePiece = item
+            except Exception:
+                continue
+            board_loc_id = self.__get_board_loc_id(piece.board_position.x, piece.board_position.x)
+
+            container = GamePieceContainer(piece, ttl=TTL_PER_DETECTION)
+
+            if (board_loc_id in self.__detected_pieces.keys()):
+                container.ttl += TTL_PER_DETECTION
+            self.__detected_pieces[board_loc_id] = container
+    
+    def __get_board_loc_id(self, x:int, y:int) -> int:
+        return FULL_BOARD_WIDTH*y + x
+
+
+    def __piece_in_zone(self, zone: list[int]) -> GamePiece | None:
+        
+        for x in zone:
+            board_loc_id = self.__get_board_loc_id(x, DROP_ZONE_Y)
+            if (board_loc_id in self.__detected_pieces.keys()):
+                if (self.__detected_pieces[board_loc_id].ttl > 0):
+                    return self.__detected_pieces[board_loc_id].piece
+
+        return None
+
 
 def main(args=None):
     rclpy.init(args=args)
