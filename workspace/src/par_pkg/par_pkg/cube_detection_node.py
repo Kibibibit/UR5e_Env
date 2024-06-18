@@ -5,7 +5,7 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
-from image_geometry import StereoCameraModel
+from image_geometry import PinholeCameraModel
 
 class CubeDetectionNode(Node):
     def __init__(self):
@@ -19,16 +19,16 @@ class CubeDetectionNode(Node):
         self.detected_cubes = [] 
 
     
-    def uv_to_point(self, uv):
+    def uv_to_angle(self, uv):
         if not self.camera_model is None:
-            return np.array(self.camera_model.project3dToPixel(uv))
+            return np.array(self.camera_model.projectPixelTo3dRay(uv))
         else:
             self.get_logger().error("Tried to use camera model before getting camera info!")
             return None
 
     def camera_info_callback(self, msg):
         if self.camera_model is None:
-            self.camera_model = StereoCameraModel()
+            self.camera_model = PinholeCameraModel()
             self.camera_model.fromCameraInfo(msg)
             self.get_logger().info("Got the camera info!")
 
@@ -98,9 +98,9 @@ class CubeDetectionNode(Node):
 
                     # Convert (center_x, center_y) to 3D coordinates
                     uv = np.array([center_x, center_y], dtype=np.float32)
-                    point = self.uv_to_point(uv)
-                    if not point is None:
-                        point_3d = point
+                    ray = self.uv_to_angle(uv)
+                    if not ray is None:
+                        point_3d = ray*(center_depth/1000.0)
 
                         # # Check for duplicate markers
                         # if not any(np.allclose(point_3d, existing_cube) for existing_cube in self.detected_cubes):
