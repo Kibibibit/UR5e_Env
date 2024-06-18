@@ -50,9 +50,10 @@ class CubeDetectionNode(Node):
         depth_normalized = cv2.normalize(depth_image, None, 0, 255, cv2.NORM_MINMAX)
         depth_normalized = np.uint8(depth_normalized)
 
-        depth_colored = cv2.cvtColor(depth_normalized, cv2.COLOR_GRAY2BGR)
-        blurred = cv2.GaussianBlur(depth_normalized, (5, 5), 0)
+        
+        blurred = cv2.GaussianBlur(depth_normalized, (11, 11), 1.5)
 
+        depth_colored = cv2.cvtColor(blurred, cv2.COLOR_GRAY2BGR)
 
         edges = cv2.Canny(blurred, 20, 80)
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -62,7 +63,6 @@ class CubeDetectionNode(Node):
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            # self.get_logger().info(f"Contour area: {area}")
             if area < 100 or area > 3000:
                 continue
 
