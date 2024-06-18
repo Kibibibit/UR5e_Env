@@ -12,14 +12,6 @@ from rclpy.action import ActionClient
 from rclpy.task import Future
 from rclpy.action.client import ClientGoalHandle
 
-class GamePieceContainer():
-
-    def __init__(self, piece: GamePiece, ttl: int):
-        self.piece = piece
-        self.ttl = ttl
-
-    def update(self):
-        self.ttl -= 1
 
 class State(Enum):
     FINDING_GRID = 0
@@ -110,7 +102,7 @@ class MainControllerNode(Node):
         self.__connect4client = Connect4Client()
         self.__state = State.FINDING_GRID
 
-        self.__detected_pieces: dict[int, GamePieceContainer] = {}
+        self.__detected_pieces: dict[int, GamePiece] = {}
 
         self.__grid_pose: Pose = None
         self.__game_timer = self.create_timer(0.5, self.__update_state_callback)
@@ -313,8 +305,6 @@ class MainControllerNode(Node):
         response:BoardToWorld.Response = board_to_world_future.result()
         return response.world_point
 
-    def __get_board_pos_from_world(self, point: Point) -> IVector2:
-        return IVector2()
 
     def __move_piece_done_callback(self, future:Future):
 
@@ -341,11 +331,8 @@ class MainControllerNode(Node):
                 continue
             board_loc_id = self.__get_board_loc_id(piece.board_position.x, piece.board_position.x)
 
-            container = GamePieceContainer(piece, ttl=TTL_PER_DETECTION)
 
-            if (board_loc_id in self.__detected_pieces.keys()):
-                container.ttl += TTL_PER_DETECTION
-            self.__detected_pieces[board_loc_id] = container
+            self.__detected_pieces[board_loc_id] = piece
     
     def __get_board_loc_id(self, x:int, y:int) -> int:
         return FULL_BOARD_WIDTH*y + x
@@ -356,14 +343,10 @@ class MainControllerNode(Node):
         for x in zone:
             board_loc_id = self.__get_board_loc_id(x, DROP_ZONE_Y)
             if (board_loc_id in self.__detected_pieces.keys()):
-                if (self.__detected_pieces[board_loc_id].ttl > 0):
-                    return self.__detected_pieces[board_loc_id].piece
+                return self.__detected_pieces[board_loc_id]
 
         return None
 
-    def __update_pieces(self):
-        for key in self.__detected_pieces.keys():
-            self.__detected_pieces[key].update()
 
     def __countdown(self, task: str):
         self.get_logger().info(f"Executing: {task} in {ROBOT_TIMER}s")
