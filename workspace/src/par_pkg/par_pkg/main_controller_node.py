@@ -166,7 +166,6 @@ class MainControllerNode(Node):
         
         self.get_logger().info("Waiting for human")
 
-        # This should just return until a piece is detected in the dropzone
 
         piece = self.__piece_in_zone(HUMAN_ZONE_X)
 
@@ -175,6 +174,9 @@ class MainControllerNode(Node):
             return
         
         self.__countdown("Moving Human Piece")
+
+        self.get_logger().warn("SAFTEY! NOT ACTUALLY MOVING PIECE")
+        return
 
         self.__human_column = piece.board_position.x # This should be the column detected
 
