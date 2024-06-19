@@ -19,6 +19,26 @@ class Connect4Client():
         ## Set the initial board state
         self.__board_state: np.ndarray = np.full(shape=(BOARD_HEIGHT, BOARD_WIDTH),fill_value=Player.EMPTY, dtype=Player)
 
+    player_pieces = {
+        Player.EMPTY: "_",
+        Player.HUMAN: "O",
+        Player.ROBOT: "X"
+    }
+
+
+    player_has_won = Player.EMPTY
+
+
+    def print_board(self):
+        out = ["0 1 2 3 4 5 6"]
+        for y in range(BOARD_HEIGHT):
+            row = []
+            for x in range(BOARD_WIDTH):
+                row.append(self.__board_state[self.get_piece(x,y)])
+            out.append(" ".join(row))
+        out.append("0 1 2 3 4 5 6")
+        print("\n".join(out))
+
 
     def next_column_empty(self, column:int) -> int:
         # Iterate from 5 to 0, effectively simulating gravity
@@ -31,6 +51,10 @@ class Connect4Client():
     
     def add_piece(self, player: int, column: int) -> tuple:
         """Adds a new piece to the board, and returns the x/y of the piece"""
+
+
+        self.print_board()
+
         if (self.valid_move(column)):
             y = self.next_column_empty(column)
             self.__board_state[y][column] = player
