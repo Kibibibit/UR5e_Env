@@ -32,7 +32,8 @@ class Connect4Client():
             Player.ROBOT: "X"
         }
         out = ["0 1 2 3 4 5 6"]
-        for y in range(BOARD_HEIGHT):
+        for y_ in range(0, BOARD_HEIGHT):
+            y = BOARD_HEIGHT-1-y_
             row = []
             for x in range(BOARD_WIDTH):
                 row.append(player_pieces[self.get_piece(x,y)])
@@ -42,10 +43,8 @@ class Connect4Client():
 
 
     def next_column_empty(self, column:int) -> int:
-        # Iterate from 5 to 0, effectively simulating gravity
-        y = BOARD_HEIGHT-1
-        for _y in range(0, BOARD_HEIGHT):
-            y = BOARD_HEIGHT-_y-1
+        # Iterate from 0 to 5, effectively simulating gravity
+        for y in range(BOARD_HEIGHT):
             if (self.get_piece(column, y) == Player.EMPTY):
                 return y
         return COLUMN_FULL

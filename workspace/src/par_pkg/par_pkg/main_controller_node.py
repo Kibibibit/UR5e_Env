@@ -200,7 +200,6 @@ class MainControllerNode(Node):
 
         piece_x, piece_y = self.__connect4client.add_piece(Player.HUMAN, self.__human_column)
 
-
         self.__human_column = -1
        
         new_pos = IVector2()
@@ -288,8 +287,10 @@ class MainControllerNode(Node):
 
             if (self.__current_player == Player.HUMAN):
                 self.__state = State.ROBOT_FINDING_PIECE
+                self.__current_player = Player.ROBOT
             else:
                 self.__state = State.WAITING_FOR_HUMAN
+                self.__current_player = Player.HUMAN
         self.__executing_action = False
 
     def __board_detected_callback(self, msg: Bool):
@@ -362,8 +363,6 @@ class MainControllerNode(Node):
                 piece.board_position.y == DROP_ZONE_Y
             ):
                 board_loc_id = self.__get_board_loc_id(piece.board_position.x, piece.board_position.y)
-                self.get_logger().info(f"Adding piece at {board_loc_id}")
-
                 self.__detected_pieces[board_loc_id] = piece
     
     def __get_board_loc_id(self, x:int, y:int) -> int:
