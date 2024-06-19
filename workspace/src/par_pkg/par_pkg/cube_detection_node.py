@@ -188,7 +188,7 @@ class CubeDetectionNode(Node):
                 uv = np.array([center_x, center_y], dtype=np.float32)
                 ray = self.uv_to_angle(uv)
                 if not ray is None:
-                    point_3d = ray*(self.camera_height-self.table_height)
+                    point_3d = ray*(self.camera_height+self.table_height)
 
                     # # Check for duplicate markers
                     # if not any(np.allclose(point_3d, existing_cube) for existing_cube in self.detected_cubes):
