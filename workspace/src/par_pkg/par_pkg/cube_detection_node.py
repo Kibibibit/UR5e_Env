@@ -108,11 +108,9 @@ class CubeDetectionNode(Node):
         center_x /= len(approx)
         center_y /= len(approx)
 
-        depth = self.camera_height-self.table_height
+        center_depth = depth_image[math.floor(center_y), math.floor(center_x)]
 
-        #center_depth = depth_image[math.floor(center_y), math.floor(center_x)]
-
-        return center_x, center_y, depth
+        return center_x, center_y, center_depth
     
     def get_transform(self, target_frame, source_frame):
         try:
@@ -190,7 +188,7 @@ class CubeDetectionNode(Node):
                 uv = np.array([center_x, center_y], dtype=np.float32)
                 ray = self.uv_to_angle(uv)
                 if not ray is None:
-                    point_3d = ray*(center_depth/1000.0)
+                    point_3d = ray*(self.camera_height-self.table_height)
 
                     # # Check for duplicate markers
                     # if not any(np.allclose(point_3d, existing_cube) for existing_cube in self.detected_cubes):
