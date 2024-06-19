@@ -58,6 +58,7 @@ TTL_PER_DETECTION = 2
 
 ROBOT_TIMER = 3
 
+UPDATE_RATE = 1.0
 
 class MainControllerNode(Node):
 
@@ -111,7 +112,7 @@ class MainControllerNode(Node):
         self.__detected_pieces: dict[int, GamePiece] = {}
 
         self.__grid_pose: Pose = None
-        self.__game_timer = self.create_timer(0.5, self.__update_state_callback, callback_group=other_callback_group)
+        self.__game_timer = self.create_timer(UPDATE_RATE, self.__update_state_callback, callback_group=other_callback_group)
         self.__executing_action: bool = False
         """
         The robot needs to pause while executing an action, as there is no need to update the state
@@ -223,6 +224,8 @@ class MainControllerNode(Node):
     
     def __robot_turn(self):
         self.get_logger().info("Robot taking turn!")
+
+        self.__executing_action = True
 
         if (self.__robot_move == -1):
             self.__robot_move = self.__connect4client.get_best_robot_move()

@@ -26,9 +26,9 @@ class ActionStates(Enum):
     DONE = 99
 
 FORCE:float = 10.0
-FULL_OPEN_WIDTH:float = 110.0
+FULL_OPEN_WIDTH:float = 40.0
 RELEASE_WIDTH: float = 20.0
-
+UPDATE_RATE: float = 1.0
 
 class PickAndPlaceActionServer(Node):
 
@@ -51,7 +51,7 @@ class PickAndPlaceActionServer(Node):
         self.current_state = ActionStates.WAIT
         self.__action_in_progress:bool = True
 
-        self.create_timer(0.25, self.check_current_state, callback_group=timer_callback_group)
+        self.create_timer(UPDATE_RATE, self.check_current_state, callback_group=timer_callback_group)
     
     def get_gripper_state(self, gp:GripperState ):
         self.gripper_state = gp
@@ -67,7 +67,6 @@ class PickAndPlaceActionServer(Node):
         self.get_logger().info((f"Goal recieved with to move block from point {self.start_point.position.x}, {self.start_point.position.y}, {self.start_point.position.z}, {self.start_point.rotation}) to ({self.end_point.position.x}, {self.end_point.position.y}, {self.end_point.position.z}, {self.end_point.rotation}) {self.gripper_width=}"))
 
         while (self.current_state != ActionStates.DONE):
-            self.get_logger().info(f"Publishing Feedback")
             feedback = PickAndPlace.Feedback()
             feedback.current_pose = self.get_current_pose()
             feedback.gripper_current_width = self.gripper_state.width
