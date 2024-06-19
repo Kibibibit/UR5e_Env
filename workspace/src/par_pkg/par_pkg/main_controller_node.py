@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Point
 from .connect4.connect4_client import Connect4Client, Player
 from enum import Enum
 from par_interfaces.action import PickAndPlace, WaypointMove
@@ -13,6 +13,7 @@ from rclpy.task import Future
 from rclpy.action.client import ClientGoalHandle
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+import time
 
 class State(Enum):
     FINDING_GRID = 0
@@ -40,6 +41,10 @@ class State(Enum):
     """
     The robot is going back to look at the board
     """
+    HUMAN_MADE_INVALID_MOVE = 6
+    """
+    The human made an invalid move
+    """
     DONE = 99
     """The game is over"""
     ERROR = 100
@@ -50,6 +55,9 @@ GRIPPER_WIDTH = 16.0
 HUMAN_ZONE_X = [0,1,2,3,4,5,6]
 ROBOT_ZONE_X = [8]
 DROP_ZONE_Y = 7
+
+INVALID_POS_X = 7
+INVALID_POS_Y = DROP_ZONE_Y
 
 FULL_BOARD_WIDTH = 9
 FULL_BOARD_HEIGHT = 8
@@ -111,7 +119,6 @@ class MainControllerNode(Node):
 
         self.__detected_pieces: dict[int, GamePiece] = {}
 
-        self.__grid_pose: Pose = None
         self.__game_timer = self.create_timer(UPDATE_RATE, self.__update_state_callback, callback_group=other_callback_group)
         self.__executing_action: bool = False
         """
@@ -121,11 +128,11 @@ class MainControllerNode(Node):
 
         self.__current_player: Player = Player.HUMAN
         self.__human_column: int = -1
-
-        self.__next_piece_position: tuple = None
         self.__robot_move: int = -1
-
         self.__home_pose: WaypointPose = None
+        self.__invalid_move: bool = False
+
+        self.__error_message: str = ""
     
     def __update_state_callback(self):
         if (self.__executing_action):
@@ -144,11 +151,13 @@ class MainControllerNode(Node):
                 self.__robot_turn()
             case State.HOMING:
                 self.__homing_state()
+            case State.HUMAN_MADE_INVALID_MOVE:
+                self.__human_made_invalid_move()
             case State.DONE:
                 self.get_logger().info("Game over!")
                 exit(0)
             case State.ERROR:
-                self.get_logger().error("Something died!")
+                self.get_logger().error(f"Something died! {self.__error_message}")
                 exit(1)
 
     
@@ -189,8 +198,10 @@ class MainControllerNode(Node):
             return
         ## Otherwise, we go to the invalid move
         else:
+            self.__state = State.HUMAN_MADE_INVALID_MOVE
+            self.__invalid_move = True
             self.get_logger().error("Human piece is in invalid spot!")
-
+            return
 
     def __simulating_gravity(self):
 
@@ -264,6 +275,7 @@ class MainControllerNode(Node):
 
         if not homing_goal.accepted:
             self.get_logger().info("MoveIt server rejected goal!")
+            self.__error_message = "MoveitServer rejected homing goal"
             self.__state = State.ERROR
             return
         
@@ -284,18 +296,34 @@ class MainControllerNode(Node):
             else:
                 self.get_logger().info(f"{winning_player.name} player won the game!")
         else:
-
-            if (self.__current_player == Player.HUMAN):
-                self.__state = State.ROBOT_FINDING_PIECE
-                self.__current_player = Player.ROBOT
-            else:
+            if (self.__invalid_move or self.__current_player == Player.ROBOT):
                 self.__state = State.WAITING_FOR_HUMAN
                 self.__current_player = Player.HUMAN
+                self.__invalid_move = False
+            else:
+                self.__state = State.ROBOT_FINDING_PIECE
+                self.__current_player = Player.ROBOT
+                
         self.__executing_action = False
 
     def __board_detected_callback(self, msg: Bool):
         if (msg.data):
             self.__board_detected = True
+
+    def __human_made_invalid_move(self):
+
+        self.__executing_action = True
+
+        new_pos = IVector2()
+        new_pos.x = INVALID_POS_X
+        new_pos.y = INVALID_POS_Y
+
+        x = self.__human_column
+        self.__human_column = -1
+
+        board_loc_id = self.__get_board_loc_id(x, DROP_ZONE_Y)
+        self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
+
     
     def __move_piece(self, piece: GamePiece, position: IVector2):
         self.get_logger().info("Waiting for pick and place action server...")
@@ -334,6 +362,7 @@ class MainControllerNode(Node):
 
         if not move_goal.accepted:
             self.get_logger().info("Pick and Place server rejected goal!")
+            self.__error_message = "Pick and Place server rejected goal"
             self.__state = State.ERROR
             return
         
@@ -385,6 +414,7 @@ class MainControllerNode(Node):
         while (v > 0):
             self.get_logger().info(f"{v}")
             v-=1
+            time.sleep(1)
         self.get_logger().info(f"Executing: {task}")
 
 def main(args=None):
