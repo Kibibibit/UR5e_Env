@@ -19,22 +19,23 @@ class Connect4Client():
         ## Set the initial board state
         self.__board_state: np.ndarray = np.full(shape=(BOARD_HEIGHT, BOARD_WIDTH),fill_value=Player.EMPTY, dtype=Player)
 
-    player_pieces = {
-        Player.EMPTY: "_",
-        Player.HUMAN: "O",
-        Player.ROBOT: "X"
-    }
+    
 
 
     player_has_won = Player.EMPTY
 
 
     def print_board(self):
+        player_pieces = {
+            Player.EMPTY: "_",
+            Player.HUMAN: "O",
+            Player.ROBOT: "X"
+        }
         out = ["0 1 2 3 4 5 6"]
         for y in range(BOARD_HEIGHT):
             row = []
             for x in range(BOARD_WIDTH):
-                row.append(self.__board_state[self.get_piece(x,y)])
+                row.append(player_pieces[self.get_piece(x,y)])
             out.append(" ".join(row))
         out.append("0 1 2 3 4 5 6")
         print("\n".join(out))
