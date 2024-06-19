@@ -197,13 +197,13 @@ class CubeDetectionNode(Node):
                     cube_pose = self.transform_cube(cube_point, rclpy.time.Time().to_msg())
 
                     board_pos = self.world_to_board_pos(cube_pose.position)
-                    piece_container = GamePiece()
-                    piece_container.board_position = board_pos
-                    piece_container.world_position = cube_pose.position
+                    piece = GamePiece()
+                    piece.board_position = board_pos
+                    piece.world_position = cube_pose.position
                     
                     board_loc_id = self.get_board_loc_id(board_pos.x, board_pos.y)
 
-                    container = GamePieceContainer(piece_container, ttl=TTL_PER_DETECTION)
+                    container = GamePieceContainer(piece, ttl=TTL_PER_DETECTION)
 
                     if (board_loc_id in self.detected_pieces.keys()):
                         container.ttl += TTL_PER_DETECTION

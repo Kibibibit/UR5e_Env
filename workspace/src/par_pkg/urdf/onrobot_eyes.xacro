@@ -23,7 +23,7 @@
             We need to preform camera extrinsics calibration manually to get these values.
             industrial_calibration seems like a good package for doing this.
         -->
-            <origin xyz="-0.003 ${(0.10485-d415_cam_depth_py/2)} ${0.019792+0.00945}" rpy="-${pi/2} -${pi/2} 0" />
+            <origin xyz="-0.003 ${(0.10485-d415_cam_depth_py/2) - 0.006} ${0.019792+0.00945}" rpy="-${pi/2} -${pi/2} 0" />
         </xacro:sensor_d415>
 
         <link name="onrobot_eyes_base_link"/>
