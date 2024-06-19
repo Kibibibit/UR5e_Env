@@ -7,14 +7,15 @@ import cv2
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
-from geometry_msgs.msg import Point, PoseStamped
+from geometry_msgs.msg import Point, PoseStamped, Pose
 from std_msgs.msg import Float64
 import math
 import tf2_ros
 from tf2_geometry_msgs import do_transform_pose_stamped, TransformStamped
 from par_interfaces.msg import GamePiece, GamePieces, IVector2
 from par_interfaces.srv import WorldToBoard
-
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 
 TTL_PER_DETECTION = 3
 FULL_BOARD_WIDTH = 9
@@ -30,11 +31,11 @@ class GamePieceContainer():
 
 
 class CubeDetectionNode(Node):
-    def __init__(self):
+    def __init__(self, service_callback_group, depth_callback_group):
         super().__init__('cube_detection_node')
         self.publisher_ = self.create_publisher(Image, 'camera_image', 10)
         self.marker_publisher_ = self.create_publisher(MarkerArray, 'detected_cubes_markers', 10)
-        self.table_image_subscriber = self.create_subscription(Image, '/camera/depth/table_image_raw', self.depth_image_callback, 10)
+        self.table_image_subscriber = self.create_subscription(Image, '/camera/depth/table_image_raw', self.depth_image_callback, 10, callback_group=depth_callback_group)
         self.camera_info_subscription = self.create_subscription(CameraInfo, '/camera/camera/depth/camera_info', self.camera_info_callback, 10)
         self.bridge = CvBridge()
         self.camera_model = None
@@ -51,7 +52,8 @@ class CubeDetectionNode(Node):
 
         self.world_to_board_client = self.create_client(
             WorldToBoard,
-            "/par/world_to_board"
+            "/par/world_to_board",
+            callback_group=service_callback_group
         )
 
         self.tf_buffer = tf2_ros.Buffer()
@@ -196,35 +198,35 @@ class CubeDetectionNode(Node):
 
 
                     
-
+                    
                     board_pos = self.world_to_board_pos(cube_pose.position)
-
-                    piece = GamePiece()
-                    piece.board_position = board_pos
-                    piece.world_position = cube_pose.position
+                    piece_container = GamePiece()
+                    piece_container.board_position = board_pos
+                    piece_container.world_position = cube_pose.position
                     
                     board_loc_id = self.get_board_loc_id(board_pos.x, board_pos.y)
 
-                    container = GamePieceContainer(piece, ttl=TTL_PER_DETECTION)
+                    container = GamePieceContainer(piece_container, ttl=TTL_PER_DETECTION)
 
                     if (board_loc_id in self.detected_pieces.keys()):
                         container.ttl += TTL_PER_DETECTION
                     self.detected_pieces[board_loc_id] = container
-
         pieces = GamePieces()
+        pieces_array = []
         markers = MarkerArray()
         for key in self.detected_pieces.keys():
             self.detected_pieces[key].update()
-            piece = self.detected_pieces[key]
-            if (piece.ttl >= TTL_PER_DETECTION):
-                pieces.pieces.append(piece)
+            piece_container = self.detected_pieces[key]
+            if (piece_container.ttl >= TTL_PER_DETECTION):
+                pieces_array.append(piece_container.piece)
 
                 marker = Marker()
                 marker.header.frame_id = "world" 
                 marker.header.stamp = self.get_clock().now().to_msg()
                 marker.type = Marker.CUBE
                 marker.id = key
-                marker.pose = cube_pose
+                marker.pose = Pose()
+                marker.pose.position = piece_container.piece.world_position
                 marker.scale.x = 0.015
                 marker.scale.y = 0.015
                 marker.scale.z = 0.015
@@ -234,17 +236,14 @@ class CubeDetectionNode(Node):
                 marker.color.a = 1.0
                 markers.markers.append(marker)
         
+        pieces.pieces = pieces_array
+
         return depth_colored, markers, pieces
     
     def world_to_board_pos(self, point: Point) -> IVector2:
         request = WorldToBoard.Request()
         request.world_point = point
-        board_to_world_future = self.world_to_board_client.call_async(request)
-
-        while not board_to_world_future.done():
-            pass
-
-        response:WorldToBoard.Response = board_to_world_future.result()
+        response = self.world_to_board_client.call(request)
         return response.board_pos
     
     def get_board_loc_id(self, x:int, y:int) -> int:
@@ -253,15 +252,26 @@ class CubeDetectionNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = CubeDetectionNode()
+
+    service_callback_group = MutuallyExclusiveCallbackGroup()
+
+    node = CubeDetectionNode(
+        service_callback_group=service_callback_group,
+        depth_callback_group=None
+    )
+
+    executor = MultiThreadedExecutor()
+
+    executor.add_node(node)
 
     try:
-        rclpy.spin(node)
+        executor.spin()
     except KeyboardInterrupt:
         pass
 
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

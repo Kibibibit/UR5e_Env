@@ -25,8 +25,9 @@ class ActionStates(Enum):
     WAIT = 0
     DONE = 99
 
-FORCE:float = 1.0
-FULL_OPEN_WIDTH:float = 20.0
+FORCE:float = 10.0
+FULL_OPEN_WIDTH:float = 110.0
+RELEASE_WIDTH: float = 20.0
 
 
 class PickAndPlaceActionServer(Node):
@@ -85,7 +86,8 @@ class PickAndPlaceActionServer(Node):
 
     def check_current_state(self):
         if(self.__action_in_progress):
-            self.get_logger().info(f"completing action {self.current_state.name}...")
+            # self.get_logger().info(f"completing action {self.current_state.name}...")
+            pass
         else:
             self.__action_in_progress = True
             self.get_logger().info(f"Changing state {self.current_state.name}...")
@@ -106,7 +108,7 @@ class PickAndPlaceActionServer(Node):
 
     def open_gripper(self):
         self.current_state = ActionStates.OPEN_GRIPPER
-        self.move_gripper(FULL_OPEN_WIDTH)
+        self.move_gripper(FULL_OPEN_WIDTH, 40.0)
 
     def move_to_item(self):
         self.current_state = ActionStates.MOVE_TO_ITEM
@@ -123,12 +125,12 @@ class PickAndPlaceActionServer(Node):
 
     def release_item(self):
         self.current_state = ActionStates.RELEASE_ITEM
-        self.move_gripper(FULL_OPEN_WIDTH)
+        self.move_gripper(RELEASE_WIDTH)
 
-    def move_gripper(self, width):
+    def move_gripper(self, width, force = FORCE):
         move_gripper_goal = GripperSetWidth.Goal()
 
-        move_gripper_goal.target_force = FORCE
+        move_gripper_goal.target_force = force
         move_gripper_goal.target_width = width
 
         self.gripper_action_client.wait_for_server()
@@ -149,12 +151,11 @@ class PickAndPlaceActionServer(Node):
 
     def gripper_result_callback(self, future:Future):
         result:GripperSetWidth.Result = future.result().result
-        self.get_logger().info(f"Gripper set width at: {result.final_width}")
 
         self.__action_in_progress = False
     
     def gripper_feedback(self, gripper_feedback):
-        self.get_logger().info(f"current gripper width: {gripper_feedback.feedback.current_width}") 
+        pass
         
     def move_to_pose(self, pose:WaypointPose):
         goal_pose = WaypointMove.Goal()
@@ -185,7 +186,7 @@ class PickAndPlaceActionServer(Node):
         self.__action_in_progress = False
 
     def moveit_feedback(self, moveit_feedback):
-        self.get_logger().info(f"current pose: {moveit_feedback.feedback.current_pose}")
+        pass #self.get_logger().info(f"current pose: {moveit_feedback.feedback.current_pose}")
        
     def get_current_pose(self):
         current_pose_future = self.current_pose_client.call_async(CurrentWaypointPose.Request())
