@@ -89,7 +89,9 @@ class TableDepthImageNode(Node):
 
     def __table_height_callback(self, msg: Float64):
         self.__table_height = msg.data
-        self.__camera_height_publisher.publish(self.__camera_height)
+        camera_msg = Float64()
+        camera_msg.data = self.__camera_height
+        self.__camera_height_publisher.publish(camera_msg)
         
 
 def main(args=None):
