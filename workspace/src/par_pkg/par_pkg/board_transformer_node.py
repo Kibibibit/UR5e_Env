@@ -58,6 +58,7 @@ class BoardTransformerNode(Node):
 
         self.__table_height_publisher = self.create_publisher(Float64, '/par/table_height',qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
+
         self.__board_found_publisher = self.create_publisher(Bool, "/par/board_found", qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
 
     def __get_transform(self, target_frame, source_frame):

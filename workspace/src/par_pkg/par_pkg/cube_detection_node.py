@@ -41,6 +41,8 @@ class CubeDetectionNode(Node):
         self.camera_model = None
         self.table_height_subscriber = self.create_subscription(Float64,'par/table_height', self.table_height_callback, qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
         self.table_height = 0.0
+        self.camera_height_subscriber = self.create_subscription(Float64,'par/camera_height', self.camera_height_callback, qos_profile=QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE))
+        self.camera_height = 0.0
 
         self.pieces_publisher = self.create_publisher(
             GamePieces,
@@ -90,6 +92,9 @@ class CubeDetectionNode(Node):
 
     def table_height_callback(self, msg: Float64):
         self.table_height = msg.data
+    
+    def camera_height_callback(self, msg: Float64):
+        self.camera_height = msg.data
 
 
     def get_cube(self, depth_image, approx):
@@ -103,9 +108,11 @@ class CubeDetectionNode(Node):
         center_x /= len(approx)
         center_y /= len(approx)
 
-        center_depth = depth_image[math.floor(center_y), math.floor(center_x)]
+        depth = self.camera_height-self.table_height
 
-        return center_x, center_y, center_depth
+        #center_depth = depth_image[math.floor(center_y), math.floor(center_x)]
+
+        return center_x, center_y, depth
     
     def get_transform(self, target_frame, source_frame):
         try:

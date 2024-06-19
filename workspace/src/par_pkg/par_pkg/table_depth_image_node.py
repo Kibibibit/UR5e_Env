@@ -36,6 +36,12 @@ class TableDepthImageNode(Node):
              QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
         )
 
+        self.__camera_height_publisher =self.create_publisher(
+            Float64,
+            "/par/camera_height",
+            QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
+        )
+
         self.__depth_camera_publisher = self.create_publisher(
             Image,
             "/camera/depth/table_image_raw",
@@ -83,6 +89,8 @@ class TableDepthImageNode(Node):
 
     def __table_height_callback(self, msg: Float64):
         self.__table_height = msg.data
+        self.__camera_height_publisher.publish(self.__camera_height)
+        
 
 def main(args=None):
     rclpy.init(args=args)
