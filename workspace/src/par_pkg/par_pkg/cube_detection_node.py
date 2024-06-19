@@ -11,7 +11,7 @@ from geometry_msgs.msg import Point, PoseStamped, Pose
 from std_msgs.msg import Float64
 import math
 import tf2_ros
-from tf2_geometry_msgs import do_transform_pose_stamped, TransformStamped
+from tf2_geometry_msgs import do_transform_pose_stamped
 from par_interfaces.msg import GamePiece, GamePieces, IVector2
 from par_interfaces.srv import WorldToBoard
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
@@ -196,9 +196,6 @@ class CubeDetectionNode(Node):
 
                     cube_pose = self.transform_cube(cube_point, rclpy.time.Time().to_msg())
 
-
-                    
-                    
                     board_pos = self.world_to_board_pos(cube_pose.position)
                     piece_container = GamePiece()
                     piece_container.board_position = board_pos
