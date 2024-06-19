@@ -128,7 +128,7 @@ class CubeDetectionNode(Node):
         
         world_pose = do_transform_pose_stamped(cube_pose, transformation).pose
 
-        world_pose.position.z = self.table_height
+        # world_pose.position.z = self.table_height
 
         return world_pose
 
