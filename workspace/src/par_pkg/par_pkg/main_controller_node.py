@@ -351,7 +351,7 @@ class MainControllerNode(Node):
 
         goal.gripper_width = GRIPPER_WIDTH
         goal.start_point = WaypointPose()
-        goal.start_point.position = piece.world_position
+        goal.start_point.position = self.__get_world_pos_from_board(piece.board_position)
         goal.start_point.rotation = 0.0
         goal.end_point = WaypointPose()
         goal.end_point.position = self.__get_world_pos_from_board(position)
