@@ -71,6 +71,45 @@ To create a new package, attach to the docker, and go into `~/workspace/src` and
 #### Destroying the container
 If you need to rebuild the container, you should run `./docker-delete.sh`, which will wipe the container and require a rebuild to use again. You shouldn't have to do this very often.
 
+### Playing Connect4 Package for UR5e Cobot
+#### Setup
+1. The board is found in `/workspace/src/par_pkg/objects` under the filename `0.png`. Ensure that the board is printed on **A3 paper** with a **margin width of 0**.
+
+2. Secure board on a table to ensure movement cannot occur during gameplay
+
+3. Start docker environment and attach to it
+
+4. Ensure the workspace is built using the command `build_workspace`
+
+4. Start up UR5e and Moveit drivers
+
+5. Move arm directly above board with camera facing down. The best position is with camera having a birds eye view of the top row with the **Human Drop Zone** and **Robot Piece**. This can be achieved directly using the teach pendant or using the shell script `waypoint_move.sh` under `~/workspace/testing_scripts` <br><br>**Note: waypoint_move.sh requires arguments of position x, y, z and roation of the end effector which are all floats.** This can be ran as `./waypoint_move.sh <X> <Y> <Z> <rotation>` an example of this would be `./waypoint_move.sh -0.5 0 0.2 0`
+6. Launch Find Object 2D using the command `find_object_2d` and ensure that the detecting the board object (will state that object is detected in the console)
+
+7. Launch the Connect4 program by running the command `ros2 launch par_pkg par_pkg.launch.py`
+9. The node is up and ready when the console says it ahs found the grid and is waiting for the human piece
+
+#### Playing
+*This has been designed to play with game pieces made with 2x2 lego blocks that have been stacked to 2 blocks each game piece. 25 pieces per player is a suitable amount to play the game.*
+1. To start playing place a block in one colour at the top of the column in the **Human Drop Zone** where you would like the piece to fall to
+2. If the robot has detected the piece it will confirm in the console and display a three second countdown to start its process of moving the block
+3. The robot will move the block to where it would fall to in a regular connect4 board
+4. After this the console will say it is waiting for a robot piece. Place a game piece in the grid square labeled
+**Robot Piece**
+5. The arm upon recognition should grab the piece and move it to the AI's corresponding response. Execution is complete when the console is asking for the players turn.
+6. Repeat steps 1-5 until someone wins in connect 4
+
+#### Known Issues
+- Robot is known to come across issues with precision to the the players piece and appears to stop on a randomly while moving the robots piece on a rare instance. The robot is able to mostly recover and still play the game.
+
+- Issues also arise where it rarely has detected a piece in the wrong grid square when attempting, making the current state of the game incorrect. Game is able to continue, just with the player's piece in the wrong spot.
+
+- Universal robots has a known bug where the connection to the PC will drop if no action is sent to the robot, which will stop the robots ability to move its arm. Restarting the connection on the pendant most of the time will fix this issue, however sometimes drivers have to be restarted.
+ 
+- Moveit driver is also known to timeout and refuse any commands, in which case it may be needed to restart the stack
+
+- Camera has a black spot on the depth sensor where it cannot see anything in that spot, possibly attributed to realsense driver reading the  stereo camera as mono. Move board to ensure that all grid squares are visible, viewing the image in rviz under the topic `/camera_image` can help achieve this. 
+
 
 ## Credits
 - Sam Griffiths (RMIT)
