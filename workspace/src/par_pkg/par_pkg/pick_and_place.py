@@ -26,7 +26,7 @@ class ActionStates(Enum):
     DONE = 99
 
 FORCE:float = 10.0
-FULL_OPEN_WIDTH:float = 40.0
+FULL_OPEN_WIDTH:float = 70.0
 RELEASE_WIDTH: float = 20.0
 UPDATE_RATE: float = 1.0
 

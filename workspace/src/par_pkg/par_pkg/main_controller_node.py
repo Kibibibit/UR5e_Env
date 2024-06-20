@@ -68,6 +68,8 @@ ROBOT_TIMER = 3
 
 UPDATE_RATE = 1.0
 
+TIMEOUT = 30
+
 class MainControllerNode(Node):
 
     def __init__(self, action_callback_group,service_callback_group,other_callback_group):
@@ -131,13 +133,19 @@ class MainControllerNode(Node):
         self.__robot_move: int = -1
         self.__home_pose: WaypointPose = None
         self.__invalid_move: bool = False
-
+        self.__timeout = TIMEOUT
         self.__error_message: str = ""
     
     def __update_state_callback(self):
+        if (self.__timeout <= 0):
+            self.get_logger().warn("HIT TIMEOUT! PROCEEDING TO HOME!")
+            self.__state = State.HOMING
+            self.__executing_action = False
         if (self.__executing_action):
-            self.get_logger().info("Waiting for action to finish")
+            self.get_logger().info(f"Waiting for action to finish {self.__state.name}")
+            self.__timeout -= 1
             return
+        self.__timeout = TIMEOUT
         match self.__state:
             case State.FINDING_GRID:
                 self.__finding_grid()
@@ -236,6 +244,10 @@ class MainControllerNode(Node):
         self.get_logger().info("Robot taking turn!")
 
         self.__executing_action = True
+        board_loc_id = self.__get_board_loc_id(ROBOT_ZONE_X[0], DROP_ZONE_Y)
+        if (not board_loc_id in self.__detected_pieces.keys()):
+            self.__executing_action = False
+            return
 
         if (self.__robot_move == -1):
             self.__robot_move = self.__connect4client.get_best_robot_move()
@@ -246,9 +258,13 @@ class MainControllerNode(Node):
             new_pos.x = piece_x
             new_pos.y = piece_y
             self.__robot_move = -1
-            board_loc_id = self.__get_board_loc_id(ROBOT_ZONE_X[0], DROP_ZONE_Y)
+
+            
+            
 
             self.__countdown("Moving robot piece")
+
+            
 
             self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
 

@@ -22,7 +22,7 @@ MoveitActionServerNode::MoveitActionServerNode(const rclcpp::NodeOptions& option
       std::bind(&MoveitActionServerNode::handle_accepted, this, _1));
 
 
-  move_plane_height = 0.45;
+  move_plane_height = 0.25;
 
   executing_move = false;
   this->move_group_interface =
