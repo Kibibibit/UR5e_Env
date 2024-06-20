@@ -20,6 +20,16 @@ A Ros2 environment for working with Moveit2 on the ur5e arm.
 - `docker-compose` - sudo apt install docker-compose
 
 
+
+## Drivers and Aliases
+The docker container contains several drivers and aliases for running different parts of the codebase.
+- `arm_drivers` - This runs the arm, gripper and camera drivers.
+- `moveit_config_driver` - This runs the moveit drivers, along with our custom moveit action server.
+- `find_object_2d` - Boots findobject2d, using its findobject3d launch file.
+- `realsense_driver` - This boots just the camera driver, if needed.
+
+All of these aliases are set in `workspace/testing_scripts/helper-aliases.sh`, and can be modified or added to there.
+
 ## Usage
 
 ### Starting Up
@@ -52,15 +62,6 @@ moveit_config_driver
 You can now move the blue sphere to move the arm around, and use `plan` to visualise the trajectory of the movement, and then `execute` to move the arm. <br/>
 This is needed for moveit commands to work from other packages, so if you want to disable RVIZ, you can add `--no-rviz` to the end of the command. If you're working without the gripper, you can add `--no-gripper` to disable it <br/>
 
-#### Realsense
-The realsense ROS node is needed for the camera topics to be accessed.
-In a new terminal tab, attach to the container (`./docker-attach.sh`) <br/>
-Run:
-```sh
-realsense_driver
-```
-To test the camera display, open a new tab and open RVIZ. Then, add an Image display and set the topic to `/camera/color/raw`. You should see a camera output.
-
 ### Creating new Packages
 To create a new package, attach to the docker, and go into `~/workspace/src` and run the package create command. Make sure to run your build commands in `~/workspace` and not `src`
 
@@ -72,6 +73,7 @@ If you need to rebuild the container, you should run `./docker-delete.sh`, which
 
 
 ## Credits
-*TODO Format nicely*
-Sam/Jasper
-Some ros wiki pages, will find and add when I get a chance.
+- Sam Griffiths (RMIT)
+- Jasper Avice Demay (RMIT)
+- [FindObject2D](https://github.com/introlab/find-object)
+- [Kiyokawa Takuya](https://github.com/takuya-ki/onrobot-rg)

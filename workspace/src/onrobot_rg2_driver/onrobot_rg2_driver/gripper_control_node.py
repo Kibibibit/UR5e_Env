@@ -10,7 +10,7 @@ from .utils.rg2_client import RG2Client
 ### gripper_control_node.py ###
 # Author: Daniel Mills (s3843035@student.rmit.edu.au)
 # Created: 2024-05-23
-# Updated: 2024-06-07
+# Updated: 2024-13-07
 
 
 ### This is the node that will handle opening and closing, and other tasks for it.
@@ -91,6 +91,8 @@ class GripperControlNode(Node):
         
 
     def state_update_timer_callback(self):
+        ## We want to constantly know the state of the gripper, so
+        ## we can report data to the action 
         self._current_gripper_width = self.get_gripper_width()
         self._is_gripper_busy = self.get_gripper_is_busy()
 
