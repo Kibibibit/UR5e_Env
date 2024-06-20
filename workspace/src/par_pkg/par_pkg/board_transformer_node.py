@@ -83,6 +83,9 @@ class BoardTransformerNode(Node):
         board_pose = do_transform_pose_stamped(world_pose, transformation)
 
         board_vector = IVector2()
+        ## because the frame for the find_object2d is rotated weirdly,
+        ## it proved much simpler to simply map y to x and z to y.
+        
         board_vector.x = math.floor(board_pose.pose.position.y / (GRID_SIZE_X))
         board_vector.y = math.floor(board_pose.pose.position.z / (GRID_SIZE_Y))
 
@@ -94,6 +97,9 @@ class BoardTransformerNode(Node):
         
         pose = PoseStamped()
         pose.header.stamp = rclpy.time.Time().to_msg()
+        ## Adding 0.5 to the position means we go to the center of the grid.
+        ## Originally, the centers were set at the correct position but slight rounding
+        ## errors could introduce problems, so this is more stable
         pose.pose.position.y = (float(request.board_pos.x)+0.5)*GRID_SIZE_X
         pose.pose.position.z = (float(request.board_pos.y)+0.5)*GRID_SIZE_Y
 
