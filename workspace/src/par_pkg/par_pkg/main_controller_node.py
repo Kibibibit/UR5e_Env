@@ -113,7 +113,6 @@ class MainControllerNode(Node):
         )
 
         self.__current_pose_client = self.create_client(CurrentWaypointPose, "/par_moveit/get_current_waypoint_pose", callback_group=service_callback_group)
-
         self.__board_detected = False
 
         self.__connect4client = Connect4Client()
@@ -128,23 +127,37 @@ class MainControllerNode(Node):
         machine
         """
 
+        ## We'll start with the human player going first, easier that way
         self.__current_player: Player = Player.HUMAN
+        ## These store the columns the human and robot have played in
         self.__human_column: int = -1
         self.__robot_move: int = -1
+
+        ## This is the pose returned to by homing pose
         self.__home_pose: WaypointPose = None
+        ## Did the human just make an invalid move?
         self.__invalid_move: bool = False
+        ## This decreases every cycle, and if it hits zero the action times out
         self.__timeout = TIMEOUT
+        ## Stores the error message for the error state
         self.__error_message: str = ""
     
     def __update_state_callback(self):
+
+        ## Sometimes the robot gets stuck after taking its turn.
+        ## We're not sure why, but adding a timeout and just proceeding to the next
+        ## state seems to deal with the issue
         if (self.__timeout <= 0):
             self.get_logger().warn("HIT TIMEOUT! PROCEEDING TO HOME!")
             self.__state = State.HOMING
             self.__executing_action = False
+        
+        ## If an action is already running, we don't want to update the state
         if (self.__executing_action):
             self.get_logger().info(f"Waiting for action to finish {self.__state.name}")
             self.__timeout -= 1
             return
+        
         self.__timeout = TIMEOUT
         match self.__state:
             case State.FINDING_GRID:
@@ -163,6 +176,7 @@ class MainControllerNode(Node):
                 self.__human_made_invalid_move()
             case State.DONE:
                 self.get_logger().info("Game over!")
+                ## Exit here doesn't work for some reason :/
                 exit(0)
             case State.ERROR:
                 self.get_logger().error(f"Something died! {self.__error_message}")
@@ -177,8 +191,12 @@ class MainControllerNode(Node):
             self.__state = State.WAITING_FOR_HUMAN
 
     def __get_current_pose(self):
+        ### This gets the current waypoint pose of the arm,
+        ### mostly used for getting the home pose
         current_pose_future = self.__current_pose_client.call_async(CurrentWaypointPose.Request())
 
+        ## Would have been nice to call this syncronously but ros and async
+        ## is a powder keg.
         while not current_pose_future.done():
             pass
 
@@ -191,11 +209,11 @@ class MainControllerNode(Node):
 
 
         piece = self.__piece_in_zone(HUMAN_ZONE_X)
-
+        # If no piece found in human zone, we can jsut exit this state
         if (piece == None):
             self.get_logger().info("No human piece found yet!")
             return
-        
+        # Doing a 3 second countdown to prevent the arm from moving too suddenly
         self.__countdown("Moving Human Piece")
 
         self.__human_column = piece.board_position.x # This should be the column detected
@@ -217,8 +235,11 @@ class MainControllerNode(Node):
         self.get_logger().info("Simulating Gravity!")
         self.__executing_action = True
 
+        ## Here is where we update the connect4 clinet
         piece_x, piece_y = self.__connect4client.add_piece(Player.HUMAN, self.__human_column)
-
+        ## The robot has a bad habit of trying to play a turn over and over,
+        ## so setting this back to -1 helps prevent that.
+        ## Better control of the asynchronous methods would negate the need for this
         self.__human_column = -1
        
         new_pos = IVector2()
@@ -245,10 +266,14 @@ class MainControllerNode(Node):
 
         self.__executing_action = True
         board_loc_id = self.__get_board_loc_id(ROBOT_ZONE_X[0], DROP_ZONE_Y)
+        ## Sometimes, the robot tries to grab a piece that wasn't picked up
+        ## well enough, so this just prevents that
         if (not board_loc_id in self.__detected_pieces.keys()):
             self.__executing_action = False
             return
-
+        
+        ## Like with the human move, the robot would often try and place a piece
+        ## every state cycle, so this prevents that
         if (self.__robot_move == -1):
             self.__robot_move = self.__connect4client.get_best_robot_move()
 
@@ -259,13 +284,7 @@ class MainControllerNode(Node):
             new_pos.y = piece_y
             self.__robot_move = -1
 
-            
-            
-
             self.__countdown("Moving robot piece")
-
-            
-
             self.__move_piece(self.__detected_pieces[board_loc_id], new_pos)
 
 
@@ -298,6 +317,8 @@ class MainControllerNode(Node):
         self.get_logger().info(f"MoveIt server accepted goal!")
 
         result = homing_goal.get_result_async()
+        ## Because of how futures work, this done callback needs its own done callback
+        ## before it actually waits for the action to finish
         result.add_done_callback(self.__homing_result_callback)        
 
         
@@ -305,6 +326,7 @@ class MainControllerNode(Node):
     def __homing_result_callback(self, future: Future):
         winning_player = self.__connect4client.has_player_won()
 
+        ## once the turn is done, first we can check if someone won
         if (winning_player != Player.EMPTY):
             self.__state = State.DONE
             if (winning_player == Player.TIE):
@@ -312,6 +334,8 @@ class MainControllerNode(Node):
             else:
                 self.get_logger().info(f"{winning_player.name} player won the game!")
         else:
+            ## If it was an invalid move, or just the robot's turn,
+            ## go to the humans turn. Otherwise, go to the robots turn
             if (self.__invalid_move or self.__current_player == Player.ROBOT):
                 self.__state = State.WAITING_FOR_HUMAN
                 self.__current_player = Player.HUMAN
@@ -351,6 +375,8 @@ class MainControllerNode(Node):
 
         goal.gripper_width = GRIPPER_WIDTH
         goal.start_point = WaypointPose()
+        ## Originally this grabbed the piece from its world position, but this was being a bit unreliable
+        # so now we grab at the board position, which has been more stable
         goal.start_point.position = self.__get_world_pos_from_board(piece.board_position)
         goal.start_point.rotation = 0.0
         goal.end_point = WaypointPose()
@@ -437,6 +463,9 @@ def main(args=None):
     rclpy.init(args=args)
 
 
+    ## Callbacks deadlock eachother really easily unless they're
+    ## in callback groups like this. Not really sure why ros does things this way
+    ## but it does.
     action_callback_group = MutuallyExclusiveCallbackGroup()
     service_callback_group = MutuallyExclusiveCallbackGroup()
 
